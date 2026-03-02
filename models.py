@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -19,9 +19,9 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    nickname = Column(String, nullable=False)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    nickname = Column(String(100), nullable=False)
     is_organizer = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -33,10 +33,10 @@ class Event(Base):
     __tablename__ = "events"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    description = Column(String)
-    location_name = Column(String, nullable=False)
-    address = Column(String)
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    location_name = Column(String(255), nullable=False)
+    address = Column(String(500))
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     start_date = Column(DateTime, nullable=False)

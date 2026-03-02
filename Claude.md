@@ -17,60 +17,66 @@ GTA 맵처럼 지도에서 실시간으로 이벤트를 확인할 수 있는 느
 
 ## 기술 스택
 - **Backend**: Python FastAPI
-- **Database**: SQLite (현재) / MariaDB (전환 검토)
-- **Web Server**: Nginx
+- **Database**: MariaDB
+- **Web Server**: Nginx (예정)
 - **Server**: OCI Ubuntu 24.04 (VM.Standard.A1.Flex, 4 OCPU, 24GB RAM)
-- **지도 API**: 카카오맵
+- **지도 API**: 카카오맵 (예정)
+
+## 개발 방식
+- **개발 주체**: OCI 서버 (코드 작성 후 SFTP로 즉시 업로드 → 서버에서 실행/테스트)
+- **로컬 역할**: VS Code + Claude Code로 코드 작성만 담당
+- **로컬 DB 없음**: 모든 DB 작업은 서버 MariaDB 사용
+- **테스트**: 브라우저에서 서버 IP로 직접 확인
 
 ## 프로젝트 구조
 - `main.py` - FastAPI 앱 진입점
-- `database.py` - DB 연결 설정
+- `database.py` - DB 연결 설정 (MariaDB, .env 참조)
 - `models.py` - SQLAlchemy DB 모델
 - `schemas.py` - Pydantic 요청/응답 스키마
+- `auth.py` - JWT 인증 유틸리티
 - `routers/` - API 라우터
   - `routers/events.py` - 이벤트 CRUD API
   - `routers/auth.py` - 로그인/회원가입 API
 - `static/` - 프론트엔드 파일 (HTML, CSS, JS)
+- `.env` - 서버 환경변수 (Git 제외, 서버에만 존재)
+- `.env.example` - 환경변수 템플릿 (Git 포함)
 
 ## DB 스키마
 ### users (사용자)
-- id, email, password, nickname, is_organizer, created_at
+- id, email, hashed_password, nickname, is_organizer, created_at
 
 ### events (이벤트)
 - id, title, description, location_name, address
 - latitude, longitude (지도 좌표)
-- start_date, end_date
+- start_date, end_date, event_type
 - organizer_id (users 외래키)
 - created_at
 
-## 배포
-- 서버 IP: 217.142.229.136
-- 리전: ap-osaka-1
-- 가용성 도메인: AD-1
-- 결함 도메인: FD-3
-- SFTP 자동 업로드 (uploadOnSave: true)
-- 서버에서 uvicorn으로 실행
-- 포트: 8000
+## 서버 정보
+- **퍼블릭 IP**: 217.142.229.136
+- **리전**: ap-osaka-1 (Japan Central)
+- **가용성 도메인**: AD-1
+- **결함 도메인**: FD-3
+- **인스턴스**: VM.Standard.A1.Flex (ARM64/aarch64)
+- **OS**: Canonical Ubuntu 24.04
+- **VCN**: vcn-windy-city-server
+- **기본 SSH 사용자**: ubuntu
+
+## 개발 환경
+- **로컬**: macOS (Apple Silicon)
+- **에디터**: VS Code + SFTP 익스텐션 (uploadOnSave: true)
+- **AI 도구**: Claude Code + MCP (filesystem, sqlite)
+- **형상 관리**: GitHub (git@github.com-mbh77:mbh77/windy-city.git)
+- **SSH 키**: ~/.ssh/id_ed25519 (github.com-mbh77 호스트 설정)
+- **DB 클라이언트**: DBeaver (SSH 터널링으로 서버 MariaDB 접속)
+
+## 배포 정보
+- 포트: 8000 (uvicorn)
+- 실행 명령: `cd ~/windy-city && source venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8000`
 
 ## 주의사항
 - ARM64(aarch64) 환경 호환 패키지 사용
-- 이미지: Canonical-Ubuntu-24.04-aarch64-2026.01.29-0
-- 인스턴스 모양: VM.Standard.A1.Flex (4 OCPU, 24GB RAM, 4Gbps)
-- 기본 SSH 사용자: ubuntu
-- VCN: vcn-windy-city-server
-- SQLite 파일 위치: ~/windy-city/windy-city.db
 - 코드는 항상 한국어 주석 작성
-
-## DB 운영 방향 (초안)
-- 현재 운영 DB는 SQLite 유지 (개발/초기 운영 단순화 목적)
-- 서버 자원 증설로 MariaDB 전환 검토 가능 상태
-- 아직 확정되지 않은 항목:
-  - MariaDB 버전
-  - 배포 형태 (단일 인스턴스 직접 설치 vs 컨테이너)
-  - 백업 정책(주기/보관 기간)
-  - 모니터링 항목(커넥션 수, 슬로우 쿼리, 디스크 사용량)
-- 전환 확정 시 정리할 내용:
-  - SQLAlchemy 연결 문자열 표준화 (`DATABASE_URL`)
-  - 의존성 드라이버 확정 (`pymysql` 또는 `mariadb`)
-  - 기존 SQLite 데이터 마이그레이션 방식
-  - 롤백 절차(문제 발생 시 SQLite 복귀)
+- `.env` 파일은 서버에만 존재, Git에 올리지 않음
+- SECRET_KEY는 반드시 .env에서 관리
+- MariaDB 접속은 SSH 터널링 사용 (3306 포트 외부 미개방)

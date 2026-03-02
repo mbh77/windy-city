@@ -26,5 +26,3 @@ app.include_router(events.router)
 
 # 정적 파일 서빙 (프론트엔드)
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
-
-#테스트

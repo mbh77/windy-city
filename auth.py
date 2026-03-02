@@ -1,15 +1,19 @@
+import os
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
+from dotenv import load_dotenv
 
 from database import get_db
 import models
 
-# JWT 설정 (배포 전 SECRET_KEY 반드시 변경!)
-SECRET_KEY = "windy-city-secret-key-change-in-production"
+load_dotenv()
+
+# JWT 설정 (.env의 SECRET_KEY 사용)
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key-change-this")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7일
 

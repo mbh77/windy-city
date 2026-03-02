@@ -2,6 +2,8 @@ fastapi
 email-validator
 uvicorn[standard]
 sqlalchemy
+pymysql
+python-dotenv
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
