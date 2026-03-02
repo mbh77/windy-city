@@ -70,9 +70,33 @@ GTA 맵처럼 지도에서 실시간으로 이벤트를 확인할 수 있는 느
 - **SSH 키**: ~/.ssh/id_ed25519 (github.com-mbh77 호스트 설정)
 - **DB 클라이언트**: DBeaver (SSH 터널링으로 서버 MariaDB 접속)
 
+## 환경 분리 전략
+동일한 OCI 서버에서 포트와 DB로 dev/prod 환경을 분리
+
+| | Dev | Prod |
+|--|--|--|
+| 포트 | 8000 | 80 (Nginx) |
+| DB | windycity_dev | windycity |
+| 브랜치 | develop | main |
+| .env | .env.dev | .env |
+| 용도 | 개발/테스트 | 실제 서비스 |
+
+### 브랜치 전략
+- `develop` 브랜치 → dev 환경 (8000포트)
+- `main` 브랜치 → prod 환경 (80포트, Nginx)
+
+### 디렉토리 구조 (서버)
+- `/home/ubuntu/windy-city` - prod 환경
+- `/home/ubuntu/windy-city-dev` - dev 환경
+
 ## 배포 정보
-- 포트: 8000 (uvicorn)
-- 실행 명령: `cd ~/windy-city && source venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8000`
+### Dev
+- 포트: 8000 (uvicorn 직접 실행)
+- 실행 명령: `cd ~/windy-city-dev && source venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8000`
+
+### Prod
+- 포트: 80 (Nginx → uvicorn)
+- 실행 명령: `cd ~/windy-city && source venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8001`
 
 ## 주의사항
 - ARM64(aarch64) 환경 호환 패키지 사용
