@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Windy City 바람난 도시</title>
+  <link rel="stylesheet" href="/style.css" />
+  <!-- 카카오맵 SDK (앱 키를 발급받아 아래에 입력) -->
+  <script type="text/javascript"
+    src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_APP_KEY&libraries=services">
+  </script>
+</head>
+<body>
+  <!-- 상단 필터 바 -->
+  <header class="topbar">
+    <div class="logo">🌀 Windy City</div>
+    <div class="filters">
+      <input type="date" id="filter-date" />
+      <select id="filter-type">
+        <option value="">전체 유형</option>
+        <option value="salsa">살사</option>
+        <option value="bachata">바차타</option>
+        <option value="kizomba">키좀바</option>
+        <option value="social">소셜</option>
+        <option value="workshop">워크샵</option>
+        <option value="congress">콩그레스</option>
+      </select>
+      <button id="btn-search" class="btn-primary">검색</button>
+    </div>
+    <div class="auth-area">
+      <button id="btn-auth" class="btn-ghost">로그인</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 지도 영역 -->
+    <div id="map"></div>
+
+    <!-- 이벤트 목록 패널 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span id="event-count">이벤트 0개</span>
+        <button id="btn-add-event" class="btn-primary" style="display:none">+ 이벤트 등록</button>
+      </div>
+      <ul id="event-list"></ul>
+    </aside>
+  </main>
+
+  <!-- 이벤트 상세 팝업 -->
+  <div id="modal-event" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('modal-event')">✕</button>
+      <div id="modal-event-body"></div>
+    </div>
+  </div>
+
+  <!-- 로그인/회원가입 모달 -->
+  <div id="modal-auth" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('modal-auth')">✕</button>
+      <div class="tab-group">
+        <button class="tab active" onclick="switchTab('login')">로그인</button>
+        <button class="tab" onclick="switchTab('register')">회원가입</button>
+      </div>
+
+      <!-- 로그인 폼 -->
+      <form id="form-login" onsubmit="handleLogin(event)">
+        <input type="email" name="email" placeholder="이메일" required />
+        <input type="password" name="password" placeholder="비밀번호" required />
+        <button type="submit" class="btn-primary w100">로그인</button>
+        <p class="form-error" id="login-error"></p>
+      </form>
+
+      <!-- 회원가입 폼 -->
+      <form id="form-register" class="hidden" onsubmit="handleRegister(event)">
+        <input type="email" name="email" placeholder="이메일" required />
+        <input type="password" name="password" placeholder="비밀번호" required />
+        <input type="text" name="nickname" placeholder="닉네임" required />
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_organizer" />
+          이벤트 주최자로 가입
+        </label>
+        <button type="submit" class="btn-primary w100">가입하기</button>
+        <p class="form-error" id="register-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- 이벤트 등록 모달 -->
+  <div id="modal-create" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('modal-create')">✕</button>
+      <h2>이벤트 등록</h2>
+      <form id="form-create" onsubmit="handleCreateEvent(event)">
+        <input type="text" name="title" placeholder="이벤트 제목" required />
+        <textarea name="description" placeholder="설명 (선택)"></textarea>
+        <input type="text" name="location_name" placeholder="장소명" required />
+        <input type="text" name="address" placeholder="주소 (선택)" />
+        <div class="coord-row">
+          <input type="number" name="latitude" placeholder="위도" step="any" required readonly id="input-lat" />
+          <input type="number" name="longitude" placeholder="경도" step="any" required readonly id="input-lng" />
+          <button type="button" class="btn-ghost" onclick="pickLocation()">지도에서 선택</button>
+        </div>
+        <div class="date-row">
+          <input type="datetime-local" name="start_date" required />
+          <input type="datetime-local" name="end_date" />
+        </div>
+        <select name="event_type">
+          <option value="salsa">살사</option>
+          <option value="bachata">바차타</option>
+          <option value="kizomba">키좀바</option>
+          <option value="social" selected>소셜</option>
+          <option value="workshop">워크샵</option>
+          <option value="congress">콩그레스</option>
+        </select>
+        <button type="submit" class="btn-primary w100">등록하기</button>
+        <p class="form-error" id="create-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
