@@ -41,6 +41,17 @@
     </div>
   </header>
 
+  <!-- 위치 선택 모드 오버레이 바 -->
+  <div id="pick-location-bar" class="pick-bar hidden">
+    <span id="pick-bar-msg">지도에서 위치를 클릭하세요</span>
+    <div id="pick-bar-actions" class="hidden">
+      <button class="btn-primary" onclick="confirmPickedLocation()">확인</button>
+      <button class="btn-ghost" onclick="retryPickLocation()">재선택</button>
+      <button class="btn-ghost" onclick="cancelPickLocation()">취소</button>
+    </div>
+    <button id="pick-bar-cancel" class="btn-ghost" onclick="cancelPickLocation()">취소</button>
+  </div>
+
   <main class="layout">
     <!-- 지도 영역 -->
     <div id="map"></div>

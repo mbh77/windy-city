@@ -17,6 +17,10 @@ let markers = [];
 let events = [];
 let currentUser = null;
 let isPickingLocation = false;
+let tempMarker = null;
+let pickedLatLng = null;
+// 이벤트 등록 폼 데이터 임시 저장 (위치 선택 중 모달 닫힐 때)
+let savedFormData = null;
 
 // ── 토큰 관리 ─────────────────────────────────────────────────
 function getToken() { return localStorage.getItem('token'); }
@@ -58,10 +62,22 @@ function initMap() {
   window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
     if (!isPickingLocation) return;
     const latlng = mouseEvent.latLng;
-    document.getElementById('input-lat').value = latlng.getLat().toFixed(6);
-    document.getElementById('input-lng').value = latlng.getLng().toFixed(6);
-    isPickingLocation = false;
-    map.setCursor('');
+    pickedLatLng = latlng;
+
+    // 기존 임시 마커 제거
+    if (tempMarker) tempMarker.setMap(null);
+
+    // 빨간 마커 생성
+    tempMarker = new window.kakao.maps.Marker({
+      position: latlng,
+      map: map
+    });
+
+    // 바 상태 변경: 메시지 + 확인/재선택/취소 버튼
+    document.getElementById('pick-bar-msg').textContent =
+      `위도 ${latlng.getLat().toFixed(6)}, 경도 ${latlng.getLng().toFixed(6)}`;
+    document.getElementById('pick-bar-actions').classList.remove('hidden');
+    document.getElementById('pick-bar-cancel').classList.add('hidden');
   });
 }
 
@@ -310,10 +326,98 @@ async function handleCreateEvent(e) {
 
 // ── 지도에서 위치 선택 ────────────────────────────────────────
 function pickLocation() {
+  // 폼 데이터 임시 저장
+  savedFormData = saveCreateFormData();
   isPickingLocation = true;
+  pickedLatLng = null;
   closeModal('modal-create');
-  // 잠깐 후 다시 열기 (지도 클릭 후 모달 복귀는 클릭 핸들러에서 처리)
-  alert('지도에서 위치를 클릭하세요. 선택 후 이벤트 등록 창을 다시 열어주세요.');
+
+  // 오버레이 바 표시
+  const bar = document.getElementById('pick-location-bar');
+  bar.classList.remove('hidden');
+  document.getElementById('pick-bar-msg').textContent = '지도에서 위치를 클릭하세요';
+  document.getElementById('pick-bar-actions').classList.add('hidden');
+  document.getElementById('pick-bar-cancel').classList.remove('hidden');
+
+  // 커서 변경 + 지도 테두리
+  document.getElementById('map').classList.add('picking');
+}
+
+// 위치 확인 → 좌표 저장 후 모달 복귀
+function confirmPickedLocation() {
+  if (!pickedLatLng) return;
+  // 좌표를 savedFormData에 반영한 후 복원
+  if (savedFormData) {
+    savedFormData.latitude = pickedLatLng.getLat().toFixed(6);
+    savedFormData.longitude = pickedLatLng.getLng().toFixed(6);
+  }
+  exitPickMode();
+  openModal('modal-create');
+  if (savedFormData) {
+    restoreCreateFormData(savedFormData);
+    savedFormData = null;
+  }
+}
+
+// 재선택 → 마커 제거, 다시 클릭 대기
+function retryPickLocation() {
+  if (tempMarker) { tempMarker.setMap(null); tempMarker = null; }
+  pickedLatLng = null;
+  document.getElementById('pick-bar-msg').textContent = '지도에서 위치를 클릭하세요';
+  document.getElementById('pick-bar-actions').classList.add('hidden');
+  document.getElementById('pick-bar-cancel').classList.remove('hidden');
+}
+
+// 취소 → 원래 상태로 복귀
+function cancelPickLocation() {
+  exitPickMode();
+  openModal('modal-create');
+  if (savedFormData) {
+    restoreCreateFormData(savedFormData);
+    savedFormData = null;
+  }
+}
+
+// 위치 선택 모드 종료 공통 처리
+function exitPickMode() {
+  isPickingLocation = false;
+  if (tempMarker) { tempMarker.setMap(null); tempMarker = null; }
+  document.getElementById('pick-location-bar').classList.add('hidden');
+  document.getElementById('map').classList.remove('picking');
+}
+
+// 폼 데이터 저장/복원 (위치 선택 중 모달이 닫히므로)
+function saveCreateFormData() {
+  const form = document.getElementById('form-create');
+  return {
+    title: form.title.value,
+    description: form.description.value,
+    location_name: form.location_name.value,
+    address: form.address.value,
+    latitude: form.latitude.value,
+    longitude: form.longitude.value,
+    start_date: form.start_date.value,
+    end_date: form.end_date.value,
+    event_type: form.event_type.value,
+    dance_genres: Array.from(form.querySelectorAll('input[name="dance_genres"]:checked')).map(cb => cb.value),
+  };
+}
+
+function restoreCreateFormData(data) {
+  const form = document.getElementById('form-create');
+  form.title.value = data.title;
+  form.description.value = data.description;
+  form.location_name.value = data.location_name;
+  form.address.value = data.address;
+  form.latitude.value = data.latitude;
+  form.longitude.value = data.longitude;
+  form.start_date.value = data.start_date;
+  form.end_date.value = data.end_date;
+  form.event_type.value = data.event_type;
+  // 체크박스 복원
+  form.querySelectorAll('input[name="dance_genres"]').forEach(cb => {
+    cb.checked = data.dance_genres.includes(cb.value);
+  });
 }
 
 // ── 로그아웃 ──────────────────────────────────────────────────
