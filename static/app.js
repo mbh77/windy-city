@@ -77,7 +77,6 @@ function initMap() {
     document.getElementById('pick-bar-msg').textContent =
       `위도 ${latlng.getLat().toFixed(6)}, 경도 ${latlng.getLng().toFixed(6)}`;
     document.getElementById('pick-bar-actions').classList.remove('hidden');
-    document.getElementById('pick-bar-cancel').classList.add('hidden');
   });
 }
 
@@ -337,7 +336,9 @@ function pickLocation() {
   bar.classList.remove('hidden');
   document.getElementById('pick-bar-msg').textContent = '지도에서 위치를 클릭하세요';
   document.getElementById('pick-bar-actions').classList.add('hidden');
-  document.getElementById('pick-bar-cancel').classList.remove('hidden');
+
+  // 기존 이벤트 마커 숨기기
+  markers.forEach(m => m.setMap(null));
 
   // 커서 변경 + 지도 테두리
   document.getElementById('map').classList.add('picking');
@@ -365,7 +366,6 @@ function retryPickLocation() {
   pickedLatLng = null;
   document.getElementById('pick-bar-msg').textContent = '지도에서 위치를 클릭하세요';
   document.getElementById('pick-bar-actions').classList.add('hidden');
-  document.getElementById('pick-bar-cancel').classList.remove('hidden');
 }
 
 // 취소 → 원래 상태로 복귀
@@ -384,6 +384,9 @@ function exitPickMode() {
   if (tempMarker) { tempMarker.setMap(null); tempMarker = null; }
   document.getElementById('pick-location-bar').classList.add('hidden');
   document.getElementById('map').classList.remove('picking');
+
+  // 기존 이벤트 마커 복원
+  markers.forEach(m => m.setMap(map));
 }
 
 // 폼 데이터 저장/복원 (위치 선택 중 모달이 닫히므로)
