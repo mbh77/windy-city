@@ -114,12 +114,18 @@
         <input type="text" name="title" placeholder="이벤트 제목" required />
         <textarea name="description" placeholder="설명 (선택)"></textarea>
         <input type="text" name="location_name" placeholder="장소명" required />
-        <input type="text" name="address" placeholder="주소 (선택)" />
+        <input type="hidden" name="address" />
         <input type="hidden" name="latitude" id="input-lat" />
         <input type="hidden" name="longitude" id="input-lng" />
+        <label class="form-label">위치 지정</label>
+        <div class="location-search-row">
+          <input type="text" id="location-search-input" placeholder="주소 또는 장소명 검색" autocomplete="off" />
+          <button type="button" class="btn-ghost" onclick="searchLocation()">검색</button>
+          <button type="button" class="btn-ghost" onclick="pickLocation()">지도</button>
+        </div>
+        <ul id="location-search-results" class="search-results hidden"></ul>
         <div class="location-pick-row">
           <span id="picked-address" class="picked-address">위치를 선택해 주세요</span>
-          <button type="button" class="btn-ghost" onclick="pickLocation()">지도에서 선택</button>
         </div>
         <div class="date-row">
           <input type="datetime-local" name="start_date" required />

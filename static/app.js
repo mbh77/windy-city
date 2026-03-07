@@ -53,6 +53,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     updatePickedAddressDisplay();
     openModal('modal-create');
   });
+
+  // 장소 검색 Enter 키 처리 (폼 submit 방지)
+  document.getElementById('location-search-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchLocation();
+    }
+  });
 });
 
 function initMap() {
@@ -435,6 +443,64 @@ function updatePickedAddressDisplay() {
     el.textContent = '위치를 선택해 주세요';
     el.classList.remove('has-value');
   }
+}
+
+// ── 장소/주소 검색 ──────────────────────────────────────────
+function searchLocation() {
+  const query = document.getElementById('location-search-input').value.trim();
+  if (!query) return;
+
+  const resultsEl = document.getElementById('location-search-results');
+  resultsEl.innerHTML = '<li class="search-loading">검색 중...</li>';
+  resultsEl.classList.remove('hidden');
+
+  const places = new window.kakao.maps.services.Places();
+  places.keywordSearch(query, (data, status) => {
+    if (status === window.kakao.maps.services.Status.OK) {
+      renderSearchResults(data.slice(0, 5));
+    } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
+      resultsEl.innerHTML = '<li class="search-empty">검색 결과가 없습니다</li>';
+    } else {
+      resultsEl.innerHTML = '<li class="search-empty">검색에 실패했습니다</li>';
+    }
+  });
+}
+
+// 검색 결과 렌더링
+function renderSearchResults(places) {
+  const resultsEl = document.getElementById('location-search-results');
+  resultsEl.innerHTML = '';
+  places.forEach(place => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <div class="search-place-name">${place.place_name}</div>
+      <div class="search-place-addr">${place.road_address_name || place.address_name}</div>
+    `;
+    li.addEventListener('click', () => selectSearchResult(place));
+    resultsEl.appendChild(li);
+  });
+}
+
+// 검색 결과 선택 → 좌표/주소/장소명 자동 입력
+function selectSearchResult(place) {
+  const form = document.getElementById('form-create');
+  // 좌표 저장
+  document.getElementById('input-lat').value = parseFloat(place.y).toFixed(6);
+  document.getElementById('input-lng').value = parseFloat(place.x).toFixed(6);
+  // 주소 자동 입력
+  form.address.value = place.road_address_name || place.address_name;
+  // 장소명이 비어 있으면 자동 입력
+  if (!form.location_name.value) {
+    form.location_name.value = place.place_name;
+  }
+  // 검색 결과 닫기
+  document.getElementById('location-search-results').classList.add('hidden');
+  document.getElementById('location-search-input').value = '';
+  // 위치 표시 업데이트
+  updatePickedAddressDisplay();
+  // 지도 해당 위치로 이동
+  const pos = new window.kakao.maps.LatLng(place.y, place.x);
+  map.panTo(pos);
 }
 
 // 폼 데이터 저장/복원 (위치 선택 중 모달이 닫히므로)
