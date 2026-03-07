@@ -115,9 +115,10 @@
         <textarea name="description" placeholder="설명 (선택)"></textarea>
         <input type="text" name="location_name" placeholder="장소명" required />
         <input type="text" name="address" placeholder="주소 (선택)" />
-        <div class="coord-row">
-          <input type="number" name="latitude" placeholder="위도" step="any" required readonly id="input-lat" />
-          <input type="number" name="longitude" placeholder="경도" step="any" required readonly id="input-lng" />
+        <input type="hidden" name="latitude" id="input-lat" />
+        <input type="hidden" name="longitude" id="input-lng" />
+        <div class="location-pick-row">
+          <span id="picked-address" class="picked-address">위치를 선택해 주세요</span>
           <button type="button" class="btn-ghost" onclick="pickLocation()">지도에서 선택</button>
         </div>
         <div class="date-row">

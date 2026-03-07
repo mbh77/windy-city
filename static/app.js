@@ -46,7 +46,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (currentUser) logout();
     else openModal('modal-auth');
   });
-  document.getElementById('btn-add-event').addEventListener('click', () => openModal('modal-create'));
+  document.getElementById('btn-add-event').addEventListener('click', () => {
+    document.getElementById('form-create').reset();
+    document.getElementById('input-lat').value = '';
+    document.getElementById('input-lng').value = '';
+    updatePickedAddressDisplay();
+    openModal('modal-create');
+  });
 });
 
 function initMap() {
@@ -73,9 +79,21 @@ function initMap() {
       map: map
     });
 
-    // 바 상태 변경: 메시지 + 확인/재선택/취소 버튼
-    document.getElementById('pick-bar-msg').textContent =
-      `위도 ${latlng.getLat().toFixed(6)}, 경도 ${latlng.getLng().toFixed(6)}`;
+    // 역지오코딩으로 주소 표시
+    document.getElementById('pick-bar-msg').textContent = '주소 검색 중...';
+    const geocoder = new window.kakao.maps.services.Geocoder();
+    geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK && result[0]) {
+        const addr = result[0].road_address
+          ? result[0].road_address.address_name
+          : result[0].address.address_name;
+        document.getElementById('pick-bar-msg').textContent = addr;
+        // 주소를 savedFormData에도 저장
+        if (savedFormData) savedFormData.address = addr;
+      } else {
+        document.getElementById('pick-bar-msg').textContent = '주소를 찾을 수 없습니다';
+      }
+    });
     document.getElementById('pick-bar-actions').classList.remove('hidden');
   });
 }
@@ -290,6 +308,12 @@ async function handleCreateEvent(e) {
   const errEl = document.getElementById('create-error');
   errEl.textContent = '';
 
+  // 위치 선택 검증
+  if (!form.latitude.value || !form.longitude.value) {
+    errEl.textContent = '지도에서 위치를 선택해 주세요';
+    return;
+  }
+
   // 선택된 춤 종류 수집
   const selectedGenres = Array.from(form.querySelectorAll('input[name="dance_genres"]:checked'))
     .map(cb => cb.value);
@@ -316,6 +340,7 @@ async function handleCreateEvent(e) {
   if (res.ok) {
     closeModal('modal-create');
     form.reset();
+    updatePickedAddressDisplay();
     await loadEvents();
   } else {
     const err = await res.json();
@@ -347,10 +372,16 @@ function pickLocation() {
 // 위치 확인 → 좌표 저장 후 모달 복귀
 function confirmPickedLocation() {
   if (!pickedLatLng) return;
+  // 바에 표시된 주소 가져오기
+  const pickedAddr = document.getElementById('pick-bar-msg').textContent;
   // 좌표를 savedFormData에 반영한 후 복원
   if (savedFormData) {
     savedFormData.latitude = pickedLatLng.getLat().toFixed(6);
     savedFormData.longitude = pickedLatLng.getLng().toFixed(6);
+    // 주소 필드에도 반영
+    if (pickedAddr && pickedAddr !== '주소 검색 중...' && pickedAddr !== '주소를 찾을 수 없습니다') {
+      savedFormData.address = pickedAddr;
+    }
   }
   exitPickMode();
   openModal('modal-create');
@@ -358,6 +389,8 @@ function confirmPickedLocation() {
     restoreCreateFormData(savedFormData);
     savedFormData = null;
   }
+  // 모달 내 위치 표시 업데이트
+  updatePickedAddressDisplay();
 }
 
 // 재선택 → 마커 제거, 다시 클릭 대기
@@ -387,6 +420,21 @@ function exitPickMode() {
 
   // 기존 이벤트 마커 복원
   markers.forEach(m => m.setMap(map));
+}
+
+// 모달 내 선택된 주소 표시 업데이트
+function updatePickedAddressDisplay() {
+  const el = document.getElementById('picked-address');
+  const lat = document.getElementById('input-lat').value;
+  const lng = document.getElementById('input-lng').value;
+  const addr = document.getElementById('form-create').address.value;
+  if (lat && lng) {
+    el.textContent = addr || '위치 선택됨';
+    el.classList.add('has-value');
+  } else {
+    el.textContent = '위치를 선택해 주세요';
+    el.classList.remove('has-value');
+  }
 }
 
 // 폼 데이터 저장/복원 (위치 선택 중 모달이 닫히므로)
