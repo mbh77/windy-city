@@ -24,6 +24,9 @@ function authHeaders() {
 
 // ── 초기화 ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
+  if (window.kakao && window.kakao.maps) {
+    await new Promise(resolve => window.kakao.maps.load(resolve));
+  }
   initMap();
   await restoreSession();
   await loadEvents();
@@ -40,13 +43,13 @@ function initMap() {
   const container = document.getElementById('map');
   // 서울 시청 기준 초기 위치
   const options = {
-    center: new kakao.maps.LatLng(37.5665, 126.9780),
+    center: new window.kakao.maps.LatLng(37.5665, 126.9780),
     level: 7
   };
-  map = new kakao.maps.Map(container, options);
+  map = new window.kakao.maps.Map(container, options);
 
   // 지도 클릭 시 위치 선택 (이벤트 등록용)
-  kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
+  window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
     if (!isPickingLocation) return;
     const latlng = mouseEvent.latLng;
     document.getElementById('input-lat').value = latlng.getLat().toFixed(6);
@@ -129,8 +132,8 @@ function renderMarkers(evts) {
   markers = [];
 
   evts.forEach(ev => {
-    const pos = new kakao.maps.LatLng(ev.latitude, ev.longitude);
-    const marker = new kakao.maps.Marker({ position: pos, map });
+    const pos = new window.kakao.maps.LatLng(ev.latitude, ev.longitude);
+    const marker = new window.kakao.maps.Marker({ position: pos, map });
 
     // 인포윈도우
     const infoContent = `
@@ -138,11 +141,11 @@ function renderMarkers(evts) {
         <strong>${ev.title}</strong><br/>
         <span style="color:#888;font-size:11px">${formatDate(ev.start_date)}</span>
       </div>`;
-    const infowindow = new kakao.maps.InfoWindow({ content: infoContent });
+    const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent });
 
-    kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
-    kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
-    kakao.maps.event.addListener(marker, 'click', () => showEventDetail(ev));
+    window.kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
+    window.kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
+    window.kakao.maps.event.addListener(marker, 'click', () => showEventDetail(ev));
 
     markers.push(marker);
   });
@@ -169,7 +172,7 @@ function showEventDetail(ev) {
   openModal('modal-event');
 
   // 지도에서 해당 마커 위치로 이동
-  map.panTo(new kakao.maps.LatLng(ev.latitude, ev.longitude));
+  map.panTo(new window.kakao.maps.LatLng(ev.latitude, ev.longitude));
 }
 
 // ── 이벤트 삭제 ───────────────────────────────────────────────
