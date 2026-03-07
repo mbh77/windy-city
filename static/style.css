@@ -36,12 +36,21 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 #event-list .event-type-badge { display: inline-block; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px; }
 
 /* ── 이벤트 유형 색상 ── */
-.type-salsa { background: #ff6b6b22; color: #ff6b6b; }
-.type-bachata { background: #6b9dff22; color: #6b9dff; }
-.type-kizomba { background: #b56bff22; color: #b56bff; }
 .type-social { background: #6bff9d22; color: #6bff9d; }
 .type-workshop { background: #ffd06b22; color: #ffd06b; }
 .type-congress { background: #ff9d6b22; color: #ff9d6b; }
+.type-practice { background: #6bdfff22; color: #6bdfff; }
+.type-performance { background: #ff6bdf22; color: #ff6bdf; }
+.type-other { background: #99999922; color: #999; }
+
+/* ── 춤 종류 배지 ── */
+.genre-badge { display: inline-block; font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; margin-right: 2px; margin-bottom: 4px; }
+.genre-salsa { background: #ff6b6b22; color: #ff6b6b; }
+.genre-bachata { background: #6b9dff22; color: #6b9dff; }
+.genre-kizomba { background: #b56bff22; color: #b56bff; }
+.genre-zouk { background: #6bffd022; color: #6bffd0; }
+.genre-tango { background: #ff6ba822; color: #ff6ba8; }
+.genre-other { background: #99999922; color: #999; }
 
 /* ── 모달 ── */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; }
@@ -60,6 +69,9 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 .coord-row, .date-row { display: flex; gap: 6px; }
 .coord-row input, .date-row input { flex: 1; }
 .checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 0.85rem; color: #ccc; cursor: pointer; }
+.form-label { font-size: 0.8rem; color: #999; margin-bottom: 6px; display: block; }
+.genre-checkboxes { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 10px; }
+.genre-checkboxes .checkbox-label { margin-bottom: 4px; }
 
 /* ── 탭 ── */
 .tab-group { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 1px solid #333; }

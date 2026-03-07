@@ -18,12 +18,21 @@
       <input type="date" id="filter-date" />
       <select id="filter-type">
         <option value="">전체 유형</option>
-        <option value="salsa">살사</option>
-        <option value="bachata">바차타</option>
-        <option value="kizomba">키좀바</option>
         <option value="social">소셜</option>
         <option value="workshop">워크샵</option>
         <option value="congress">콩그레스</option>
+        <option value="practice">프랙티스</option>
+        <option value="performance">공연</option>
+        <option value="other">기타</option>
+      </select>
+      <select id="filter-genre">
+        <option value="">전체 장르</option>
+        <option value="salsa">살사</option>
+        <option value="bachata">바차타</option>
+        <option value="kizomba">키좀바</option>
+        <option value="zouk">주크</option>
+        <option value="tango">탱고</option>
+        <option value="other">기타</option>
       </select>
       <button id="btn-search" class="btn-primary">검색</button>
     </div>
@@ -105,14 +114,24 @@
           <input type="datetime-local" name="start_date" required />
           <input type="datetime-local" name="end_date" />
         </div>
+        <label class="form-label">이벤트 유형</label>
         <select name="event_type">
-          <option value="salsa">살사</option>
-          <option value="bachata">바차타</option>
-          <option value="kizomba">키좀바</option>
           <option value="social" selected>소셜</option>
           <option value="workshop">워크샵</option>
           <option value="congress">콩그레스</option>
+          <option value="practice">프랙티스</option>
+          <option value="performance">공연</option>
+          <option value="other">기타</option>
         </select>
+        <label class="form-label">춤 종류 (복수 선택)</label>
+        <div class="genre-checkboxes">
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="salsa" /> 살사</label>
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="bachata" /> 바차타</label>
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="kizomba" /> 키좀바</label>
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="zouk" /> 주크</label>
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="tango" /> 탱고</label>
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="other" /> 기타</label>
+        </div>
         <button type="submit" class="btn-primary w100">등록하기</button>
         <p class="form-error" id="create-error"></p>
       </form>

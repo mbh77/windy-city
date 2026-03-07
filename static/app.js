@@ -1,8 +1,14 @@
 // ── 상수 ──────────────────────────────────────────────────────
 const API = '';  // 같은 origin이므로 빈 문자열
+// 이벤트 유형 라벨
 const TYPE_LABELS = {
+  social: '소셜', workshop: '워크샵', congress: '콩그레스',
+  practice: '프랙티스', performance: '공연', other: '기타'
+};
+// 춤 종류 라벨
+const GENRE_LABELS = {
   salsa: '살사', bachata: '바차타', kizomba: '키좀바',
-  social: '소셜', workshop: '워크샵', congress: '콩그레스'
+  zouk: '주크', tango: '탱고', other: '기타'
 };
 
 // ── 상태 ──────────────────────────────────────────────────────
@@ -100,6 +106,8 @@ async function loadEvents() {
     params.set('date_to', end.toISOString());
   }
   if (typeVal) params.set('event_type', typeVal);
+  const genreVal = document.getElementById('filter-genre').value;
+  if (genreVal) params.set('dance_genre', genreVal);
 
   const res = await fetch(`${API}/api/events/?${params}`);
   events = await res.json();
@@ -114,8 +122,12 @@ function renderList(evts) {
   ul.innerHTML = '';
   evts.forEach(ev => {
     const li = document.createElement('li');
+    const genreBadges = (ev.dance_genres || []).map(g =>
+      `<span class="genre-badge genre-${g}">${GENRE_LABELS[g]}</span>`
+    ).join('');
     li.innerHTML = `
       <span class="event-type-badge type-${ev.event_type}">${TYPE_LABELS[ev.event_type]}</span>
+      ${genreBadges}
       <div class="event-title">${ev.title}</div>
       <div class="event-meta">📍 ${ev.location_name}</div>
       <div class="event-meta">📅 ${formatDate(ev.start_date)}</div>
@@ -155,8 +167,12 @@ function renderMarkers(evts) {
 function showEventDetail(ev) {
   const isOwner = currentUser && currentUser.id === ev.organizer_id;
   const body = document.getElementById('modal-event-body');
+  const detailGenres = (ev.dance_genres || []).map(g =>
+    `<span class="genre-badge genre-${g}">${GENRE_LABELS[g]}</span>`
+  ).join('');
   body.innerHTML = `
     <span class="event-type-badge type-${ev.event_type}">${TYPE_LABELS[ev.event_type]}</span>
+    ${detailGenres}
     <h2 style="margin-top:8px">${ev.title}</h2>
     ${ev.description ? `<p style="margin:8px 0;color:#bbb;font-size:0.85rem">${ev.description}</p>` : ''}
     <div class="detail-row"><span class="detail-label">장소</span>${ev.location_name}</div>
@@ -259,6 +275,10 @@ async function handleCreateEvent(e) {
   const errEl = document.getElementById('create-error');
   errEl.textContent = '';
 
+  // 선택된 춤 종류 수집
+  const selectedGenres = Array.from(form.querySelectorAll('input[name="dance_genres"]:checked'))
+    .map(cb => cb.value);
+
   const body = {
     title: form.title.value,
     description: form.description.value || null,
@@ -269,6 +289,7 @@ async function handleCreateEvent(e) {
     start_date: new Date(form.start_date.value).toISOString(),
     end_date: form.end_date.value ? new Date(form.end_date.value).toISOString() : null,
     event_type: form.event_type.value,
+    dance_genres: selectedGenres,
   };
 
   const res = await fetch(`${API}/api/events/`, {
