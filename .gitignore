@@ -7,3 +7,7 @@ __pycache__/
 .vscode/
 .sftp-config.json
 .mcp.json
+
+# Frontend
+frontend/node_modules/
+static/
