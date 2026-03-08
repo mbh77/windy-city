@@ -34,6 +34,15 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
+class VerifyEmail(BaseModel):
+    email: EmailStr
+    code: str
+
+
+class ResendCode(BaseModel):
+    email: EmailStr
+
+
 # ── 이벤트 스키마 ──────────────────────────────────────────────
 
 class EventCreate(BaseModel):

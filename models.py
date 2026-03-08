@@ -31,9 +31,14 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
+    hashed_password = Column(String(255), nullable=True)  # 소셜 로그인은 비밀번호 없음
     nickname = Column(String(100), nullable=False)
     is_organizer = Column(Boolean, default=False)
+    is_verified = Column(Boolean, default=False)
+    verify_code = Column(String(6))
+    verify_code_expires = Column(DateTime)
+    provider = Column(String(10), default="email")  # email, kakao, naver, google
+    provider_id = Column(String(100))
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # 관계: 주최자가 등록한 이벤트들
