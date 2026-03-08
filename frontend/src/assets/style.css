@@ -1,6 +1,7 @@
 /* ── 기본 리셋 ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+#app { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 
 /* ── 상단 필터 바 ── */
 .topbar {
@@ -69,6 +70,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 }
 .modal-content input[type="checkbox"] { display: inline; width: auto; margin-bottom: 0; }
 .modal-content textarea { resize: vertical; min-height: 70px; }
+
 /* ── 장소 검색 ── */
 .location-search-row { display: flex; gap: 6px; margin-bottom: 8px; }
 .location-search-row input { flex: 1; margin-bottom: 0 !important; }
@@ -115,6 +117,11 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 .form-error { color: #ff6b6b; font-size: 0.8rem; margin-top: 6px; min-height: 1em; }
 
 /* ── 이벤트 상세 ── */
+.detail-row { display: flex; gap: 8px; margin-bottom: 6px; font-size: 0.85rem; color: #ccc; }
+.detail-label { color: #888; min-width: 60px; }
+.action-row { display: flex; gap: 8px; margin-top: 16px; }
+.btn-danger { background: #c0392b; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 0.85rem; }
+
 /* ── 위치 선택 모드 ── */
 .pick-bar {
   position: fixed; top: 52px; left: 50%; transform: translateX(-50%);
@@ -131,9 +138,3 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 
 /* 지도 위치 선택 모드 시각 피드백 */
 #map.picking { cursor: crosshair !important; outline: 3px solid #ff6b6b; outline-offset: -3px; }
-
-#modal-event-body h2 { margin-bottom: 8px; }
-#modal-event-body .detail-row { display: flex; gap: 8px; margin-bottom: 6px; font-size: 0.85rem; color: #ccc; }
-#modal-event-body .detail-label { color: #888; min-width: 60px; }
-#modal-event-body .action-row { display: flex; gap: 8px; margin-top: 16px; }
-#modal-event-body .btn-danger { background: #c0392b; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 0.85rem; }
