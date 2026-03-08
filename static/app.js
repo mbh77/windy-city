@@ -21,6 +21,8 @@ let tempMarker = null;
 let pickedLatLng = null;
 // 이벤트 등록 폼 데이터 임시 저장 (위치 선택 중 모달 닫힐 때)
 let savedFormData = null;
+// 이메일 인증 대기 중인 이메일
+let pendingVerifyEmail = null;
 
 // ── 토큰 관리 ─────────────────────────────────────────────────
 function getToken() { return localStorage.getItem('token'); }
@@ -245,31 +247,44 @@ async function deleteEvent(id) {
   }
 }
 
+// ── 버튼 스피너 유틸 ──────────────────────────────────────────
+function btnLoading(btn) { btn.classList.add('btn-loading'); btn.disabled = true; }
+function btnReset(btn) { btn.classList.remove('btn-loading'); btn.disabled = false; }
+
 // ── 로그인 ────────────────────────────────────────────────────
 async function handleLogin(e) {
   e.preventDefault();
   const form = e.target;
+  const btn = document.getElementById('btn-login');
   const errEl = document.getElementById('login-error');
   errEl.textContent = '';
+  btnLoading(btn);
 
-  const res = await fetch(`${API}/api/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: form.email.value,
-      password: form.password.value,
-    })
-  });
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: form.email.value,
+        password: form.password.value,
+      })
+    });
 
-  if (res.ok) {
-    const data = await res.json();
-    setToken(data.access_token);
-    await restoreSession();
-    closeModal('modal-auth');
-    form.reset();
-  } else {
-    const err = await res.json();
-    errEl.textContent = err.detail || '로그인에 실패했습니다';
+    if (res.ok) {
+      const data = await res.json();
+      setToken(data.access_token);
+      await restoreSession();
+      closeModal('modal-auth');
+      form.reset();
+    } else if (res.status === 403) {
+      pendingVerifyEmail = form.email.value;
+      showVerifySection(pendingVerifyEmail);
+    } else {
+      const err = await res.json();
+      errEl.textContent = err.detail || '로그인에 실패했습니다';
+    }
+  } finally {
+    btnReset(btn);
   }
 }
 
@@ -277,36 +292,116 @@ async function handleLogin(e) {
 async function handleRegister(e) {
   e.preventDefault();
   const form = e.target;
+  const btn = document.getElementById('btn-register');
   const errEl = document.getElementById('register-error');
   errEl.textContent = '';
+  btnLoading(btn);
 
-  const res = await fetch(`${API}/api/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: form.email.value,
-      password: form.password.value,
-      nickname: form.nickname.value,
-      is_organizer: form.is_organizer.checked,
-    })
-  });
-
-  if (res.ok) {
-    // 가입 후 자동 로그인
-    const loginRes = await fetch(`${API}/api/auth/login`, {
+  try {
+    const res = await fetch(`${API}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: form.email.value, password: form.password.value })
+      body: JSON.stringify({
+        email: form.email.value,
+        password: form.password.value,
+        nickname: form.nickname.value,
+        is_organizer: form.is_organizer.checked,
+      })
     });
-    const data = await loginRes.json();
-    setToken(data.access_token);
-    await restoreSession();
-    closeModal('modal-auth');
-    form.reset();
-  } else {
-    const err = await res.json();
-    errEl.textContent = err.detail || '가입에 실패했습니다';
+
+    if (res.ok) {
+      pendingVerifyEmail = form.email.value;
+      showVerifySection(pendingVerifyEmail);
+      form.reset();
+    } else {
+      const err = await res.json();
+      errEl.textContent = err.detail || '가입에 실패했습니다';
+    }
+  } finally {
+    btnReset(btn);
   }
+}
+
+// ── 인증 코드 UI 전환 ──────────────────────────────────────────
+function showVerifySection(email) {
+  document.getElementById('form-login').classList.add('hidden');
+  document.getElementById('form-register').classList.add('hidden');
+  document.querySelector('.tab-group').classList.add('hidden');
+  document.getElementById('verify-section').classList.remove('hidden');
+  document.getElementById('verify-msg').textContent = `${email} 으로 인증 코드가 발송되었습니다`;
+  document.getElementById('verify-code').value = '';
+  document.getElementById('verify-error').textContent = '';
+}
+
+// ── 인증 코드 확인 ──────────────────────────────────────────────
+async function handleVerify() {
+  const code = document.getElementById('verify-code').value.trim();
+  const btn = document.getElementById('btn-verify');
+  const errEl = document.getElementById('verify-error');
+  errEl.textContent = '';
+
+  if (!code || code.length !== 6) {
+    errEl.textContent = '6자리 인증 코드를 입력해 주세요';
+    return;
+  }
+
+  btnLoading(btn);
+  try {
+    const res = await fetch(`${API}/api/auth/verify-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingVerifyEmail, code })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setToken(data.access_token);
+      await restoreSession();
+      hideVerifySection();
+      closeModal('modal-auth');
+    } else {
+      const err = await res.json();
+      errEl.textContent = err.detail || '인증에 실패했습니다';
+    }
+  } finally {
+    btnReset(btn);
+  }
+}
+
+// ── 인증 코드 재발송 ────────────────────────────────────────────
+async function handleResendCode() {
+  const btn = document.getElementById('btn-resend');
+  const errEl = document.getElementById('verify-error');
+  errEl.textContent = '';
+  btnLoading(btn);
+
+  try {
+    const res = await fetch(`${API}/api/auth/resend-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingVerifyEmail })
+    });
+
+    if (res.ok) {
+      errEl.style.color = '#6bff9d';
+      errEl.textContent = '인증 코드가 재발송되었습니다';
+      setTimeout(() => { errEl.style.color = ''; }, 3000);
+    } else {
+      const err = await res.json();
+      errEl.textContent = err.detail || '재발송에 실패했습니다';
+    }
+  } finally {
+    btnReset(btn);
+  }
+}
+
+// ── 인증 섹션 숨기고 원래 UI 복원 ───────────────────────────────
+function hideVerifySection() {
+  document.getElementById('verify-section').classList.add('hidden');
+  document.querySelector('.tab-group').classList.remove('hidden');
+  // 로그인 탭으로 초기화
+  switchTab('login');
+  pendingVerifyEmail = null;
 }
 
 // ── 이벤트 등록 ───────────────────────────────────────────────
