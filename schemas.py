@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
-from typing import Optional
-from models import EventType
+from typing import Optional, List
+from models import EventType, DanceGenre
 
 
 # ── 사용자 스키마 ──────────────────────────────────────────────
@@ -46,6 +46,7 @@ class EventCreate(BaseModel):
     start_date: datetime
     end_date: Optional[datetime] = None
     event_type: EventType = EventType.social
+    dance_genres: List[DanceGenre] = []
 
 
 class EventUpdate(BaseModel):
@@ -58,6 +59,7 @@ class EventUpdate(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     event_type: Optional[EventType] = None
+    dance_genres: Optional[List[DanceGenre]] = None
 
 
 class EventResponse(BaseModel):
@@ -71,6 +73,7 @@ class EventResponse(BaseModel):
     start_date: datetime
     end_date: Optional[datetime]
     event_type: EventType
+    dance_genres: List[DanceGenre] = []
     organizer_id: int
     organizer_nickname: Optional[str] = None
     created_at: datetime

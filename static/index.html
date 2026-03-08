@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/style.css" />
   <!-- 카카오맵 SDK (앱 키를 발급받아 아래에 입력) -->
   <script type="text/javascript"
-    src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_APP_KEY&libraries=services">
+    src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ba9181f67ad33c531408461e22415705&libraries=services&autoload=false">
   </script>
 </head>
 <body>
@@ -18,12 +18,21 @@
       <input type="date" id="filter-date" />
       <select id="filter-type">
         <option value="">전체 유형</option>
-        <option value="salsa">살사</option>
-        <option value="bachata">바차타</option>
-        <option value="kizomba">키좀바</option>
         <option value="social">소셜</option>
         <option value="workshop">워크샵</option>
         <option value="congress">콩그레스</option>
+        <option value="practice">프랙티스</option>
+        <option value="performance">공연</option>
+        <option value="other">기타</option>
+      </select>
+      <select id="filter-genre">
+        <option value="">전체 장르</option>
+        <option value="salsa">살사</option>
+        <option value="bachata">바차타</option>
+        <option value="kizomba">키좀바</option>
+        <option value="zouk">주크</option>
+        <option value="tango">탱고</option>
+        <option value="other">기타</option>
       </select>
       <button id="btn-search" class="btn-primary">검색</button>
     </div>
@@ -31,6 +40,16 @@
       <button id="btn-auth" class="btn-ghost">로그인</button>
     </div>
   </header>
+
+  <!-- 위치 선택 모드 오버레이 바 -->
+  <div id="pick-location-bar" class="pick-bar hidden">
+    <span id="pick-bar-msg">지도에서 위치를 클릭하세요</span>
+    <div id="pick-bar-actions" class="hidden">
+      <button class="btn-primary" onclick="confirmPickedLocation()">확인</button>
+      <button class="btn-ghost" onclick="retryPickLocation()">재선택</button>
+    </div>
+    <button class="btn-ghost" onclick="cancelPickLocation()">취소</button>
+  </div>
 
   <main class="layout">
     <!-- 지도 영역 -->
@@ -95,24 +114,41 @@
         <input type="text" name="title" placeholder="이벤트 제목" required />
         <textarea name="description" placeholder="설명 (선택)"></textarea>
         <input type="text" name="location_name" placeholder="장소명" required />
-        <input type="text" name="address" placeholder="주소 (선택)" />
-        <div class="coord-row">
-          <input type="number" name="latitude" placeholder="위도" step="any" required readonly id="input-lat" />
-          <input type="number" name="longitude" placeholder="경도" step="any" required readonly id="input-lng" />
-          <button type="button" class="btn-ghost" onclick="pickLocation()">지도에서 선택</button>
+        <input type="hidden" name="address" />
+        <input type="hidden" name="latitude" id="input-lat" />
+        <input type="hidden" name="longitude" id="input-lng" />
+        <label class="form-label">위치 지정</label>
+        <div class="location-search-row">
+          <input type="text" id="location-search-input" placeholder="주소 또는 장소명 검색" autocomplete="off" />
+          <button type="button" class="btn-ghost" onclick="searchLocation()">검색</button>
+          <button type="button" class="btn-ghost" onclick="pickLocation()">지도</button>
+        </div>
+        <ul id="location-search-results" class="search-results hidden"></ul>
+        <div class="location-pick-row">
+          <span id="picked-address" class="picked-address">위치를 선택해 주세요</span>
         </div>
         <div class="date-row">
           <input type="datetime-local" name="start_date" required />
           <input type="datetime-local" name="end_date" />
         </div>
+        <label class="form-label">이벤트 유형</label>
         <select name="event_type">
-          <option value="salsa">살사</option>
-          <option value="bachata">바차타</option>
-          <option value="kizomba">키좀바</option>
           <option value="social" selected>소셜</option>
           <option value="workshop">워크샵</option>
           <option value="congress">콩그레스</option>
+          <option value="practice">프랙티스</option>
+          <option value="performance">공연</option>
+          <option value="other">기타</option>
         </select>
+        <label class="form-label">춤 종류 (복수 선택)</label>
+        <div class="genre-checkboxes">
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="salsa" /> 살사</label>
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="bachata" /> 바차타</label>
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="kizomba" /> 키좀바</label>
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="zouk" /> 주크</label>
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="tango" /> 탱고</label>
+          <label class="checkbox-label"><input type="checkbox" name="dance_genres" value="other" /> 기타</label>
+        </div>
         <button type="submit" class="btn-primary w100">등록하기</button>
         <p class="form-error" id="create-error"></p>
       </form>

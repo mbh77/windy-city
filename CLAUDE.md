@@ -65,7 +65,7 @@ GTA 맵처럼 지도에서 실시간으로 이벤트를 확인할 수 있는 느
 ## 개발 환경
 - **로컬**: macOS (Apple Silicon)
 - **에디터**: VS Code + SFTP 익스텐션 (uploadOnSave: true)
-- **AI 도구**: Claude Code + MCP (filesystem, sqlite)
+- **AI 도구**: Claude Code + MCP (mysql)
 - **형상 관리**: GitHub (git@github.com-mbh77:mbh77/windy-city.git)
 - **SSH 키**: ~/.ssh/id_ed25519 (github.com-mbh77 호스트 설정)
 - **DB 클라이언트**: DBeaver (SSH 터널링으로 서버 MariaDB 접속)
