@@ -39,7 +39,8 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 /* ── 이벤트 유형 색상 ── */
 .type-social { background: #6bff9d22; color: #6bff9d; }
 .type-workshop { background: #ffd06b22; color: #ffd06b; }
-.type-congress { background: #ff9d6b22; color: #ff9d6b; }
+.type-festival { background: #ff9d6b22; color: #ff9d6b; }
+.type-regular_class { background: #ffa5ff22; color: #ffa5ff; }
 .type-practice { background: #6bdfff22; color: #6bdfff; }
 .type-performance { background: #ff6bdf22; color: #ff6bdf; }
 .type-other { background: #99999922; color: #999; }
@@ -51,7 +52,43 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 .genre-kizomba { background: #b56bff22; color: #b56bff; }
 .genre-zouk { background: #6bffd022; color: #6bffd0; }
 .genre-tango { background: #ff6ba822; color: #ff6ba8; }
+.genre-merengue { background: #ffd06b22; color: #ffd06b; }
 .genre-other { background: #99999922; color: #999; }
+
+/* ── 장소 유형 배지 ── */
+.venue-type-badge { display: inline-block; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px; }
+.vtype-club { background: #9b59b622; color: #9b59b6; }
+.vtype-academy { background: #3498db22; color: #3498db; }
+.vtype-practice_room { background: #2ecc7122; color: #2ecc71; }
+
+/* ── 난이도 배지 ── */
+.difficulty-badge { display: inline-block; font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; margin-bottom: 4px; background: #e67e2222; color: #e67e22; }
+
+/* ── 시설 태그 ── */
+.facility-tag { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; background: #2a2a2a; color: #ccc; margin-right: 4px; }
+
+/* ── 장소 상세 ── */
+.venue-desc { margin: 8px 0; color: #bbb; font-size: 0.85rem; line-height: 1.5; }
+.venue-link { color: #6b9dff; text-decoration: none; word-break: break-all; }
+.venue-link:hover { text-decoration: underline; }
+
+/* ── 카테고리 체크박스 필터 ── */
+.category-filters { display: flex; gap: 12px; align-items: center; }
+.category-check { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #ccc; cursor: pointer; white-space: nowrap; }
+.category-check input[type="checkbox"] { width: auto; margin: 0; }
+.cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── 인라인 체크박스 그룹 ── */
+.inline-checks { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+
+/* ── 사이드바 리스트 (공용) ── */
+.sidebar-list { flex: 1; overflow-y: auto; padding: 8px 0; list-style: none; }
+.sidebar-list li { padding: 12px 16px; border-bottom: 1px solid #222; cursor: pointer; transition: background 0.15s; }
+.sidebar-list li:hover { background: #222; }
+.sidebar-list .item-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+.sidebar-list .item-meta { font-size: 0.75rem; color: #888; }
+.sidebar-list .empty-msg { padding: 20px 16px; color: #666; font-size: 0.85rem; text-align: center; cursor: default; }
+.sidebar-list .empty-msg:hover { background: transparent; }
 
 /* ── 유틸리티 ── */
 .hidden { display: none !important; }

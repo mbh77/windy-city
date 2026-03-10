@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 
 from database import engine
 import models
-from routers import auth, events
+from routers import auth, events, venues
 
 # DB 테이블 생성
 models.Base.metadata.create_all(bind=engine)
@@ -23,6 +23,7 @@ app.add_middleware(
 # API 라우터 등록
 app.include_router(auth.router)
 app.include_router(events.router)
+app.include_router(venues.router)
 
 # 정적 파일 서빙 (프론트엔드)
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

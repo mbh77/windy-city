@@ -1,6 +1,11 @@
 <template>
   <!-- 상단 필터 바 -->
-  <TopBar @search="handleSearch" @authClick="handleAuthClick" />
+  <TopBar
+    :visibleCategories="visibleCategories"
+    @search="handleSearch"
+    @authClick="handleAuthClick"
+    @toggleCategory="toggleCategory"
+  />
 
   <!-- 위치 선택 모드 오버레이 -->
   <PickLocationBar
@@ -17,22 +22,33 @@
     <KakaoMap
       ref="mapRef"
       :isPicking="isPicking"
+      :visibleCategories="visibleCategories"
       @markerClick="openEventDetail"
+      @venueMarkerClick="openVenueDetail"
       @locationPicked="handleLocationPicked"
     />
 
-    <!-- 이벤트 목록 -->
+    <!-- 사이드바 -->
     <Sidebar
-      @addEvent="openCreateModal"
+      @addEvent="openCreateEventModal"
       @selectEvent="openEventDetail"
+      @addVenue="openCreateVenueModal"
+      @selectVenue="openVenueDetail"
     />
   </main>
 
   <!-- 이벤트 상세 모달 -->
   <EventDetailModal
-    :visible="showDetail"
+    :visible="showEventDetail"
     :event="selectedEvent"
-    @close="closeDetail"
+    @close="closeEventDetail"
+  />
+
+  <!-- 장소 상세 모달 -->
+  <VenueDetailModal
+    :visible="showVenueDetail"
+    :venue="selectedVenue"
+    @close="closeVenueDetail"
   />
 
   <!-- 로그인/회원가입 모달 -->
@@ -43,52 +59,85 @@
 
   <!-- 이벤트 등록 모달 -->
   <CreateEventModal
-    ref="createRef"
-    :visible="showCreate"
-    :restoredForm="restoredFormData"
-    @close="showCreate = false"
-    @pickLocation="startPickLocation"
+    ref="createEventRef"
+    :visible="showCreateEvent"
+    :restoredForm="restoredEventForm"
+    @close="showCreateEvent = false"
+    @pickLocation="startPickLocation('event', $event)"
     @created="handleEventCreated"
+  />
+
+  <!-- 장소 등록 모달 -->
+  <CreateVenueModal
+    ref="createVenueRef"
+    :visible="showCreateVenue"
+    :restoredForm="restoredVenueForm"
+    @close="showCreateVenue = false"
+    @pickLocation="startPickLocation('venue', $event)"
+    @created="handleVenueCreated"
   />
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useAuth } from './composables/useAuth.js'
 import { useEvents } from './composables/useEvents.js'
+import { useVenues } from './composables/useVenues.js'
 
 import TopBar from './components/TopBar.vue'
 import Sidebar from './components/Sidebar.vue'
 import KakaoMap from './components/KakaoMap.vue'
 import PickLocationBar from './components/PickLocationBar.vue'
 import EventDetailModal from './components/EventDetailModal.vue'
+import VenueDetailModal from './components/VenueDetailModal.vue'
 import AuthModal from './components/AuthModal.vue'
 import CreateEventModal from './components/CreateEventModal.vue'
+import CreateVenueModal from './components/CreateVenueModal.vue'
 
 const { currentUser, restoreSession, logout } = useAuth()
 const { events, loadEvents } = useEvents()
+const { venues, loadVenues } = useVenues()
 
 // refs
 const mapRef = ref(null)
-const createRef = ref(null)
+const createEventRef = ref(null)
+const createVenueRef = ref(null)
 
 // 모달 상태
-const showDetail = ref(false)
+const showEventDetail = ref(false)
+const showVenueDetail = ref(false)
 const showAuth = ref(false)
-const showCreate = ref(false)
+const showCreateEvent = ref(false)
+const showCreateVenue = ref(false)
 const selectedEvent = ref(null)
+const selectedVenue = ref(null)
 
 // 위치 선택 상태
 const isPicking = ref(false)
 const pickMessage = ref('지도에서 위치를 클릭하세요')
 const pickedLocation = ref(null)
-const restoredFormData = ref(null)
+const pickTarget = ref('event')
+const restoredEventForm = ref(null)
+const restoredVenueForm = ref(null)
+
+// 카테고리 체크박스 상태
+const visibleCategories = reactive({
+  club: true,
+  academy: true,
+  practice_room: true,
+  event: true,
+})
 
 // ── 초기화 ──
 onMounted(async () => {
   await restoreSession()
-  await loadEvents()
+  await Promise.all([loadEvents(), loadVenues()])
 })
+
+// ── 카테고리 토글 ──
+function toggleCategory(key) {
+  visibleCategories[key] = !visibleCategories[key]
+}
 
 // ── 검색 ──
 function handleSearch(filters) {
@@ -107,20 +156,32 @@ function handleAuthClick() {
 // ── 이벤트 상세 ──
 function openEventDetail(ev) {
   selectedEvent.value = ev
-  showDetail.value = true
+  showEventDetail.value = true
   mapRef.value?.panTo(ev.latitude, ev.longitude)
 }
 
-async function closeDetail() {
-  showDetail.value = false
+async function closeEventDetail() {
+  showEventDetail.value = false
   await loadEvents()
 }
 
+// ── 장소 상세 ──
+function openVenueDetail(v) {
+  selectedVenue.value = v
+  showVenueDetail.value = true
+  mapRef.value?.panTo(v.latitude, v.longitude)
+}
+
+async function closeVenueDetail() {
+  showVenueDetail.value = false
+  await loadVenues()
+}
+
 // ── 이벤트 등록 ──
-function openCreateModal() {
-  restoredFormData.value = null
-  createRef.value?.resetForm()
-  showCreate.value = true
+function openCreateEventModal() {
+  restoredEventForm.value = null
+  createEventRef.value?.resetForm()
+  showCreateEvent.value = true
 }
 
 async function handleEventCreated(data) {
@@ -131,10 +192,31 @@ async function handleEventCreated(data) {
   await loadEvents()
 }
 
-// ── 위치 선택 모드 ──
-function startPickLocation(formData) {
-  restoredFormData.value = formData ? { ...formData } : null
-  showCreate.value = false
+// ── 장소 등록 ──
+function openCreateVenueModal() {
+  restoredVenueForm.value = null
+  createVenueRef.value?.resetForm()
+  showCreateVenue.value = true
+}
+
+async function handleVenueCreated(data) {
+  if (data?.panTo) {
+    mapRef.value?.panTo(data.panTo.lat, data.panTo.lng)
+    return
+  }
+  await loadVenues()
+}
+
+// ── 위치 선택 모드 (이벤트/장소 공용) ──
+function startPickLocation(target, formData) {
+  pickTarget.value = target
+  if (target === 'event') {
+    restoredEventForm.value = formData ? { ...formData } : null
+    showCreateEvent.value = false
+  } else {
+    restoredVenueForm.value = formData ? { ...formData } : null
+    showCreateVenue.value = false
+  }
   isPicking.value = true
   pickMessage.value = '지도에서 위치를 클릭하세요'
   pickedLocation.value = null
@@ -149,14 +231,22 @@ function confirmPick() {
   if (!pickedLocation.value) return
   isPicking.value = false
 
-  if (restoredFormData.value) {
-    restoredFormData.value.latitude = pickedLocation.value.lat.toFixed(6)
-    restoredFormData.value.longitude = pickedLocation.value.lng.toFixed(6)
-    if (pickedLocation.value.address) {
-      restoredFormData.value.address = pickedLocation.value.address
+  const loc = pickedLocation.value
+  if (pickTarget.value === 'event') {
+    if (restoredEventForm.value) {
+      restoredEventForm.value.latitude = loc.lat.toFixed(6)
+      restoredEventForm.value.longitude = loc.lng.toFixed(6)
+      if (loc.address) restoredEventForm.value.address = loc.address
     }
+    showCreateEvent.value = true
+  } else {
+    if (restoredVenueForm.value) {
+      restoredVenueForm.value.latitude = loc.lat.toFixed(6)
+      restoredVenueForm.value.longitude = loc.lng.toFixed(6)
+      if (loc.address) restoredVenueForm.value.address = loc.address
+    }
+    showCreateVenue.value = true
   }
-  showCreate.value = true
   pickedLocation.value = null
 }
 
@@ -169,6 +259,10 @@ function retryPick() {
 function cancelPick() {
   isPicking.value = false
   pickedLocation.value = null
-  showCreate.value = true
+  if (pickTarget.value === 'event') {
+    showCreateEvent.value = true
+  } else {
+    showCreateVenue.value = true
+  }
 }
 </script>
