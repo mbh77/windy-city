@@ -47,50 +47,75 @@
         <input v-model="form.phone" type="text" placeholder="전화번호 (선택)" />
         <input v-model="form.website" type="text" placeholder="홈페이지 URL (선택)" />
 
-        <!-- 춤 종류 -->
-        <label class="form-label">춤 종류 (복수 선택)</label>
-        <div class="genre-checkboxes">
-          <label v-for="opt in GENRE_OPTIONS" :key="opt.value" class="checkbox-label">
-            <input v-model="form.dance_genres" type="checkbox" :value="opt.value" />
-            {{ opt.label }}
-          </label>
+        <!-- 춤 종류 (접이식) -->
+        <button type="button" class="collapsible-toggle" @click="showGenres = !showGenres">
+          춤 종류 (복수 선택)
+          <span class="collapse-arrow" :class="{ open: showGenres }">&#9662;</span>
+        </button>
+        <div v-show="showGenres" class="collapsible-body">
+          <div class="genre-checkboxes">
+            <label v-for="opt in GENRE_OPTIONS" :key="opt.value" class="checkbox-label">
+              <input v-model="form.dance_genres" type="checkbox" :value="opt.value" />
+              {{ opt.label }}
+            </label>
+          </div>
         </div>
 
-        <!-- 유형별 추가 필드 -->
+        <!-- 유형별 추가 필드 (접이식) -->
         <template v-if="form.venue_type === 'club'">
-          <label class="form-label">클럽 정보</label>
-          <input v-model="form.cover_charge" type="text" placeholder="입장료 (예: 20,000원)" />
-          <div class="inline-checks">
-            <label class="checkbox-label"><input v-model="form.has_bar" type="checkbox" /> 바/주류 판매</label>
+          <button type="button" class="collapsible-toggle" @click="showTypeInfo = !showTypeInfo">
+            클럽 정보
+            <span class="collapse-arrow" :class="{ open: showTypeInfo }">&#9662;</span>
+          </button>
+          <div v-show="showTypeInfo" class="collapsible-body">
+            <input v-model="form.cover_charge" type="text" placeholder="입장료 (예: 20,000원)" />
+            <div class="inline-checks">
+              <label class="checkbox-label"><input v-model="form.has_bar" type="checkbox" /> 바/주류 판매</label>
+            </div>
           </div>
         </template>
 
         <template v-if="form.venue_type === 'academy'">
-          <label class="form-label">학원 정보</label>
-          <div class="inline-checks">
-            <label class="checkbox-label"><input v-model="form.has_trial_class" type="checkbox" /> 체험 수업 가능</label>
+          <button type="button" class="collapsible-toggle" @click="showTypeInfo = !showTypeInfo">
+            학원 정보
+            <span class="collapse-arrow" :class="{ open: showTypeInfo }">&#9662;</span>
+          </button>
+          <div v-show="showTypeInfo" class="collapsible-body">
+            <div class="inline-checks">
+              <label class="checkbox-label"><input v-model="form.has_trial_class" type="checkbox" /> 체험 수업 가능</label>
+            </div>
+            <input v-if="form.has_trial_class" v-model="form.trial_class_fee" type="text" placeholder="체험 수업비 (예: 10,000원)" />
           </div>
-          <input v-if="form.has_trial_class" v-model="form.trial_class_fee" type="text" placeholder="체험 수업비 (예: 10,000원)" />
         </template>
 
         <template v-if="form.venue_type === 'practice_room'">
-          <label class="form-label">연습실 정보</label>
-          <input v-model="form.rental_fee" type="text" placeholder="대관료 (예: 시간당 20,000원)" />
-          <input v-model.number="form.area_sqm" type="number" placeholder="면적 (㎡)" />
-          <div class="inline-checks">
-            <label class="checkbox-label"><input v-model="form.has_mirror" type="checkbox" /> 거울</label>
-            <label class="checkbox-label"><input v-model="form.has_sound_system" type="checkbox" /> 음향 시설</label>
+          <button type="button" class="collapsible-toggle" @click="showTypeInfo = !showTypeInfo">
+            연습실 정보
+            <span class="collapse-arrow" :class="{ open: showTypeInfo }">&#9662;</span>
+          </button>
+          <div v-show="showTypeInfo" class="collapsible-body">
+            <input v-model="form.rental_fee" type="text" placeholder="대관료 (예: 시간당 20,000원)" />
+            <input v-model.number="form.area_sqm" type="number" placeholder="면적 (㎡)" />
+            <div class="inline-checks">
+              <label class="checkbox-label"><input v-model="form.has_mirror" type="checkbox" /> 거울</label>
+              <label class="checkbox-label"><input v-model="form.has_sound_system" type="checkbox" /> 음향 시설</label>
+            </div>
           </div>
         </template>
 
-        <!-- 공통 시설 -->
-        <label class="form-label">시설 정보</label>
-        <input v-model="form.floor_type" type="text" placeholder="플로어 타입 (예: 우드)" />
-        <input v-model.number="form.capacity" type="number" placeholder="수용 인원" />
-        <div class="inline-checks">
-          <label class="checkbox-label"><input v-model="form.has_parking" type="checkbox" /> 주차 가능</label>
+        <!-- 공통 시설 (접이식) -->
+        <button type="button" class="collapsible-toggle" @click="showFacility = !showFacility">
+          시설 정보
+          <span class="collapse-arrow" :class="{ open: showFacility }">&#9662;</span>
+        </button>
+        <div v-show="showFacility" class="collapsible-body">
+          <input v-model="form.floor_type" type="text" placeholder="플로어 타입 (예: 우드)" />
+          <input v-model.number="form.capacity" type="number" placeholder="수용 인원" />
+          <div class="inline-checks">
+            <label class="checkbox-label"><input v-model="form.has_parking" type="checkbox" /> 주차 가능</label>
+          </div>
+          <input v-if="form.has_parking" v-model="form.parking_info" type="text" placeholder="주차 정보 (예: 건물 지하 주차장)" />
         </div>
-        <input v-if="form.has_parking" v-model="form.parking_info" type="text" placeholder="주차 정보 (예: 건물 지하 주차장)" />
 
         <button type="submit" class="btn-primary w100">등록하기</button>
         <p class="form-error">{{ error }}</p>
@@ -110,6 +135,11 @@ const props = defineProps({
 })
 const emit = defineEmits(['close', 'pickLocation', 'created'])
 const { createVenue } = useVenues()
+
+// 접이식 섹션 상태
+const showGenres = ref(false)
+const showTypeInfo = ref(false)
+const showFacility = ref(false)
 
 const form = reactive({
   venue_type: 'club',
@@ -157,6 +187,9 @@ function resetForm() {
   searchQuery.value = ''
   searchResults.value = []
   searchStatus.value = ''
+  showGenres.value = false
+  showTypeInfo.value = false
+  showFacility.value = false
 }
 
 // 모달 열릴 때: 복원 데이터 적용

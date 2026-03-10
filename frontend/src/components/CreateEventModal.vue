@@ -47,45 +47,66 @@
           <option v-for="opt in TYPE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
 
-        <label class="form-label">춤 종류 (복수 선택)</label>
-        <div class="genre-checkboxes">
-          <label v-for="opt in GENRE_OPTIONS" :key="opt.value" class="checkbox-label">
-            <input v-model="form.dance_genres" type="checkbox" :value="opt.value" />
-            {{ opt.label }}
-          </label>
+        <!-- 춤 종류 (접이식) -->
+        <button type="button" class="collapsible-toggle" @click="showGenres = !showGenres">
+          춤 종류 (복수 선택)
+          <span class="collapse-arrow" :class="{ open: showGenres }">&#9662;</span>
+        </button>
+        <div v-show="showGenres" class="collapsible-body">
+          <div class="genre-checkboxes">
+            <label v-for="opt in GENRE_OPTIONS" :key="opt.value" class="checkbox-label">
+              <input v-model="form.dance_genres" type="checkbox" :value="opt.value" />
+              {{ opt.label }}
+            </label>
+          </div>
         </div>
 
-        <!-- 가격 정보 -->
-        <label class="form-label">가격 정보</label>
-        <input v-model="form.price" type="text" placeholder="가격 (예: 20,000원)" />
-        <input v-model="form.early_bird_price" type="text" placeholder="얼리버드 가격 (선택)" />
+        <!-- 가격 정보 (접이식) -->
+        <button type="button" class="collapsible-toggle" @click="showPrice = !showPrice">
+          가격 정보
+          <span class="collapse-arrow" :class="{ open: showPrice }">&#9662;</span>
+        </button>
+        <div v-show="showPrice" class="collapsible-body">
+          <input v-model="form.price" type="text" placeholder="가격 (예: 20,000원)" />
+          <input v-model="form.early_bird_price" type="text" placeholder="얼리버드 가격 (선택)" />
+        </div>
 
-        <!-- 유형별 추가 필드 -->
+        <!-- 유형별 추가 필드 (접이식) -->
         <template v-if="form.event_type === 'social'">
-          <label class="form-label">소셜 파티 정보</label>
-          <input v-model="form.dj_name" type="text" placeholder="DJ 이름 (선택)" />
-          <input v-model="form.dress_code" type="text" placeholder="드레스코드 (선택)" />
-          <div class="inline-checks">
-            <label class="checkbox-label"><input v-model="form.has_pre_lesson" type="checkbox" /> 프리레슨 포함</label>
+          <button type="button" class="collapsible-toggle" @click="showTypeInfo = !showTypeInfo">
+            소셜 파티 정보
+            <span class="collapse-arrow" :class="{ open: showTypeInfo }">&#9662;</span>
+          </button>
+          <div v-show="showTypeInfo" class="collapsible-body">
+            <input v-model="form.dj_name" type="text" placeholder="DJ 이름 (선택)" />
+            <input v-model="form.dress_code" type="text" placeholder="드레스코드 (선택)" />
+            <div class="inline-checks">
+              <label class="checkbox-label"><input v-model="form.has_pre_lesson" type="checkbox" /> 프리레슨 포함</label>
+            </div>
           </div>
         </template>
 
         <template v-if="form.event_type === 'workshop' || form.event_type === 'regular_class'">
-          <label class="form-label">수업 정보</label>
-          <input v-model="form.instructor_name" type="text" placeholder="강사명 (선택)" />
-          <select v-model="form.difficulty">
-            <option value="">난이도 선택</option>
-            <option v-for="opt in DIFFICULTY_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-          </select>
-          <input v-model.number="form.max_participants" type="number" placeholder="최대 정원 (선택)" />
-          <div class="inline-checks">
-            <label class="checkbox-label"><input v-model="form.requires_partner" type="checkbox" /> 파트너 필요</label>
+          <button type="button" class="collapsible-toggle" @click="showTypeInfo = !showTypeInfo">
+            수업 정보
+            <span class="collapse-arrow" :class="{ open: showTypeInfo }">&#9662;</span>
+          </button>
+          <div v-show="showTypeInfo" class="collapsible-body">
+            <input v-model="form.instructor_name" type="text" placeholder="강사명 (선택)" />
+            <select v-model="form.difficulty">
+              <option value="">난이도 선택</option>
+              <option v-for="opt in DIFFICULTY_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+            <input v-model.number="form.max_participants" type="number" placeholder="최대 정원 (선택)" />
+            <div class="inline-checks">
+              <label class="checkbox-label"><input v-model="form.requires_partner" type="checkbox" /> 파트너 필요</label>
+            </div>
           </div>
         </template>
 
         <!-- 반복 이벤트 -->
         <template v-if="form.event_type === 'regular_class'">
-          <div class="inline-checks">
+          <div class="inline-checks" style="margin-top:8px">
             <label class="checkbox-label"><input v-model="form.is_recurring" type="checkbox" /> 반복 이벤트 (매주)</label>
           </div>
         </template>
@@ -108,6 +129,11 @@ const props = defineProps({
 })
 const emit = defineEmits(['close', 'pickLocation', 'created'])
 const { createEvent } = useEvents()
+
+// 접이식 섹션 상태
+const showGenres = ref(false)
+const showPrice = ref(false)
+const showTypeInfo = ref(false)
 
 const form = reactive({
   title: '',
@@ -151,6 +177,9 @@ function resetForm() {
   searchQuery.value = ''
   searchResults.value = []
   searchStatus.value = ''
+  showGenres.value = false
+  showPrice.value = false
+  showTypeInfo.value = false
 }
 
 watch(() => props.visible, (v) => {

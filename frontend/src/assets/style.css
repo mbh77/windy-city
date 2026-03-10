@@ -78,6 +78,18 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 .category-check input[type="checkbox"] { width: auto; margin: 0; }
 .cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
+/* ── 접이식 섹션 ── */
+.collapsible-toggle {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  background: #252525; color: #ccc; border: 1px solid #383838; border-radius: 6px;
+  padding: 10px 14px; font-size: 0.85rem; cursor: pointer; margin-bottom: 8px;
+  transition: background 0.15s;
+}
+.collapsible-toggle:hover { background: #2e2e2e; }
+.collapse-arrow { font-size: 0.75rem; transition: transform 0.2s; }
+.collapse-arrow.open { transform: rotate(180deg); }
+.collapsible-body { margin-bottom: 8px; padding: 0 2px; }
+
 /* ── 인라인 체크박스 그룹 ── */
 .inline-checks { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
 
@@ -95,9 +107,26 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 
 /* ── 모달 ── */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.modal-content { background: #1e1e1e; border-radius: 12px; padding: 24px; width: 460px; max-width: 95vw; position: relative; max-height: 90vh; overflow-y: auto; }
-.modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #888; font-size: 1.1rem; cursor: pointer; }
+.modal-content { background: #1e1e1e; border-radius: 12px; padding: 28px 32px; width: 800px; max-width: 95vw; position: relative; max-height: 90vh; overflow-y: auto; }
+.modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #888; font-size: 1.1rem; cursor: pointer; z-index: 1; }
 .modal-close:hover { color: #fff; }
+/* 인증 모달은 좁게 유지 */
+.modal-sm .modal-content { width: 420px; }
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .modal { align-items: stretch; }
+  .modal-content { width: 100%; max-width: 100%; max-height: 100%; border-radius: 0; padding: 20px 16px; }
+  .topbar { flex-wrap: wrap; gap: 8px; padding: 8px 12px; }
+  .logo { font-size: 1rem; }
+  .category-filters { order: 3; width: 100%; justify-content: center; }
+  .filters { order: 2; flex-wrap: wrap; }
+  .auth-area { order: 1; }
+  .sidebar { width: 100%; max-height: 40vh; border-left: none; border-top: 1px solid #2a2a2a; }
+  .layout { flex-direction: column; }
+  .genre-checkboxes { grid-template-columns: repeat(2, 1fr); }
+  .date-row { flex-direction: column; }
+}
 
 /* ── 폼 ── */
 .modal-content h2 { margin-bottom: 16px; font-size: 1.1rem; }
@@ -124,11 +153,11 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 .location-pick-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .picked-address { flex: 1; font-size: 0.85rem; color: #888; padding: 8px 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .picked-address.has-value { color: #e0e0e0; }
-.date-row { display: flex; flex-direction: column; gap: 0; }
-.date-row input { width: 100%; }
+.date-row { display: flex; gap: 8px; }
+.date-row input { flex: 1; }
 .checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 0.85rem; color: #ccc; cursor: pointer; }
 .form-label { font-size: 0.8rem; color: #999; margin-bottom: 6px; display: block; }
-.genre-checkboxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 8px; margin-bottom: 10px; }
+.genre-checkboxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 8px; margin-bottom: 10px; }
 .genre-checkboxes .checkbox-label { margin-bottom: 0; white-space: nowrap; }
 
 /* ── 탭 ── */

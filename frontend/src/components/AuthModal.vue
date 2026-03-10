@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" class="modal" @click.self="handleClose">
+  <div v-if="visible" class="modal modal-sm" @click.self="handleClose">
     <div class="modal-content">
       <button class="modal-close" @click="handleClose">✕</button>
 
