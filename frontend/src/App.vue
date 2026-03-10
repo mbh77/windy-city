@@ -5,6 +5,7 @@
     @search="handleSearch"
     @authClick="handleAuthClick"
     @toggleCategory="toggleCategory"
+    @placeSelect="handlePlaceSelect"
   />
 
   <!-- 위치 선택 모드 오버레이 -->
@@ -26,10 +27,13 @@
       @markerClick="openEventDetail"
       @venueMarkerClick="openVenueDetail"
       @locationPicked="handleLocationPicked"
+      @boundsChanged="mapBounds = $event"
     />
 
     <!-- 사이드바 -->
     <Sidebar
+      :mapBounds="mapBounds"
+      :visibleCategories="visibleCategories"
       @addEvent="openCreateEventModal"
       @selectEvent="openEventDetail"
       @addVenue="openCreateVenueModal"
@@ -103,6 +107,9 @@ const mapRef = ref(null)
 const createEventRef = ref(null)
 const createVenueRef = ref(null)
 
+// 지도 영역
+const mapBounds = ref(null)
+
 // 모달 상태
 const showEventDetail = ref(false)
 const showVenueDetail = ref(false)
@@ -137,6 +144,11 @@ onMounted(async () => {
 // ── 카테고리 토글 ──
 function toggleCategory(key) {
   visibleCategories[key] = !visibleCategories[key]
+}
+
+// ── 장소 검색 → 지도 이동 ──
+function handlePlaceSelect({ lat, lng }) {
+  mapRef.value?.panTo(lat, lng)
 }
 
 // ── 검색 ──

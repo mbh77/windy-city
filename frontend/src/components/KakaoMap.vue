@@ -9,7 +9,7 @@ import { useVenues } from '../composables/useVenues.js'
 import { formatDate } from '../utils/api.js'
 import { VENUE_TYPE_LABELS } from '../utils/constants.js'
 
-const emit = defineEmits(['markerClick', 'venueMarkerClick', 'locationPicked'])
+const emit = defineEmits(['markerClick', 'venueMarkerClick', 'locationPicked', 'boundsChanged'])
 const props = defineProps({
   isPicking: { type: Boolean, default: false },
   visibleCategories: {
@@ -62,6 +62,23 @@ onMounted(async () => {
   map = new window.kakao.maps.Map(container, {
     center: new window.kakao.maps.LatLng(37.5665, 126.9780),
     level: 7,
+  })
+
+  // 지도 영역 변경 시 bounds 전달
+  function emitBounds() {
+    const bounds = map.getBounds()
+    const sw = bounds.getSouthWest()
+    const ne = bounds.getNorthEast()
+    emit('boundsChanged', {
+      swLat: sw.getLat(), swLng: sw.getLng(),
+      neLat: ne.getLat(), neLng: ne.getLng(),
+    })
+  }
+  window.kakao.maps.event.addListener(map, 'idle', emitBounds)
+  // 초기 bounds 전달 (타일 로드 후)
+  window.kakao.maps.event.addListener(map, 'tilesloaded', function onTiles() {
+    emitBounds()
+    window.kakao.maps.event.removeListener(map, 'tilesloaded', onTiles)
   })
 
   // 지도 클릭 → 위치 선택 모드

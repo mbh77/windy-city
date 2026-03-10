@@ -3,17 +3,44 @@
 body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 #app { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 
-/* ── 상단 필터 바 ── */
+/* ── 상단 바 ── */
 .topbar {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 16px; background: #1a1a1a; border-bottom: 1px solid #2a2a2a;
+  display: flex; flex-direction: column;
+  background: #1a1a1a; border-bottom: 1px solid #2a2a2a;
   flex-shrink: 0; z-index: 10;
 }
+.topbar-row { display: flex; align-items: center; gap: 12px; padding: 8px 16px; }
+.topbar-main { border-bottom: 1px solid #2a2a2a; }
+.topbar-filters { padding: 6px 16px; gap: 16px; }
 .logo { font-size: 1.2rem; font-weight: 700; color: #ff6b6b; white-space: nowrap; }
-.filters { display: flex; gap: 8px; flex: 1; }
+.filters { display: flex; gap: 8px; }
 .filters input[type="date"],
 .filters select { background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; }
+.filter-divider { width: 1px; height: 20px; background: #444; flex-shrink: 0; }
 .auth-area { margin-left: auto; }
+
+/* ── 장소 검색 ── */
+.place-search { position: relative; flex: 1; max-width: 400px; }
+.place-search-input {
+  background: #2a2a2a; color: #e0e0e0; border: 1px solid #444;
+  border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; width: 100%;
+}
+.place-search-input::placeholder { color: #888; }
+.place-search-results {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 100;
+  background: #2a2a2a; border: 1px solid #444; border-top: none;
+  border-radius: 0 0 6px 6px; list-style: none;
+  max-height: 280px; overflow-y: auto; min-width: 280px;
+}
+.place-search-results li {
+  padding: 8px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 2px;
+  border-bottom: 1px solid #333;
+}
+.place-search-results li:last-child { border-bottom: none; }
+.place-search-results li:hover,
+.place-search-results li.highlighted { background: #3a3a3a; }
+.place-name { font-size: 0.85rem; color: #e0e0e0; }
+.place-addr { font-size: 0.75rem; color: #888; }
 
 /* ── 버튼 ── */
 .btn-primary { background: #ff6b6b; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
@@ -117,11 +144,13 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 @media (max-width: 768px) {
   .modal { align-items: stretch; }
   .modal-content { width: 100%; max-width: 100%; max-height: 100%; border-radius: 0; padding: 20px 16px; }
-  .topbar { flex-wrap: wrap; gap: 8px; padding: 8px 12px; }
+  .topbar-row { flex-wrap: wrap; gap: 8px; padding: 6px 12px; }
   .logo { font-size: 1rem; }
-  .category-filters { order: 3; width: 100%; justify-content: center; }
-  .filters { order: 2; flex-wrap: wrap; }
-  .auth-area { order: 1; }
+  .place-search { max-width: none; }
+  .topbar-filters { gap: 8px; }
+  .category-filters { width: 100%; justify-content: center; }
+  .filter-divider { display: none; }
+  .filters { width: 100%; flex-wrap: wrap; }
   .sidebar { width: 100%; max-height: 40vh; border-left: none; border-top: 1px solid #2a2a2a; }
   .layout { flex-direction: column; }
   .genre-checkboxes { grid-template-columns: repeat(2, 1fr); }
@@ -190,7 +219,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 
 /* ── 위치 선택 모드 ── */
 .pick-bar {
-  position: fixed; top: 52px; left: 50%; transform: translateX(-50%);
+  position: fixed; top: 90px; left: 50%; transform: translateX(-50%);
   z-index: 50; background: #1a1a1a; border: 1px solid #ff6b6b;
   border-radius: 10px; padding: 10px 20px;
   display: flex; align-items: center; gap: 12px;
