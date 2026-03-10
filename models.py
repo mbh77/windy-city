@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Enum, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -13,6 +13,7 @@ class DanceGenre(str, enum.Enum):
     kizomba = "kizomba"
     zouk = "zouk"
     tango = "tango"
+    merengue = "merengue"
     other = "other"
 
 
@@ -20,10 +21,27 @@ class DanceGenre(str, enum.Enum):
 class EventType(str, enum.Enum):
     social = "social"
     workshop = "workshop"
-    congress = "congress"
-    practice = "practice"
+    festival = "festival"
+    regular_class = "regular_class"
     performance = "performance"
+    practice = "practice"
     other = "other"
+
+
+# 장소 유형 (단일 선택)
+class VenueType(str, enum.Enum):
+    club = "club"
+    academy = "academy"
+    practice_room = "practice_room"
+
+
+# 난이도 (단일 선택)
+class DifficultyLevel(str, enum.Enum):
+    beginner = "beginner"
+    elementary = "elementary"
+    intermediate = "intermediate"
+    advanced = "advanced"
+    all_level = "all_level"
 
 
 class User(Base):
@@ -41,9 +59,73 @@ class User(Base):
     provider_id = Column(String(100))
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # 관계: 주최자가 등록한 이벤트들
+    # 관계
     events = relationship("Event", back_populates="organizer")
+    venues = relationship("Venue", back_populates="owner")
 
+
+# ── 장소 (Venue) ─────────────────────────────────────────────
+
+class Venue(Base):
+    __tablename__ = "venues"
+
+    id = Column(Integer, primary_key=True, index=True)
+    venue_type = Column(Enum(VenueType), nullable=False)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)  # 리치 텍스트 HTML
+    address = Column(String(500))
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    phone = Column(String(50))
+    website = Column(String(500))
+    sns_links = Column(JSON)  # {"instagram": "...", "kakao": "..."}
+    business_hours = Column(JSON)  # {"mon": "18:00-02:00", ...}
+
+    # 공통 시설 정보
+    floor_type = Column(String(50))  # 우드/타일/대리석
+    capacity = Column(Integer)
+    has_parking = Column(Boolean, default=False)
+    parking_info = Column(String(255))
+
+    # 클럽 전용
+    cover_charge = Column(String(255))  # 입장료
+    has_bar = Column(Boolean, default=False)
+
+    # 연습실 전용
+    rental_fee = Column(String(255))  # 대관료
+    has_mirror = Column(Boolean, default=False)
+    has_sound_system = Column(Boolean, default=False)
+    area_sqm = Column(Float)  # 면적 (㎡)
+
+    # 학원 전용
+    has_trial_class = Column(Boolean, default=False)
+    trial_class_fee = Column(String(100))
+
+    # 확장용
+    extra_info = Column(JSON)
+
+    # 등록자
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 관계
+    owner = relationship("User", back_populates="venues")
+    dance_genres = relationship("VenueDanceGenre", back_populates="venue", cascade="all, delete-orphan")
+    events = relationship("Event", back_populates="venue")
+
+
+# 장소-춤종류 연결 테이블
+class VenueDanceGenre(Base):
+    __tablename__ = "venue_dance_genres"
+
+    venue_id = Column(Integer, ForeignKey("venues.id", ondelete="CASCADE"), primary_key=True)
+    dance_genre = Column(Enum(DanceGenre), primary_key=True)
+
+    venue = relationship("Venue", back_populates="dance_genres")
+
+
+# ── 이벤트 (Event) ───────────────────────────────────────────
 
 # 이벤트-춤종류 연결 테이블
 class EventDanceGenre(Base):
@@ -60,7 +142,7 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
-    description = Column(Text)
+    description = Column(Text)  # 리치 텍스트 HTML
     location_name = Column(String(255), nullable=False)
     address = Column(String(500))
     latitude = Column(Float, nullable=False)
@@ -68,9 +150,52 @@ class Event(Base):
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime)
     event_type = Column(Enum(EventType), default=EventType.social)
+
+    # 장소 연결 (선택)
+    venue_id = Column(Integer, ForeignKey("venues.id"), nullable=True)
+
+    # 가격 정보
+    price = Column(String(255))
+    early_bird_price = Column(String(255))
+
+    # 워크샵/수업 관련
+    difficulty = Column(Enum(DifficultyLevel), nullable=True)
+    instructor_name = Column(String(255))
+    max_participants = Column(Integer)
+    requires_partner = Column(Boolean, default=False)
+
+    # 소셜 파티 관련
+    dj_name = Column(String(255))
+    has_pre_lesson = Column(Boolean, default=False)
+    dress_code = Column(String(255))
+
+    # 반복 이벤트
+    is_recurring = Column(Boolean, default=False)
+    recurrence_rule = Column(JSON)  # {"day_of_week": "fri", "frequency": "weekly"}
+
+    # 확장용
+    extra_info = Column(JSON)
+
     organizer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # 관계
     organizer = relationship("User", back_populates="events")
+    venue = relationship("Venue", back_populates="events")
     dance_genres = relationship("EventDanceGenre", back_populates="event", cascade="all, delete-orphan")
+
+
+# ── 미디어 (이미지/영상 공용) ─────────────────────────────────
+
+class Media(Base):
+    __tablename__ = "media"
+
+    id = Column(Integer, primary_key=True, index=True)
+    entity_type = Column(String(20), nullable=False)  # "venue" 또는 "event"
+    entity_id = Column(Integer, nullable=False)
+    media_type = Column(String(20), nullable=False)  # "image" 또는 "video"
+    url = Column(String(1000), nullable=False)  # 이미지 경로 또는 영상 URL
+    thumbnail_url = Column(String(1000))  # 썸네일 (영상용)
+    sort_order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)

@@ -2,12 +2,18 @@
   <div v-if="visible" class="modal" @click.self="$emit('close')">
     <div class="modal-content">
       <button class="modal-close" @click="$emit('close')">✕</button>
-      <h2>이벤트 등록</h2>
+      <h2>장소 등록</h2>
       <form @submit.prevent="handleSubmit">
-        <input v-model="form.title" type="text" placeholder="이벤트 제목" required />
-        <textarea v-model="form.description" placeholder="설명 (선택)"></textarea>
-        <input v-model="form.location_name" type="text" placeholder="장소명" required />
+        <!-- 장소 유형 -->
+        <label class="form-label">장소 유형</label>
+        <select v-model="form.venue_type" required>
+          <option v-for="opt in VENUE_TYPE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+        </select>
 
+        <input v-model="form.name" type="text" placeholder="장소명" required />
+        <textarea v-model="form.description" placeholder="상세 설명 (선택)"></textarea>
+
+        <!-- 위치 검색 -->
         <label class="form-label">위치 지정</label>
         <div class="location-search-row">
           <input
@@ -37,15 +43,9 @@
           </span>
         </div>
 
-        <div class="date-row">
-          <input v-model="form.start_date" type="datetime-local" required />
-          <input v-model="form.end_date" type="datetime-local" />
-        </div>
-
-        <label class="form-label">이벤트 유형</label>
-        <select v-model="form.event_type">
-          <option v-for="opt in TYPE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-        </select>
+        <!-- 연락처 -->
+        <input v-model="form.phone" type="text" placeholder="전화번호 (선택)" />
+        <input v-model="form.website" type="text" placeholder="홈페이지 URL (선택)" />
 
         <!-- 춤 종류 (접이식) -->
         <button type="button" class="collapsible-toggle" @click="showGenres = !showGenres">
@@ -61,55 +61,61 @@
           </div>
         </div>
 
-        <!-- 가격 정보 (접이식) -->
-        <button type="button" class="collapsible-toggle" @click="showPrice = !showPrice">
-          가격 정보
-          <span class="collapse-arrow" :class="{ open: showPrice }">&#9662;</span>
-        </button>
-        <div v-show="showPrice" class="collapsible-body">
-          <input v-model="form.price" type="text" placeholder="가격 (예: 20,000원)" />
-          <input v-model="form.early_bird_price" type="text" placeholder="얼리버드 가격 (선택)" />
-        </div>
-
         <!-- 유형별 추가 필드 (접이식) -->
-        <template v-if="form.event_type === 'social'">
+        <template v-if="form.venue_type === 'club'">
           <button type="button" class="collapsible-toggle" @click="showTypeInfo = !showTypeInfo">
-            소셜 파티 정보
+            클럽 정보
             <span class="collapse-arrow" :class="{ open: showTypeInfo }">&#9662;</span>
           </button>
           <div v-show="showTypeInfo" class="collapsible-body">
-            <input v-model="form.dj_name" type="text" placeholder="DJ 이름 (선택)" />
-            <input v-model="form.dress_code" type="text" placeholder="드레스코드 (선택)" />
+            <input v-model="form.cover_charge" type="text" placeholder="입장료 (예: 20,000원)" />
             <div class="inline-checks">
-              <label class="checkbox-label"><input v-model="form.has_pre_lesson" type="checkbox" /> 프리레슨 포함</label>
+              <label class="checkbox-label"><input v-model="form.has_bar" type="checkbox" /> 바/주류 판매</label>
             </div>
           </div>
         </template>
 
-        <template v-if="form.event_type === 'workshop' || form.event_type === 'regular_class'">
+        <template v-if="form.venue_type === 'academy'">
           <button type="button" class="collapsible-toggle" @click="showTypeInfo = !showTypeInfo">
-            수업 정보
+            학원 정보
             <span class="collapse-arrow" :class="{ open: showTypeInfo }">&#9662;</span>
           </button>
           <div v-show="showTypeInfo" class="collapsible-body">
-            <input v-model="form.instructor_name" type="text" placeholder="강사명 (선택)" />
-            <select v-model="form.difficulty">
-              <option value="">난이도 선택</option>
-              <option v-for="opt in DIFFICULTY_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-            </select>
-            <input v-model.number="form.max_participants" type="number" placeholder="최대 정원 (선택)" />
             <div class="inline-checks">
-              <label class="checkbox-label"><input v-model="form.requires_partner" type="checkbox" /> 파트너 필요</label>
+              <label class="checkbox-label"><input v-model="form.has_trial_class" type="checkbox" /> 체험 수업 가능</label>
+            </div>
+            <input v-if="form.has_trial_class" v-model="form.trial_class_fee" type="text" placeholder="체험 수업비 (예: 10,000원)" />
+          </div>
+        </template>
+
+        <template v-if="form.venue_type === 'practice_room'">
+          <button type="button" class="collapsible-toggle" @click="showTypeInfo = !showTypeInfo">
+            연습실 정보
+            <span class="collapse-arrow" :class="{ open: showTypeInfo }">&#9662;</span>
+          </button>
+          <div v-show="showTypeInfo" class="collapsible-body">
+            <input v-model="form.rental_fee" type="text" placeholder="대관료 (예: 시간당 20,000원)" />
+            <input v-model.number="form.area_sqm" type="number" placeholder="면적 (㎡)" />
+            <div class="inline-checks">
+              <label class="checkbox-label"><input v-model="form.has_mirror" type="checkbox" /> 거울</label>
+              <label class="checkbox-label"><input v-model="form.has_sound_system" type="checkbox" /> 음향 시설</label>
             </div>
           </div>
         </template>
 
-        <!-- 반복 이벤트 -->
-        <template v-if="form.event_type === 'regular_class'">
-          <div class="inline-checks" style="margin-top:8px">
-            <label class="checkbox-label"><input v-model="form.is_recurring" type="checkbox" /> 반복 이벤트 (매주)</label>
+        <!-- 공통 시설 (접이식) -->
+        <button type="button" class="collapsible-toggle" @click="showFacility = !showFacility">
+          시설 정보
+          <span class="collapse-arrow" :class="{ open: showFacility }">&#9662;</span>
+        </button>
+        <div v-show="showFacility" class="collapsible-body">
+          <input v-model="form.floor_type" type="text" placeholder="플로어 타입 (예: 우드)" />
+          <input v-model.number="form.capacity" type="number" placeholder="수용 인원" />
+          <div class="inline-checks">
+            <label class="checkbox-label"><input v-model="form.has_parking" type="checkbox" /> 주차 가능</label>
           </div>
-        </template>
+          <input v-if="form.has_parking" v-model="form.parking_info" type="text" placeholder="주차 정보 (예: 건물 지하 주차장)" />
+        </div>
 
         <button type="submit" class="btn-primary w100">등록하기</button>
         <p class="form-error">{{ error }}</p>
@@ -120,42 +126,47 @@
 
 <script setup>
 import { ref, reactive, watch } from 'vue'
-import { TYPE_OPTIONS, GENRE_OPTIONS, DIFFICULTY_OPTIONS } from '../utils/constants.js'
-import { useEvents } from '../composables/useEvents.js'
+import { VENUE_TYPE_OPTIONS, GENRE_OPTIONS } from '../utils/constants.js'
+import { useVenues } from '../composables/useVenues.js'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
   restoredForm: { type: Object, default: null },
 })
 const emit = defineEmits(['close', 'pickLocation', 'created'])
-const { createEvent } = useEvents()
+const { createVenue } = useVenues()
 
 // 접이식 섹션 상태
 const showGenres = ref(false)
-const showPrice = ref(false)
 const showTypeInfo = ref(false)
+const showFacility = ref(false)
 
 const form = reactive({
-  title: '',
+  venue_type: 'club',
+  name: '',
   description: '',
-  location_name: '',
   address: '',
   latitude: '',
   longitude: '',
-  start_date: '',
-  end_date: '',
-  event_type: 'social',
+  phone: '',
+  website: '',
   dance_genres: [],
-  price: '',
-  early_bird_price: '',
-  dj_name: '',
-  dress_code: '',
-  has_pre_lesson: false,
-  instructor_name: '',
-  difficulty: '',
-  max_participants: null,
-  requires_partner: false,
-  is_recurring: false,
+  // 클럽
+  cover_charge: '',
+  has_bar: false,
+  // 학원
+  has_trial_class: false,
+  trial_class_fee: '',
+  // 연습실
+  rental_fee: '',
+  area_sqm: null,
+  has_mirror: false,
+  has_sound_system: false,
+  // 공통 시설
+  floor_type: '',
+  capacity: null,
+  has_parking: false,
+  parking_info: '',
 })
 
 const error = ref('')
@@ -165,29 +176,30 @@ const searchStatus = ref('')
 
 function resetForm() {
   Object.assign(form, {
-    title: '', description: '', location_name: '', address: '',
-    latitude: '', longitude: '', start_date: '', end_date: '',
-    event_type: 'social', dance_genres: [],
-    price: '', early_bird_price: '',
-    dj_name: '', dress_code: '', has_pre_lesson: false,
-    instructor_name: '', difficulty: '', max_participants: null,
-    requires_partner: false, is_recurring: false,
+    venue_type: 'club', name: '', description: '', address: '',
+    latitude: '', longitude: '', phone: '', website: '',
+    dance_genres: [], cover_charge: '', has_bar: false,
+    has_trial_class: false, trial_class_fee: '',
+    rental_fee: '', area_sqm: null, has_mirror: false, has_sound_system: false,
+    floor_type: '', capacity: null, has_parking: false, parking_info: '',
   })
   error.value = ''
   searchQuery.value = ''
   searchResults.value = []
   searchStatus.value = ''
   showGenres.value = false
-  showPrice.value = false
   showTypeInfo.value = false
+  showFacility.value = false
 }
 
+// 모달 열릴 때: 복원 데이터 적용
 watch(() => props.visible, (v) => {
   if (v && props.restoredForm) {
     Object.assign(form, props.restoredForm)
   }
 })
 
+// 장소 검색
 function searchLocation() {
   const query = searchQuery.value.trim()
   if (!query) return
@@ -212,8 +224,8 @@ function selectPlace(place) {
   form.latitude = parseFloat(place.y).toFixed(6)
   form.longitude = parseFloat(place.x).toFixed(6)
   form.address = place.road_address_name || place.address_name
-  if (!form.location_name) {
-    form.location_name = place.place_name
+  if (!form.name) {
+    form.name = place.place_name
   }
   searchResults.value = []
   searchQuery.value = ''
@@ -225,34 +237,35 @@ function selectPlace(place) {
 async function handleSubmit() {
   error.value = ''
   if (!form.latitude || !form.longitude) {
-    error.value = '지도에서 위치를 선택해 주세요'
+    error.value = '위치를 선택해 주세요'
     return
   }
 
   const body = {
-    title: form.title,
+    venue_type: form.venue_type,
+    name: form.name,
     description: form.description || null,
-    location_name: form.location_name,
     address: form.address || null,
     latitude: parseFloat(form.latitude),
     longitude: parseFloat(form.longitude),
-    start_date: new Date(form.start_date).toISOString(),
-    end_date: form.end_date ? new Date(form.end_date).toISOString() : null,
-    event_type: form.event_type,
+    phone: form.phone || null,
+    website: form.website || null,
     dance_genres: form.dance_genres,
-    price: form.price || null,
-    early_bird_price: form.early_bird_price || null,
-    dj_name: form.dj_name || null,
-    dress_code: form.dress_code || null,
-    has_pre_lesson: form.has_pre_lesson,
-    instructor_name: form.instructor_name || null,
-    difficulty: form.difficulty || null,
-    max_participants: form.max_participants || null,
-    requires_partner: form.requires_partner,
-    is_recurring: form.is_recurring,
+    floor_type: form.floor_type || null,
+    capacity: form.capacity || null,
+    has_parking: form.has_parking,
+    parking_info: form.has_parking ? (form.parking_info || null) : null,
+    cover_charge: form.cover_charge || null,
+    has_bar: form.has_bar,
+    rental_fee: form.rental_fee || null,
+    area_sqm: form.area_sqm || null,
+    has_mirror: form.has_mirror,
+    has_sound_system: form.has_sound_system,
+    has_trial_class: form.has_trial_class,
+    trial_class_fee: form.has_trial_class ? (form.trial_class_fee || null) : null,
   }
 
-  const result = await createEvent(body)
+  const result = await createVenue(body)
   if (result.ok) {
     resetForm()
     emit('close')
@@ -262,15 +275,5 @@ async function handleSubmit() {
   }
 }
 
-function getFormData() {
-  return { ...form }
-}
-
-function setLocation(lat, lng, address) {
-  form.latitude = parseFloat(lat).toFixed(6)
-  form.longitude = parseFloat(lng).toFixed(6)
-  if (address) form.address = address
-}
-
-defineExpose({ resetForm, getFormData, setLocation })
+defineExpose({ resetForm })
 </script>

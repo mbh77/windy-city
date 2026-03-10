@@ -3,17 +3,44 @@
 body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 #app { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 
-/* ── 상단 필터 바 ── */
+/* ── 상단 바 ── */
 .topbar {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 16px; background: #1a1a1a; border-bottom: 1px solid #2a2a2a;
+  display: flex; flex-direction: column;
+  background: #1a1a1a; border-bottom: 1px solid #2a2a2a;
   flex-shrink: 0; z-index: 10;
 }
+.topbar-row { display: flex; align-items: center; gap: 12px; padding: 8px 16px; }
+.topbar-main { border-bottom: 1px solid #2a2a2a; }
+.topbar-filters { padding: 6px 16px; gap: 16px; }
 .logo { font-size: 1.2rem; font-weight: 700; color: #ff6b6b; white-space: nowrap; }
-.filters { display: flex; gap: 8px; flex: 1; }
+.filters { display: flex; gap: 8px; }
 .filters input[type="date"],
 .filters select { background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; }
+.filter-divider { width: 1px; height: 20px; background: #444; flex-shrink: 0; }
 .auth-area { margin-left: auto; }
+
+/* ── 장소 검색 ── */
+.place-search { position: relative; flex: 1; max-width: 400px; }
+.place-search-input {
+  background: #2a2a2a; color: #e0e0e0; border: 1px solid #444;
+  border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; width: 100%;
+}
+.place-search-input::placeholder { color: #888; }
+.place-search-results {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 100;
+  background: #2a2a2a; border: 1px solid #444; border-top: none;
+  border-radius: 0 0 6px 6px; list-style: none;
+  max-height: 280px; overflow-y: auto; min-width: 280px;
+}
+.place-search-results li {
+  padding: 8px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 2px;
+  border-bottom: 1px solid #333;
+}
+.place-search-results li:last-child { border-bottom: none; }
+.place-search-results li:hover,
+.place-search-results li.highlighted { background: #3a3a3a; }
+.place-name { font-size: 0.85rem; color: #e0e0e0; }
+.place-addr { font-size: 0.75rem; color: #888; }
 
 /* ── 버튼 ── */
 .btn-primary { background: #ff6b6b; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
@@ -39,7 +66,8 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 /* ── 이벤트 유형 색상 ── */
 .type-social { background: #6bff9d22; color: #6bff9d; }
 .type-workshop { background: #ffd06b22; color: #ffd06b; }
-.type-congress { background: #ff9d6b22; color: #ff9d6b; }
+.type-festival { background: #ff9d6b22; color: #ff9d6b; }
+.type-regular_class { background: #ffa5ff22; color: #ffa5ff; }
 .type-practice { background: #6bdfff22; color: #6bdfff; }
 .type-performance { background: #ff6bdf22; color: #ff6bdf; }
 .type-other { background: #99999922; color: #999; }
@@ -51,16 +79,83 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 .genre-kizomba { background: #b56bff22; color: #b56bff; }
 .genre-zouk { background: #6bffd022; color: #6bffd0; }
 .genre-tango { background: #ff6ba822; color: #ff6ba8; }
+.genre-merengue { background: #ffd06b22; color: #ffd06b; }
 .genre-other { background: #99999922; color: #999; }
+
+/* ── 장소 유형 배지 ── */
+.venue-type-badge { display: inline-block; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px; }
+.vtype-club { background: #9b59b622; color: #9b59b6; }
+.vtype-academy { background: #3498db22; color: #3498db; }
+.vtype-practice_room { background: #2ecc7122; color: #2ecc71; }
+
+/* ── 난이도 배지 ── */
+.difficulty-badge { display: inline-block; font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; margin-bottom: 4px; background: #e67e2222; color: #e67e22; }
+
+/* ── 시설 태그 ── */
+.facility-tag { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; background: #2a2a2a; color: #ccc; margin-right: 4px; }
+
+/* ── 장소 상세 ── */
+.venue-desc { margin: 8px 0; color: #bbb; font-size: 0.85rem; line-height: 1.5; }
+.venue-link { color: #6b9dff; text-decoration: none; word-break: break-all; }
+.venue-link:hover { text-decoration: underline; }
+
+/* ── 카테고리 체크박스 필터 ── */
+.category-filters { display: flex; gap: 12px; align-items: center; }
+.category-check { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #ccc; cursor: pointer; white-space: nowrap; }
+.category-check input[type="checkbox"] { width: auto; margin: 0; }
+.cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── 접이식 섹션 ── */
+.collapsible-toggle {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  background: #252525; color: #ccc; border: 1px solid #383838; border-radius: 6px;
+  padding: 10px 14px; font-size: 0.85rem; cursor: pointer; margin-bottom: 8px;
+  transition: background 0.15s;
+}
+.collapsible-toggle:hover { background: #2e2e2e; }
+.collapse-arrow { font-size: 0.75rem; transition: transform 0.2s; }
+.collapse-arrow.open { transform: rotate(180deg); }
+.collapsible-body { margin-bottom: 8px; padding: 0 2px; }
+
+/* ── 인라인 체크박스 그룹 ── */
+.inline-checks { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+
+/* ── 사이드바 리스트 (공용) ── */
+.sidebar-list { flex: 1; overflow-y: auto; padding: 8px 0; list-style: none; }
+.sidebar-list li { padding: 12px 16px; border-bottom: 1px solid #222; cursor: pointer; transition: background 0.15s; }
+.sidebar-list li:hover { background: #222; }
+.sidebar-list .item-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+.sidebar-list .item-meta { font-size: 0.75rem; color: #888; }
+.sidebar-list .empty-msg { padding: 20px 16px; color: #666; font-size: 0.85rem; text-align: center; cursor: default; }
+.sidebar-list .empty-msg:hover { background: transparent; }
 
 /* ── 유틸리티 ── */
 .hidden { display: none !important; }
 
 /* ── 모달 ── */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.modal-content { background: #1e1e1e; border-radius: 12px; padding: 24px; width: 460px; max-width: 95vw; position: relative; max-height: 90vh; overflow-y: auto; }
-.modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #888; font-size: 1.1rem; cursor: pointer; }
+.modal-content { background: #1e1e1e; border-radius: 12px; padding: 28px 32px; width: 800px; max-width: 95vw; position: relative; max-height: 90vh; overflow-y: auto; }
+.modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #888; font-size: 1.1rem; cursor: pointer; z-index: 1; }
 .modal-close:hover { color: #fff; }
+/* 인증 모달은 좁게 유지 */
+.modal-sm .modal-content { width: 420px; }
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .modal { align-items: stretch; }
+  .modal-content { width: 100%; max-width: 100%; max-height: 100%; border-radius: 0; padding: 20px 16px; }
+  .topbar-row { flex-wrap: wrap; gap: 8px; padding: 6px 12px; }
+  .logo { font-size: 1rem; }
+  .place-search { max-width: none; }
+  .topbar-filters { gap: 8px; }
+  .category-filters { width: 100%; justify-content: center; }
+  .filter-divider { display: none; }
+  .filters { width: 100%; flex-wrap: wrap; }
+  .sidebar { width: 100%; max-height: 40vh; border-left: none; border-top: 1px solid #2a2a2a; }
+  .layout { flex-direction: column; }
+  .genre-checkboxes { grid-template-columns: repeat(2, 1fr); }
+  .date-row { flex-direction: column; }
+}
 
 /* ── 폼 ── */
 .modal-content h2 { margin-bottom: 16px; font-size: 1.1rem; }
@@ -87,11 +182,11 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 .location-pick-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .picked-address { flex: 1; font-size: 0.85rem; color: #888; padding: 8px 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .picked-address.has-value { color: #e0e0e0; }
-.date-row { display: flex; flex-direction: column; gap: 0; }
-.date-row input { width: 100%; }
+.date-row { display: flex; gap: 8px; }
+.date-row input { flex: 1; }
 .checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 0.85rem; color: #ccc; cursor: pointer; }
 .form-label { font-size: 0.8rem; color: #999; margin-bottom: 6px; display: block; }
-.genre-checkboxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 8px; margin-bottom: 10px; }
+.genre-checkboxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 8px; margin-bottom: 10px; }
 .genre-checkboxes .checkbox-label { margin-bottom: 0; white-space: nowrap; }
 
 /* ── 탭 ── */
@@ -124,7 +219,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 
 /* ── 위치 선택 모드 ── */
 .pick-bar {
-  position: fixed; top: 52px; left: 50%; transform: translateX(-50%);
+  position: fixed; top: 90px; left: 50%; transform: translateX(-50%);
   z-index: 50; background: #1a1a1a; border: 1px solid #ff6b6b;
   border-radius: 10px; padding: 10px 20px;
   display: flex; align-items: center; gap: 12px;
