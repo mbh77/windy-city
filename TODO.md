@@ -30,6 +30,10 @@
 
 ## P1 — 핵심 완성 (즉시 작업)
 
+- ⬜ **B-001** 이미지 업로드 — 이벤트/장소 등록 폼에 이미지 첨부, 서버 로컬 저장
+  - 파일: `CreateEventModal.vue`, `CreateVenueModal.vue`, 신규 `routers/upload.py`
+  - 저장 경로: `static/uploads/` (FastAPI StaticFiles로 그대로 서빙)
+  - 스펙: JPG/PNG/WEBP, 최대 5MB, 이벤트 5장/장소 10장
 - ⬜ **B-002** 이벤트 수정 UI — 상세 모달에서 본인 이벤트 수정 버튼, 기존 데이터 프리필
   - 파일: `EventDetailModal.vue`, `CreateEventModal.vue` (수정 모드 추가)
 - ⬜ **B-003** 이벤트 삭제 UI — 삭제 확인 다이얼로그 → `DELETE /api/events/{id}`
@@ -38,9 +42,6 @@
   - 파일: `VenueDetailModal.vue`, `CreateVenueModal.vue` (수정 모드 추가)
 - ⬜ **B-005** 장소 삭제 UI — 삭제 확인 다이얼로그 → `DELETE /api/venues/{id}`
   - 파일: `VenueDetailModal.vue`
-- ⬜ **B-001** 이미지 업로드 — 이벤트/장소 등록 폼에 이미지 첨부, Cloudflare R2 연동
-  - 파일: `CreateEventModal.vue`, `CreateVenueModal.vue`, 신규 `routers/upload.py`
-  - 스펙: JPG/PNG/WEBP, 최대 5MB, 이벤트 5장/장소 10장, 썸네일 자동 생성
 - ⬜ **B-006** TopBar 1줄 통합 — 2줄 → 1줄 (높이 56px), 이벤트 필터 사이드바로 이동
   - 파일: `TopBar.vue`
 - ⬜ **B-007** 카테고리 토글 칩 버튼 — 체크박스 → pill 토글 버튼 스타일 교체

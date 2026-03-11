@@ -347,15 +347,15 @@ frontend/src/
 - 사이드바 헤더의 "날짜 변경" 버튼으로 범위 변경 가능
 
 ### 기능 3: 이미지 업로드
-- 업로드 방식: 프론트엔드에서 multipart/form-data로 서버 전송 → 서버에서 Cloudflare R2로 업로드 → URL을 media 테이블에 저장
+- 업로드 방식: 프론트엔드에서 multipart/form-data로 서버 전송 → 서버 로컬 저장 → URL을 media 테이블에 저장
+- 저장 경로: static/uploads/ (FastAPI StaticFiles로 그대로 서빙)
 - 엔드포인트: POST /api/upload/image (신규 추가 필요)
 - 허용 포맷: JPG, PNG, WEBP
 - 최대 파일 크기: 5MB
-- 응답: 업로드된 이미지 URL 반환
-- 이미지 처리: 업로드 시 썸네일 자동 생성 (리사이즈)
+- 응답: 업로드된 이미지 URL 반환 (예: /static/uploads/abc123.jpg)
 - 이벤트 최대 이미지 수: 5장
 - 장소 최대 이미지 수: 10장
-- 표시 순서: sort_order 필드로 관리, 드래그로 순서 변경
+- 표시 순서: sort_order 필드로 관리
 
 ### 기능 4: 북마크/관심 저장
 - 대상: 이벤트, 장소 모두 가능
@@ -455,7 +455,7 @@ frontend/src/
 
 B-001: 이미지 업로드 UI
 - 작업 범위: Frontend + Backend
-- 설명: 이벤트/장소 등록 폼에 이미지 첨부 기능 추가. Cloudflare R2 연동.
+- 설명: 이벤트/장소 등록 폼에 이미지 첨부 기능 추가. 서버 로컬 저장 (static/uploads/).
 - 관련 파일: CreateEventModal.vue, CreateVenueModal.vue, 신규 routers/upload.py
 
 B-002: 이벤트 수정 UI
