@@ -1,0 +1,100 @@
+# 바람난 도시 — 작업 TODO
+
+> 마지막 업데이트: 2026-03-11
+> 상태 표기: ✅ 완료 / 🚧 진행중 / ⬜ 미착수 / ⏸ 보류
+
+---
+
+## ✅ 완료된 작업
+
+- ✅ 서버 인프라 구성 (OCI, Nginx, HTTPS, systemd)
+- ✅ dev/prod 환경 분리 (포트, DB, 브랜치)
+- ✅ 회원가입·로그인 (이메일 인증, JWT)
+- ✅ 이벤트 CRUD API (`/api/events`)
+- ✅ 장소 CRUD API (`/api/venues`)
+- ✅ 미디어 API — URL 기반 등록/삭제 (`/api/events/{id}/media`, `/api/venues/{id}/media`)
+- ✅ 카카오맵 연동 (SVG 마커, 인포윈도우, 클릭 이벤트)
+- ✅ 위치 선택 모드 (지도 클릭 → 좌표 + 역지오코딩)
+- ✅ 장소/주소 검색 → 지도 이동 (TopBar, 카카오 keywordSearch + addressSearch 병렬)
+- ✅ 카테고리 필터 (클럽/학원/연습실/이벤트 토글, 마커·사이드바 연동)
+- ✅ 이벤트 필터 (날짜/유형/장르)
+- ✅ 사이드바 지도 영역(bounds) 연동
+- ✅ 이벤트 등록 모달 (CreateEventModal)
+- ✅ 장소 등록 모달 (CreateVenueModal)
+- ✅ 이벤트 상세 모달 (EventDetailModal)
+- ✅ 장소 상세 모달 (VenueDetailModal)
+- ✅ 인증 모달 (AuthModal — 로그인/회원가입/이메일인증 3단계)
+- ✅ 반응형 UI (모바일 768px)
+
+---
+
+## P1 — 핵심 완성 (즉시 작업)
+
+- ⬜ **B-002** 이벤트 수정 UI — 상세 모달에서 본인 이벤트 수정 버튼, 기존 데이터 프리필
+  - 파일: `EventDetailModal.vue`, `CreateEventModal.vue` (수정 모드 추가)
+- ⬜ **B-003** 이벤트 삭제 UI — 삭제 확인 다이얼로그 → `DELETE /api/events/{id}`
+  - 파일: `EventDetailModal.vue`
+- ⬜ **B-004** 장소 수정 UI — 상세 모달에서 본인 장소 수정 버튼, 기존 데이터 프리필
+  - 파일: `VenueDetailModal.vue`, `CreateVenueModal.vue` (수정 모드 추가)
+- ⬜ **B-005** 장소 삭제 UI — 삭제 확인 다이얼로그 → `DELETE /api/venues/{id}`
+  - 파일: `VenueDetailModal.vue`
+- ⬜ **B-001** 이미지 업로드 — 이벤트/장소 등록 폼에 이미지 첨부, Cloudflare R2 연동
+  - 파일: `CreateEventModal.vue`, `CreateVenueModal.vue`, 신규 `routers/upload.py`
+  - 스펙: JPG/PNG/WEBP, 최대 5MB, 이벤트 5장/장소 10장, 썸네일 자동 생성
+- ⬜ **B-006** TopBar 1줄 통합 — 2줄 → 1줄 (높이 56px), 이벤트 필터 사이드바로 이동
+  - 파일: `TopBar.vue`
+- ⬜ **B-007** 카테고리 토글 칩 버튼 — 체크박스 → pill 토글 버튼 스타일 교체
+  - 파일: `TopBar.vue` (또는 `CategoryBar.vue` 분리)
+- ⬜ **B-009** 통합 검색 API — `GET /api/search?q=` 신규 구현, 이벤트+장소 혼합 결과
+  - 파일: 신규 `routers/search.py`
+- ⬜ **B-008** 사이드바 검색창 추가 — 상단에 통합 검색 입력창, 입력 시 검색 모드 전환
+  - 파일: `Sidebar.vue`
+- ⬜ **B-010** 사이드바 이중 모드 — 검색어 없음: 지도 탐색 모드 / 검색어 있음: 검색 결과 모드
+  - 파일: `Sidebar.vue`, `useEvents.js`, `useVenues.js`
+- ⬜ **B-011** 이번 주 이벤트 기본 필터 — 초기 로드 시 date_from=오늘, date_to=7일후 기본값
+  - 파일: `useEvents.js`, `Sidebar.vue`
+- ⬜ **B-012** 빈 상태(empty state) UI — 이벤트/장소 없을 때 아이콘+메시지+등록 유도
+  - 파일: `Sidebar.vue`
+
+---
+
+## P2 — 중요 (P1 완료 후)
+
+- ⬜ **B-013** 반복 이벤트 등록 UI — 이벤트 폼에 반복 설정 (요일, 주기) 추가
+  - 파일: `CreateEventModal.vue`
+  - 비고: DB 스키마 `is_recurring`, `recurrence_rule` 이미 완성
+- ⬜ **B-014** 반복 이벤트 캘린더 전개 — recurrence_rule 기반 향후 이벤트 자동 생성/전개
+  - 파일: 백엔드 로직 + 프론트 표시
+- ⬜ **B-015** 북마크/관심 저장 — 하트 버튼, bookmarks 테이블 신규, 내 저장 목록 탭
+  - DB: 신규 `bookmarks` 테이블 (id, user_id, entity_type, entity_id, created_at)
+  - API: POST/DELETE `/api/events/{id}/bookmark`, `GET /api/users/me/bookmarks` 등
+- ⬜ **B-016** 주최자 대시보드 — 내 이벤트·장소 목록 관리, 수정·삭제 일괄 관리
+- ⬜ **B-017** 이벤트 외부 링크 — 인스타그램/카카오채널/티켓 링크 입력·표시
+  - DB: events 테이블에 `instagram_url`, `kakao_url`, `ticket_url` 컬럼 추가
+- ⬜ **B-018** 색상/무드 리디자인 — 배경 #0f0f1a, 강조 #ff4d6d/#a855f7 전체 교체
+  - 파일: `assets/style.css`
+- ⬜ **B-019** 지도 다크 필터 — CSS `filter: invert(90%) hue-rotate(180deg) brightness(0.85)`
+  - 파일: `KakaoMap.vue`
+- ⬜ **B-020** 모바일 바텀시트 — 모바일에서 사이드바를 아래서 올라오는 패널로 교체
+  - 파일: `Sidebar.vue`, `App.vue`, `style.css`
+- ⬜ **B-021** 스윙·왈츠 장르 추가 — DanceGenre Enum에 swing, waltz 추가, DB ALTER
+  - DB: `ALTER TABLE` + 프론트 constants.js 업데이트
+- ⬜ **B-022** 현재 지역명 표시 — 카카오 역지오코딩으로 지도 중심 행정구역명 사이드바 헤더 표시
+  - 파일: `Sidebar.vue`, `KakaoMap.vue`
+
+---
+
+## P3 — 성장 (P2 완료 후)
+
+- ⬜ **B-023** 카카오 소셜 로그인 — OAuth 연동 (DB·앱키 준비 완료)
+- ⬜ **B-024** 네이버 소셜 로그인 — OAuth 연동
+- ⬜ **B-025** 구글 소셜 로그인 — OAuth 연동
+- ⬜ **B-026** 장소 리뷰·평점 — 플로어/음향/분위기 별점, 한줄 리뷰
+- ⬜ **B-027** 강사 프로필 페이지 — 강사 등록, 이벤트 연결, SNS 링크
+- ⬜ **B-028** 주최자 팔로우 — 팔로우한 주최자의 새 이벤트 알림
+- ⬜ **B-029** D-1 알림 — 북마크 이벤트 하루 전 이메일/카카오 알림
+- ⬜ **B-030** 이벤트 제보 기능 — 일반 사용자 제보, 관리자 승인 후 등록
+- ⬜ **B-031** 연습 파트너 찾기 — 지역·장르별 연습 파트너 구인 게시판
+- ⬜ **B-032** 캘린더 뷰 — 주간/월간 캘린더로 이벤트 탐색
+- ⬜ **B-033** 관리자 페이지 — 전체 콘텐츠·유저 관리, 주최자 승인
+- ⬜ **B-034** PWA 지원 — 모바일 홈 화면 추가, 오프라인 기본 동작
