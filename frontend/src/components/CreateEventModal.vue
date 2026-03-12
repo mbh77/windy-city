@@ -2,7 +2,7 @@
   <div v-if="visible" class="modal" @click.self="$emit('close')">
     <div class="modal-content">
       <button class="modal-close" @click="$emit('close')">✕</button>
-      <h2>이벤트 등록</h2>
+      <h2>{{ editMode ? '이벤트 수정' : '이벤트 등록'}}</h2>
       <form @submit.prevent="handleSubmit">
         <input v-model="form.title" type="text" placeholder="이벤트 제목" required />
         <textarea v-model="form.description" placeholder="설명 (선택)"></textarea>
@@ -111,7 +111,9 @@
           </div>
         </template>
 
-        <button type="submit" class="btn-primary w100">등록하기</button>
+        <button type="submit" class="btn-primary w100">
+          {{ editMode ? '수정하기' : '등록하기' }}
+        </button>
         <p class="form-error">{{ error }}</p>
       </form>
     </div>
@@ -119,16 +121,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue' // computed 추가
 import { TYPE_OPTIONS, GENRE_OPTIONS, DIFFICULTY_OPTIONS } from '../utils/constants.js'
 import { useEvents } from '../composables/useEvents.js'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
   restoredForm: { type: Object, default: null },
+  eventToEdit: { type: Object, default: null },
 })
 const emit = defineEmits(['close', 'pickLocation', 'created'])
-const { createEvent } = useEvents()
+const { createEvent, updateEvent } = useEvents()
+
+const editMode = computed(() => !!props.eventToEdit)
 
 // 접이식 섹션 상태
 const showGenres = ref(false)
@@ -183,7 +188,32 @@ function resetForm() {
 }
 
 watch(() => props.visible, (v) => {
-  if (v && props.restoredForm) {
+  if (v && props.eventToEdit) {
+    // 수정 모드: 기존 데이터로 폼 채우기
+    const e = props.eventToEdit
+    Object.assign(form, {
+      title: e.title || '',
+      description: e.description || '',
+      location_name: e.location_name || '',
+      address: e.address || '',
+      latitude: e.latitude || '',
+      longitude: e.longitude || '',
+      start_date: e.start_date ? e.start_date.slice(0, 16) : '',
+      end_date: e.end_date ? e.end_date.slice(0, 16) : '',
+      event_type: e.event_type || 'social',
+      dance_genres: e.dance_genres || [],
+      price: e.price || '',
+      early_bird_price: e.early_bird_price || '',
+      dj_name: e.dj_name || '',
+      dress_code: e.dress_code || '',
+      has_pre_lesson: e.has_pre_lesson || false,
+      instructor_name: e.instructor_name || '',
+      difficulty: e.difficulty || '',
+      max_participants: e.max_participants || null,
+      requires_partner: e.requires_partner || false,
+      is_recurring: e.is_recurring || false,
+    })
+  } else if (v && props.restoredForm) {
     Object.assign(form, props.restoredForm)
   }
 })
@@ -252,7 +282,7 @@ async function handleSubmit() {
     is_recurring: form.is_recurring,
   }
 
-  const result = await createEvent(body)
+  const result = editMode.value ? await updateEvent(props.eventToEdit.id, body) : await createEvent(body)
   if (result.ok) {
     resetForm()
     emit('close')

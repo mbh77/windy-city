@@ -46,6 +46,7 @@
     :visible="showEventDetail"
     :event="selectedEvent"
     @close="closeEventDetail"
+    @edit="handleEditEvent"
   />
 
   <!-- 장소 상세 모달 -->
@@ -66,6 +67,7 @@
     ref="createEventRef"
     :visible="showCreateEvent"
     :restoredForm="restoredEventForm"
+    :eventToEdit="eventToEdit"
     @close="showCreateEvent = false"
     @pickLocation="startPickLocation('event', $event)"
     @created="handleEventCreated"
@@ -118,6 +120,7 @@ const showCreateEvent = ref(false)
 const showCreateVenue = ref(false)
 const selectedEvent = ref(null)
 const selectedVenue = ref(null)
+const eventToEdit = ref(null)
 
 // 위치 선택 상태
 const isPicking = ref(false)
@@ -192,7 +195,14 @@ async function closeVenueDetail() {
 // ── 이벤트 등록 ──
 function openCreateEventModal() {
   restoredEventForm.value = null
+  eventToEdit.value = null
   createEventRef.value?.resetForm()
+  showCreateEvent.value = true
+}
+
+function handleEditEvent(event) {
+  eventToEdit.value = event
+  showEventDetail.value = false
   showCreateEvent.value = true
 }
 

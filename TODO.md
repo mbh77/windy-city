@@ -31,10 +31,8 @@
 ## P1 — 핵심 완성 (즉시 작업)
 
 ### 1단계: 수정·삭제 UI (API 완성, 프론트엔드만)
-- ⬜ **B-002** 이벤트 수정 UI — 상세 모달에서 본인 이벤트 수정 버튼, 기존 데이터 프리필
-  - 파일: `EventDetailModal.vue`, `CreateEventModal.vue` (수정 모드 추가)
-- ⬜ **B-003** 이벤트 삭제 UI — 삭제 확인 다이얼로그 → `DELETE /api/events/{id}`
-  - 파일: `EventDetailModal.vue`
+- ✅ **B-002** 이벤트 수정 UI — 상세 모달에서 본인 이벤트 수정 버튼, 기존 데이터 프리필
+- ✅ **B-003** 이벤트 삭제 UI — 삭제 확인 다이얼로그 → `DELETE /api/events/{id}`
 - ⬜ **B-004** 장소 수정 UI — 상세 모달에서 본인 장소 수정 버튼, 기존 데이터 프리필
   - 파일: `VenueDetailModal.vue`, `CreateVenueModal.vue` (수정 모드 추가)
 - ⬜ **B-005** 장소 삭제 UI — 삭제 확인 다이얼로그 → `DELETE /api/venues/{id}`

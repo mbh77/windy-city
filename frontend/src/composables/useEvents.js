@@ -37,14 +37,33 @@ export function useEvents() {
 
   // 이벤트 삭제
   async function deleteEvent(id) {
-    const res = await apiFetch(`/api/events/${id}`, { method: 'DELETE' })
+    const res = await apiFetch(`/api/events/${id}`, { 
+      method: 'DELETE' 
+    })
+
     return res.ok
+  }
+
+  // 이벤트 수정
+  async function updateEvent(id, eventData) {
+    const res = await apiJson(`/api/events/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(eventData),
+    })
+    
+    if (res.ok) {
+      return { ok: true }
+    } else {
+      const err = await res.json()
+      return { ok: false, error: err.detail || '수정에 실패했습니다'}
+    }
   }
 
   return {
     events,
     loadEvents,
     createEvent,
+    updateEvent,
     deleteEvent,
   }
 }
