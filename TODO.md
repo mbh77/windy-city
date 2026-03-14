@@ -41,12 +41,9 @@
 - ✅ **B-007** 카테고리 토글 칩 버튼 — 지도 좌상단 pill 토글 오버레이 (`CategoryBar.vue`)
 
 ### 3단계: 통합 검색
-- ⬜ **B-009** 통합 검색 API — `GET /api/search?q=` 신규 구현, 이벤트+장소 혼합 결과
-  - 파일: 신규 `routers/search.py`
-- ⬜ **B-008** 사이드바 검색창 추가 — 상단에 통합 검색 입력창, 입력 시 검색 모드 전환
-  - 파일: `Sidebar.vue`
-- ⬜ **B-010** 사이드바 이중 모드 — 검색어 없음: 지도 탐색 모드 / 검색어 있음: 검색 결과 모드
-  - 파일: `Sidebar.vue`, `useEvents.js`, `useVenues.js`
+- ✅ **B-009** 통합 검색 API — `GET /api/search?q=` 신규 구현, 이벤트+장소 혼합 결과
+- ✅ **B-008** 사이드바 검색창 추가 — 상단에 통합 검색 입력창, 입력 시 검색 모드 전환
+- ✅ **B-010** 사이드바 이중 모드 — 검색어 없음: 지도 탐색 모드 / 검색어 있음: 검색 결과 모드
 - ⬜ **B-011** 이번 주 이벤트 기본 필터 — 초기 로드 시 date_from=오늘, date_to=7일후 기본값
   - 파일: `useEvents.js`, `Sidebar.vue`
 - ⬜ **B-012** 빈 상태(empty state) UI — 이벤트/장소 없을 때 아이콘+메시지+등록 유도
@@ -77,7 +74,7 @@
   - 파일: `assets/style.css`
 - ⬜ **B-019** 지도 다크 필터 — CSS `filter: invert(90%) hue-rotate(180deg) brightness(0.85)`
   - 파일: `KakaoMap.vue`
-- ⬜ **B-020** 모바일 바텀시트 — 모바일에서 사이드바를 아래서 올라오는 패널로 교체
+- 🚧 **B-020** 모바일 바텀시트 — 모바일에서 사이드바를 아래서 올라오는 패널로 교체
   - 파일: `Sidebar.vue`, `App.vue`, `style.css`
 - ⬜ **B-021** 스윙·왈츠 장르 추가 — DanceGenre Enum에 swing, waltz 추가, DB ALTER
   - DB: `ALTER TABLE` + 프론트 constants.js 업데이트
