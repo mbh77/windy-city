@@ -245,4 +245,21 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 /* 지도 위치 선택 모드 시각 피드백 */
 #map.picking { cursor: crosshair !important; outline: 3px solid #ff6b6b; outline-offset: -3px; }
 
-/* TEST */
+/* 서치 박스 */
+.search-box {
+  padding: 12px;
+}
+.search-box input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: #1a1a2e;
+  color: #e2e8f0;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+.search-box input:focus {
+  border-color: #ff4d6d;
+}

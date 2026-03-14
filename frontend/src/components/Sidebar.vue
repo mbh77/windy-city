@@ -1,89 +1,134 @@
 <template>
   <aside class="sidebar">
-    <!-- 탭 -->
-    <div class="tab-group">
-      <button :class="['tab', { active: activeTab === 'events' }]" @click="activeTab = 'events'">
-        이벤트 {{ visibleEvents.length }}
-      </button>
-      <button :class="['tab', { active: activeTab === 'venues' }]" @click="activeTab = 'venues'">
-        장소 {{ visibleVenues.length }}
-      </button>
+    <!-- 검색창 -->
+    <div class="search-box">
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="🔍 이벤트, 장소, 강사 이름으로 검색..."
+        @keydown.esc="searchQuery = ''" 
+      />
     </div>
-
-    <!-- 이벤트 탭 -->
-    <template v-if="activeTab === 'events'">
+    <!-- 검색 모드: 검색어가 있을 때 -->
+    <template v-if="searchQuery.trim()">
       <div class="sidebar-header">
-        <span>이벤트 {{ visibleEvents.length }}개</span>
-        <button
-          v-if="currentUser?.is_organizer"
-          class="btn-primary"
-          @click="$emit('addEvent')"
-        >
-          + 이벤트
-        </button>
+        <span>검색 결과 {{ searchResults.length }}건</span>        
       </div>
       <ul class="sidebar-list">
-        <li v-for="ev in visibleEvents" :key="ev.id" @click="$emit('selectEvent', ev)">
-          <span :class="['event-type-badge', `type-${ev.event_type}`]">
-            {{ TYPE_LABELS[ev.event_type] }}
+        <li 
+          v-for="item in searchResults"
+          :key="item.item_type + '-' + item.id"
+          @click="handleSearchClick(item)"
+        >
+          <span v-if="item.item_type === 'event'" :class="['event-type-badge', `type-${item.event_type}`]">
+            {{  TYPE_LABELS[item.event_type] }}
+          </span>
+          <span v-else :class="['venue-type-badge', `vtype-${item.venue_type}`]">
+            {{  VENUE_TYPE_LABELS[item.venue_type] }}
           </span>
           <span
-            v-for="g in ev.dance_genres || []"
+            v-for="g in item.dance_genres || []"
             :key="g"
             :class="['genre-badge', `genre-${g}`]"
           >
             {{ GENRE_LABELS[g] }}
           </span>
-          <div class="item-title">{{ ev.title }}</div>
-          <div class="item-meta">{{ ev.location_name }}</div>
-          <div class="item-meta">{{ formatDate(ev.start_date) }}</div>
+          <div class="item-title">{{ item.item_type === 'event' ? item.title : item.name }}</div>
+          <div class="item-meta">{{ item.item_type === 'event' ? item.location_name : item.address }}</div>
+          <div v-if="item.item_type === 'event'" class="item-meta">{{ formatDate(item.start_date) }}</div>
         </li>
-        <li v-if="visibleEvents.length === 0" class="empty-msg">현재 지도 영역에 이벤트가 없습니다</li>
+        <li v-if="searchResults.length === 0" class="empty-msg">검색 결과가 없습니다</li>
       </ul>
     </template>
 
-    <!-- 장소 탭 -->
-    <template v-if="activeTab === 'venues'">
-      <div class="sidebar-header">
-        <span>장소 {{ visibleVenues.length }}개</span>
-        <button
-          v-if="currentUser?.is_organizer"
-          class="btn-primary"
-          @click="$emit('addVenue')"
-        >
-          + 장소
+    <!-- 탐색 모드: 검색어가 없을 때 -->
+    <template v-else>
+      <!-- 탭 -->
+      <div class="tab-group">
+        <button :class="['tab', { active: activeTab === 'events' }]" @click="activeTab = 'events'">
+          이벤트 {{ visibleEvents.length }}
+        </button>
+        <button :class="['tab', { active: activeTab === 'venues' }]" @click="activeTab = 'venues'">
+          장소 {{ visibleVenues.length }}
         </button>
       </div>
-      <ul class="sidebar-list">
-        <li v-for="v in visibleVenues" :key="v.id" @click="$emit('selectVenue', v)">
-          <span :class="['venue-type-badge', `vtype-${v.venue_type}`]">
-            {{ VENUE_TYPE_LABELS[v.venue_type] }}
-          </span>
-          <span
-            v-for="g in v.dance_genres || []"
-            :key="g"
-            :class="['genre-badge', `genre-${g}`]"
+
+      <!-- 이벤트 탭 -->
+      <template v-if="activeTab === 'events'">
+        <div class="sidebar-header">
+          <span>이벤트 {{ visibleEvents.length }}개</span>
+          <button
+            v-if="currentUser?.is_organizer"
+            class="btn-primary"
+            @click="$emit('addEvent')"
           >
-            {{ GENRE_LABELS[g] }}
-          </span>
-          <div class="item-title">{{ v.name }}</div>
-          <div v-if="v.address" class="item-meta">{{ v.address }}</div>
-        </li>
-        <li v-if="visibleVenues.length === 0" class="empty-msg">현재 지도 영역에 장소가 없습니다</li>
-      </ul>
+            + 이벤트
+          </button>
+        </div>
+        <ul class="sidebar-list">
+          <li v-for="ev in visibleEvents" :key="ev.id" @click="$emit('selectEvent', ev)">
+            <span :class="['event-type-badge', `type-${ev.event_type}`]">
+              {{ TYPE_LABELS[ev.event_type] }}
+            </span>
+            <span
+              v-for="g in ev.dance_genres || []"
+              :key="g"
+              :class="['genre-badge', `genre-${g}`]"
+            >
+              {{ GENRE_LABELS[g] }}
+            </span>
+            <div class="item-title">{{ ev.title }}</div>
+            <div class="item-meta">{{ ev.location_name }}</div>
+            <div class="item-meta">{{ formatDate(ev.start_date) }}</div>
+          </li>
+          <li v-if="visibleEvents.length === 0" class="empty-msg">현재 지도 영역에 이벤트가 없습니다</li>
+        </ul>
+      </template>    
+
+      <!-- 장소 탭 -->
+      <template v-if="activeTab === 'venues'">
+        <div class="sidebar-header">
+          <span>장소 {{ visibleVenues.length }}개</span>
+          <button
+            v-if="currentUser?.is_organizer"
+            class="btn-primary"
+            @click="$emit('addVenue')"
+          >
+            + 장소
+          </button>
+        </div>
+        <ul class="sidebar-list">
+          <li v-for="v in visibleVenues" :key="v.id" @click="$emit('selectVenue', v)">
+            <span :class="['venue-type-badge', `vtype-${v.venue_type}`]">
+              {{ VENUE_TYPE_LABELS[v.venue_type] }}
+            </span>
+            <span
+              v-for="g in v.dance_genres || []"
+              :key="g"
+              :class="['genre-badge', `genre-${g}`]"
+            >
+              {{ GENRE_LABELS[g] }}
+            </span>
+            <div class="item-title">{{ v.name }}</div>
+            <div v-if="v.address" class="item-meta">{{ v.address }}</div>
+          </li>
+          <li v-if="visibleVenues.length === 0" class="empty-msg">현재 지도 영역에 장소가 없습니다</li>
+        </ul>
+      </template>      
+
     </template>
   </aside>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { TYPE_LABELS, GENRE_LABELS, VENUE_TYPE_LABELS } from '../utils/constants.js'
-import { formatDate } from '../utils/api.js'
+import { apiFetch, formatDate } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
 
-defineEmits(['addEvent', 'selectEvent', 'addVenue', 'selectVenue'])
+const emit = defineEmits(['addEvent', 'selectEvent', 'addVenue', 'selectVenue'])
 const props = defineProps({
   mapBounds: { type: Object, default: null },
   visibleCategories: {
@@ -96,6 +141,33 @@ const { events } = useEvents()
 const { venues } = useVenues()
 
 const activeTab = ref('events')
+
+// 검색 관련
+const searchQuery = ref('')
+const searchResults = ref([])
+let searchTimer = null
+watch(searchQuery, (val) => {
+  clearTimeout(searchTimer)
+  const q = val.trim()
+  if (!q) {
+    searchResults.value = []
+    return
+  }
+  searchTimer = setTimeout(async () => {
+    const res = await apiFetch(`/api/search?q=${encodeURIComponent(q)}`)
+    if (res.ok) {
+      searchResults.value = await res.json()
+    }
+  }, 300)
+})
+
+function handleSearchClick(item) {
+  if (item.item_type === 'event') {
+    emit('selectEvent', item)
+  } else {
+    emit('selectVenue', item)
+  }
+}
 
 // 지도 영역 내 항목만 필터링
 function inBounds(lat, lng) {
