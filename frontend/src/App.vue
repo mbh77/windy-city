@@ -1,10 +1,7 @@
 <template>
   <!-- 상단 필터 바 -->
   <TopBar
-    :visibleCategories="visibleCategories"
-    @search="handleSearch"
     @authClick="handleAuthClick"
-    @toggleCategory="toggleCategory"
     @placeSelect="handlePlaceSelect"
   />
 
@@ -20,15 +17,23 @@
 
   <main class="layout">
     <!-- 지도 -->
-    <KakaoMap
-      ref="mapRef"
-      :isPicking="isPicking"
-      :visibleCategories="visibleCategories"
-      @markerClick="openEventDetail"
-      @venueMarkerClick="openVenueDetail"
-      @locationPicked="handleLocationPicked"
-      @boundsChanged="mapBounds = $event"
-    />
+    <div class="map-wrap">
+      <KakaoMap
+        ref="mapRef"
+        :isPicking="isPicking"
+        :visibleCategories="visibleCategories"
+        @markerClick="openEventDetail"
+        @venueMarkerClick="openVenueDetail"
+        @locationPicked="handleLocationPicked"
+        @boundsChanged="mapBounds = $event"
+      />
+
+      <CategoryBar
+        :visibleCategories="visibleCategories"
+        @toggle="toggleCategory"
+      ></CategoryBar>
+    </div>
+
 
     <!-- 사이드바 -->
     <Sidebar
@@ -101,6 +106,7 @@ import VenueDetailModal from './components/VenueDetailModal.vue'
 import AuthModal from './components/AuthModal.vue'
 import CreateEventModal from './components/CreateEventModal.vue'
 import CreateVenueModal from './components/CreateVenueModal.vue'
+import CategoryBar from './components/CategoryBar.vue'
 
 const { currentUser, restoreSession, logout } = useAuth()
 const { events, loadEvents } = useEvents()
