@@ -2,7 +2,7 @@
   <div v-if="visible" class="modal" @click.self="$emit('close')">
     <div class="modal-content">
       <button class="modal-close" @click="$emit('close')">✕</button>
-      <h2>장소 등록</h2>
+      <h2>{{ editMode ? '장소 수정' : '장소 등록' }}</h2>
       <form @submit.prevent="handleSubmit">
         <!-- 장소 유형 -->
         <label class="form-label">장소 유형</label>
@@ -117,7 +117,7 @@
           <input v-if="form.has_parking" v-model="form.parking_info" type="text" placeholder="주차 정보 (예: 건물 지하 주차장)" />
         </div>
 
-        <button type="submit" class="btn-primary w100">등록하기</button>
+        <button type="submit" class="btn-primary w100">{{ editMode ? '수정하기' : '등록하기' }}</button>
         <p class="form-error">{{ error }}</p>
       </form>
     </div>
@@ -125,16 +125,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { VENUE_TYPE_OPTIONS, GENRE_OPTIONS } from '../utils/constants.js'
 import { useVenues } from '../composables/useVenues.js'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
   restoredForm: { type: Object, default: null },
+  venueToEdit: { type: Object, default:null },
 })
 const emit = defineEmits(['close', 'pickLocation', 'created'])
-const { createVenue } = useVenues()
+const { createVenue, updateVenue } = useVenues()
+
+const editMode = computed(() => !!props.venueToEdit)
 
 // 접이식 섹션 상태
 const showGenres = ref(false)
@@ -196,6 +199,35 @@ function resetForm() {
 watch(() => props.visible, (v) => {
   if (v && props.restoredForm) {
     Object.assign(form, props.restoredForm)
+  }
+})
+
+// 수정 모드: 기존 데이터 프리필
+watch(() => props.venueToEdit, (v) => {
+  if (v) {
+    Object.assign(form, {
+      venue_type: v.venue_type,
+      name: v.name,
+      description: v.description || '',
+      address: v.address || '',
+      latitude: v.latitude,
+      longitude: v.longitude,
+      phone: v.phone || '',
+      website: v.website || '',
+      dance_genres: v.dance_genres || [],
+      cover_charge: v.cover_charge || '',
+      has_bar: !!v.has_bar,
+      has_trial_class: !!v.has_trial_class,
+      trial_class_fee: v.trial_class_fee || '',
+      rental_fee: v.rental_fee || '',
+      area_sqm: v.area_sqm || null,
+      has_mirror: !!v.has_mirror,
+      has_sound_system: !!v.has_sound_system,
+      floor_type: v.floor_type || '',
+      capacity: v.capacity || null,
+      has_parking: !!v.has_parking,
+      parking_info: v.parking_info || '',
+    })
   }
 })
 
@@ -265,7 +297,10 @@ async function handleSubmit() {
     trial_class_fee: form.has_trial_class ? (form.trial_class_fee || null) : null,
   }
 
-  const result = await createVenue(body)
+  const result = editMode.value
+    ? await updateVenue(props.venueToEdit.id, body)
+    : await createVenue(body)
+
   if (result.ok) {
     resetForm()
     emit('close')

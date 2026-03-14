@@ -54,6 +54,7 @@
     :visible="showVenueDetail"
     :venue="selectedVenue"
     @close="closeVenueDetail"
+    @edit="handleEditVenue"
   />
 
   <!-- 로그인/회원가입 모달 -->
@@ -78,6 +79,7 @@
     ref="createVenueRef"
     :visible="showCreateVenue"
     :restoredForm="restoredVenueForm"
+    :venueToEdit="venueToEdit"
     @close="showCreateVenue = false"
     @pickLocation="startPickLocation('venue', $event)"
     @created="handleVenueCreated"
@@ -121,6 +123,7 @@ const showCreateVenue = ref(false)
 const selectedEvent = ref(null)
 const selectedVenue = ref(null)
 const eventToEdit = ref(null)
+const venueToEdit = ref(null)
 
 // 위치 선택 상태
 const isPicking = ref(false)
@@ -217,7 +220,14 @@ async function handleEventCreated(data) {
 // ── 장소 등록 ──
 function openCreateVenueModal() {
   restoredVenueForm.value = null
+  venueToEdit.value = null
   createVenueRef.value?.resetForm()
+  showCreateVenue.value = true
+}
+
+function handleEditVenue(venue) {
+  venueToEdit.value = venue
+  showVenueDetail.value = false
   showCreateVenue.value = true
 }
 

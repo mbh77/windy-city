@@ -77,6 +77,7 @@
         </div>
 
         <div v-if="isOwner" class="action-row">
+          <button class="btn-primary" @click="$emit('edit', venue)">수정</button>
           <button class="btn-danger" @click="handleDelete">삭제</button>
         </div>
       </template>
@@ -94,7 +95,7 @@ const props = defineProps({
   visible: { type: Boolean, default: false },
   venue: { type: Object, default: null },
 })
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close','edit'])
 
 const { currentUser } = useAuth()
 const { deleteVenue } = useVenues()
