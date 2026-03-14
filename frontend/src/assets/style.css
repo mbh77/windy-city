@@ -244,3 +244,5 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 
 /* 지도 위치 선택 모드 시각 피드백 */
 #map.picking { cursor: crosshair !important; outline: 3px solid #ff6b6b; outline-offset: -3px; }
+
+/* TEST */
