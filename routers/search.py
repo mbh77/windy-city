@@ -22,8 +22,10 @@ def search(
     now = datetime.now()
 
     # 이벤트 검색: title, description, instructor_name, location_name
+    # 반복 이벤트는 항상 포함 (진행중인 정기 이벤트)
     events = db.query(models.Event).filter(
         or_(
+            models.Event.is_recurring == True,
             models.Event.end_date >= now,
             (models.Event.end_date == None) & (models.Event.start_date >= now),
         ),

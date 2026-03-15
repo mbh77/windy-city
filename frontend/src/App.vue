@@ -148,22 +148,27 @@ const visibleCategories = reactive({
   event: true,
 })
 
-// ── 기본 날짜 필터 ──
-function getDefaultFilters() {
-  const today = new Date()
-  const weekLater = new Date()
-  weekLater.setDate(today.getDate() + 7)
-  return {
-    date_from: today.toISOString(),
-    date_to: weekLater.toISOString(),
-  }
+// ── 날짜 필터 상태 ──
+function toLocalDate(date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
 }
+
+const today = new Date()
+const weekLater = new Date()
+weekLater.setDate(today.getDate() + 7)
+const currentFilters = ref({
+  date_from: toLocalDate(today),
+  date_to: toLocalDate(weekLater),
+})
 
 // ── 초기화 ──
 onMounted(async () => {
   await restoreSession()
   await Promise.all([
-    loadEvents(getDefaultFilters()),
+    loadEvents(currentFilters.value),
     loadVenues()
   ])
 })
@@ -201,7 +206,7 @@ function openEventDetail(ev) {
 
 async function closeEventDetail() {
   showEventDetail.value = false
-  await loadEvents(getDefaultFilters())
+  await loadEvents(currentFilters.value)
 }
 
 // ── 장소 상세 ──
@@ -235,7 +240,17 @@ async function handleEventCreated(data) {
     mapRef.value?.panTo(data.panTo.lat, data.panTo.lng)
     return
   }
-  await loadEvents(getDefaultFilters())
+  // 생성/수정된 이벤트의 날짜 기준으로 필터 조정
+  if (data?.startDate) {
+    const eventDate = new Date(data.startDate)
+    const weekAfter = new Date(eventDate)
+    weekAfter.setDate(eventDate.getDate() + 7)
+    currentFilters.value = {
+      date_from: toLocalDate(eventDate),
+      date_to: toLocalDate(weekAfter),
+    }
+  }
+  await loadEvents(currentFilters.value)
 }
 
 // ── 장소 등록 ──
@@ -320,6 +335,7 @@ function cancelPick() {
 }
 
 function handleDateFilter({ date_from, date_to }) {
-  loadEvents({ date_from, date_to })
+  currentFilters.value = { date_from, date_to }
+  loadEvents(currentFilters.value)
 }
 </script>
