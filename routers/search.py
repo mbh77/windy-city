@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 
 from database import get_db
+
 import models
 
 router = APIRouter(prefix="/api", tags=["search"])
@@ -13,10 +14,19 @@ def search(
     limit: int = Query(20, ge=1, le=50),
     db: Session = Depends(get_db),
 ):
+    from datetime import datetime
+    from sqlalchemy import or_
+
     keyword = f"%{q}%"
+
+    now = datetime.now()
 
     # 이벤트 검색: title, description, instructor_name, location_name
     events = db.query(models.Event).filter(
+        or_(
+            models.Event.end_date >= now,
+            (models.Event.end_date == None) & (models.Event.start_date >= now),
+        ),
         (models.Event.title.like(keyword)) |
         (models.Event.description.like(keyword)) |
         (models.Event.instructor_name.like(keyword)) |
