@@ -25,15 +25,15 @@ def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
         # 미인증 계정이면 정보 덮어쓰기 (재가입 허용)
         existing.hashed_password = auth_utils.hash_password(user_data.password)
         existing.nickname = user_data.nickname
-        existing.is_organizer = user_data.is_organizer
+        existing.is_organizer = False
         user = existing
     else:
-        # 새 사용자 생성
+        # 새 사용자 생성 (주최자 권한은 관리자가 부여)
         user = models.User(
             email=user_data.email,
             hashed_password=auth_utils.hash_password(user_data.password),
             nickname=user_data.nickname,
-            is_organizer=user_data.is_organizer,
+            is_organizer=False,
             is_verified=False,
         )
         db.add(user)

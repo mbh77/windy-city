@@ -24,10 +24,11 @@
         <input v-model="regEmail" type="email" placeholder="이메일" required />
         <input v-model="regPassword" type="password" placeholder="비밀번호" required />
         <input v-model="regNickname" type="text" placeholder="닉네임" required />
-        <label class="checkbox-label">
+        <!-- 주최자 권한은 관리자가 부여 (회원가입 시 비활성) -->
+        <!-- <label class="checkbox-label">
           <input v-model="regIsOrganizer" type="checkbox" />
           이벤트 주최자로 가입
-        </label>
+        </label> -->
         <button type="submit" class="btn-primary w100" :class="{ 'btn-loading': regLoading }" :disabled="regLoading">
           <span class="btn-text">가입하기</span>
         </button>
