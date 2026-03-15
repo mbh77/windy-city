@@ -1,12 +1,16 @@
 <template>
-  <aside class="sidebar">
+  <aside :class="['sidebar', { expanded: isExpanded }]">
+    <div class="sheet-handle" @click="isExpanded = !isExpanded">
+      <span></span>
+    </div>
     <!-- 검색창 -->
     <div class="search-box">
       <input
         v-model="searchQuery"
         type="text"
         placeholder="🔍 이벤트, 장소, 강사 이름으로 검색..."
-        @keydown.esc="searchQuery = ''" 
+        @keydown.esc="searchQuery = ''"
+        @focus="isExpanded = true"
       />
     </div>
     <!-- 검색 모드: 검색어가 있을 때 -->
@@ -146,13 +150,19 @@ const activeTab = ref('events')
 const searchQuery = ref('')
 const searchResults = ref([])
 let searchTimer = null
+const isExpanded = ref(false)
+
 watch(searchQuery, (val) => {
   clearTimeout(searchTimer)
   const q = val.trim()
+  
   if (!q) {
     searchResults.value = []
     return
   }
+
+  isExpanded.value = true
+
   searchTimer = setTimeout(async () => {
     const res = await apiFetch(`/api/search?q=${encodeURIComponent(q)}`)
     if (res.ok) {
