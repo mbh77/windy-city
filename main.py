@@ -27,5 +27,8 @@ app.include_router(venues.router)
 app.include_router(search.router)
 app.include_router(upload.router)
 
+# 업로드 이미지 서빙 (빌드와 분리)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 # 정적 파일 서빙 (프론트엔드)
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

@@ -236,6 +236,10 @@ watch(() => props.visible, (v) => {
       requires_partner: e.requires_partner || false,
       is_recurring: e.is_recurring || false,
     })
+    // 기존 이미지 로드
+    uploadedImages.value = (e.media || [])
+      .filter(m => m.media_type === 'image')
+      .map(m => ({ id: m.id, url: m.url }))
   } else if (v && props.restoredForm) {
     Object.assign(form, props.restoredForm)
   }
@@ -305,22 +309,35 @@ async function handleSubmit() {
     is_recurring: form.is_recurring,
   }
 
-  const result = editMode.value ? await updateEvent(props.eventToEdit.id, body) : await createEvent(body)
+  const eventId = editMode.value ? props.eventToEdit.id : null
+  const result = editMode.value ? await updateEvent(eventId, body) : await createEvent(body)
   if (result.ok) {
-    // 이미지가 있으면 미디어 API로 등록
-    if (uploadedImages.value.length > 0 && result.eventId) {
-      for (let i = 0; i < uploadedImages.value.length; i++) {
-        await apiFetch(`/api/events/${result.eventId}/media`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            media_type: 'image',
-            url: uploadedImages.value[i].url,
-            sort_order: i,
-          }),
-        })
+    const savedId = eventId || result.eventId
+
+    // 수정 모드: 삭제된 기존 이미지 제거
+    if (editMode.value && props.eventToEdit.media) {
+      const currentIds = uploadedImages.value.filter(img => img.id).map(img => img.id)
+      for (const m of props.eventToEdit.media) {
+        if (!currentIds.includes(m.id)) {
+          await apiFetch(`/api/events/${savedId}/media/${m.id}`, { method: 'DELETE' })
+        }
       }
     }
+
+    // 새로 추가된 이미지 등록 (id가 없는 것만)
+    const newImages = uploadedImages.value.filter(img => !img.id)
+    for (let i = 0; i < newImages.length; i++) {
+      await apiFetch(`/api/events/${savedId}/media`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          media_type: 'image',
+          url: newImages[i].url,
+          sort_order: i,
+        }),
+      })
+    }
+
     resetForm()
     emit('close')
     emit('created')

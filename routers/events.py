@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -7,6 +8,15 @@ from database import get_db
 import models
 import schemas
 import auth as auth_utils
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+def _delete_media_file(url: str):
+    """미디어 URL에 해당하는 실제 파일 삭제"""
+    if url and url.startswith("/uploads/"):
+        filepath = os.path.join(BASE_DIR, url.lstrip("/"))
+        if os.path.exists(filepath):
+            os.remove(filepath)
 
 router = APIRouter(prefix="/api/events", tags=["events"])
 
@@ -143,11 +153,14 @@ def delete_event(
     if event.organizer_id != current_user.id:
         raise HTTPException(status_code=403, detail="삭제 권한이 없습니다")
 
-    # 관련 미디어도 삭제
-    db.query(models.Media).filter(
+    # 관련 미디어 파일 + 레코드 삭제
+    media_list = db.query(models.Media).filter(
         models.Media.entity_type == "event",
         models.Media.entity_id == event_id
-    ).delete()
+    ).all()
+    for m in media_list:
+        _delete_media_file(m.url)
+        db.delete(m)
 
     db.delete(event)
     db.commit()
@@ -202,5 +215,6 @@ def delete_event_media(
     if not media:
         raise HTTPException(status_code=404, detail="미디어를 찾을 수 없습니다")
 
+    _delete_media_file(media.url)
     db.delete(media)
     db.commit()

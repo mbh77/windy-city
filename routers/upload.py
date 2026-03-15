@@ -6,7 +6,8 @@ import models
 
 router = APIRouter(prefix="/api/upload", tags=["upload"])
 
-UPLOAD_DIR = "static/uploads"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
 MAX_SIZE = 5 * 1024 * 1024  # 5MB
 
@@ -36,4 +37,4 @@ async def upload_image(
     with open(filepath, "wb") as f:
         f.write(data)
 
-    return {"url": f"/static/uploads/{filename}"}
+    return {"url": f"/uploads/{filename}"}
