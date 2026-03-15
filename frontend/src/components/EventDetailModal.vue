@@ -20,9 +20,7 @@
         <p v-if="event.description" style="margin:8px 0;color:#bbb;font-size:0.85rem">{{ event.description }}</p>
 
         <!-- 이미지 갤러리 -->
-        <div v-if="event.media && event.media.length > 0" class="detail-gallery">
-          <img v-for="m in event.media" :key="m.id" :src="m.url" class="detail-image" />
-        </div>        
+        <ImageGallery :images="event.media || []" />        
 
         <div class="detail-row"><span class="detail-label">장소</span>{{ event.location_name }}</div>
         <div v-if="event.address" class="detail-row"><span class="detail-label">주소</span>{{ event.address }}</div>
@@ -63,6 +61,7 @@ import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '../utils/constants
 import { formatDate } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
+import ImageGallery from './ImageGallery.vue'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
