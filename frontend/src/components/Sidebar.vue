@@ -64,7 +64,7 @@
       <!-- 이벤트 탭 -->
       <template v-if="activeTab === 'events'">
         <div class="sidebar-header">
-          <span>이벤트 {{ visibleEvents.length }}개</span>
+          <span>이벤트 {{ filteredEvents.length }}개</span>
           <button
             v-if="currentUser?.is_organizer"
             class="btn-primary"
@@ -86,9 +86,18 @@
             <button class="btn-ghost" @click="applyDateFilter">적용</button>
             <button class="btn-ghost" @click="resetDateFilter">초기화</button>
           </div>
-        </div>        
+        </div>
+        <!-- 요일 필터 -->
+        <div class="day-filter">
+          <button
+            v-for="day in DAY_OPTIONS"
+            :key="day.value"
+            :class="['day-chip', { active: selectedDays.includes(day.value) }]"
+            @click="toggleDay(day.value)"
+          >{{ day.label }}</button>
+        </div>
         <ul class="sidebar-list">
-          <li v-for="ev in visibleEvents" :key="ev.id" @click="$emit('selectEvent', ev)">
+          <li v-for="ev in filteredEvents" :key="ev.id" @click="$emit('selectEvent', ev)">
             <span :class="['event-type-badge', `type-${ev.event_type}`]">
               {{ TYPE_LABELS[ev.event_type] }}
             </span>
@@ -99,11 +108,12 @@
             >
               {{ GENRE_LABELS[g] }}
             </span>
+            <span v-if="ev.is_recurring" class="recurring-badge">🔄 {{ formatRecurring(ev.recurrence_rule) }}</span>
             <div class="item-title">{{ ev.title }}</div>
             <div class="item-meta">{{ ev.location_name }}</div>
-            <div class="item-meta">{{ formatDate(ev.start_date) }}</div>
+            <div class="item-meta">{{ ev.is_recurring ? formatRecurringSchedule(ev) : formatDate(ev.start_date) }}</div>
           </li>
-          <li v-if="visibleEvents.length === 0" class="empty-state">
+          <li v-if="filteredEvents.length === 0" class="empty-state">
             <div class="empty-icon">📅</div>
             <div class="empty-title">이 지역에 이벤트가 없어요</div>
             <div class="empty-hint">날짜 범위를 넓히거나 지도를 이동해보세요</div>
@@ -200,6 +210,7 @@ function applyDateFilter() {
 function resetDateFilter() {
   dateFrom.value = today
   dateTo.value = weekLater
+  selectedDays.value = []
   emit('dateFilterChange', { date_from: today, date_to: weekLater })
   showDatePicker.value = false
 }
@@ -245,6 +256,54 @@ async function handleSearchClick(item) {
   }
 }
 
+// 반복 이벤트 표시
+const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' }
+const WEEKDAY_TO_DAY = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+const DAY_OPTIONS = [
+  { value: 'mon', label: '월' },
+  { value: 'tue', label: '화' },
+  { value: 'wed', label: '수' },
+  { value: 'thu', label: '목' },
+  { value: 'fri', label: '금' },
+  { value: 'sat', label: '토' },
+  { value: 'sun', label: '일' },
+]
+
+// 요일 필터
+const selectedDays = ref([])
+
+function toggleDay(day) {
+  const idx = selectedDays.value.indexOf(day)
+  if (idx >= 0) {
+    selectedDays.value.splice(idx, 1)
+  } else {
+    selectedDays.value.push(day)
+  }
+}
+
+function matchesDay(ev) {
+  if (selectedDays.value.length === 0) return true
+  if (ev.is_recurring && ev.recurrence_rule?.days) {
+    return ev.recurrence_rule.days.some(d => selectedDays.value.includes(d))
+  }
+  // 비반복: start_date 요일 확인
+  const weekday = new Date(ev.start_date).getDay()
+  const dayKey = WEEKDAY_TO_DAY[weekday === 0 ? 6 : weekday - 1]
+  return selectedDays.value.includes(dayKey)
+}
+
+function formatRecurring(rule) {
+  if (!rule) return '반복'
+  const freq = rule.frequency === 'weekly' ? '매주' : '격주'
+  const days = (rule.days || []).map(d => DAY_LABELS[d] || d).join('·')
+  return `${freq} ${days}`
+}
+
+function formatRecurringSchedule(ev) {
+  const time = ev.start_date ? new Date(ev.start_date).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : ''
+  return `${formatRecurring(ev.recurrence_rule)} ${time}`
+}
+
 // 지도 영역 내 항목만 필터링
 function inBounds(lat, lng) {
   if (!props.mapBounds) return true
@@ -256,6 +315,10 @@ const visibleEvents = computed(() =>
   props.visibleCategories.event
     ? events.value.filter(ev => inBounds(ev.latitude, ev.longitude))
     : []
+)
+
+const filteredEvents = computed(() =>
+  visibleEvents.value.filter(ev => matchesDay(ev))
 )
 
 const visibleVenues = computed(() =>
