@@ -223,11 +223,19 @@ watch(searchQuery, (val) => {
   }, 300)
 })
 
-function handleSearchClick(item) {
-  if (item.item_type === 'event') {
-    emit('selectEvent', item)
-  } else {
-    emit('selectVenue', item)
+async function handleSearchClick(item) {
+  // 검색 결과는 간소화된 데이터이므로 전체 데이터를 다시 가져옴
+  const url = item.item_type === 'event'
+    ? `/api/events/${item.id}`
+    : `/api/venues/${item.id}`
+  const res = await apiFetch(url)
+  if (res.ok) {
+    const fullData = await res.json()
+    if (item.item_type === 'event') {
+      emit('selectEvent', fullData)
+    } else {
+      emit('selectVenue', fullData)
+    }
   }
 }
 
