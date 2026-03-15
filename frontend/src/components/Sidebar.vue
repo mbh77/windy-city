@@ -41,7 +41,11 @@
           <div class="item-meta">{{ item.item_type === 'event' ? item.location_name : item.address }}</div>
           <div v-if="item.item_type === 'event'" class="item-meta">{{ formatDate(item.start_date) }}</div>
         </li>
-        <li v-if="searchResults.length === 0" class="empty-msg">검색 결과가 없습니다</li>
+        <li v-if="searchResults.length === 0" class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-title">검색 결과가 없습니다</div>
+          <div class="empty-hint">다른 키워드로 검색해보세요</div>
+        </li>
       </ul>
     </template>
 
@@ -99,7 +103,12 @@
             <div class="item-meta">{{ ev.location_name }}</div>
             <div class="item-meta">{{ formatDate(ev.start_date) }}</div>
           </li>
-          <li v-if="visibleEvents.length === 0" class="empty-msg">현재 지도 영역에 이벤트가 없습니다</li>
+          <li v-if="visibleEvents.length === 0" class="empty-state">
+            <div class="empty-icon">📅</div>
+            <div class="empty-title">이 지역에 이벤트가 없어요</div>
+            <div class="empty-hint">날짜 범위를 넓히거나 지도를 이동해보세요</div>
+            <button v-if="currentUser?.is_organizer" class="btn-primary" @click="$emit('addEvent')">+ 이벤트 등록하기</button>
+          </li>
         </ul>
       </template>    
 
@@ -130,7 +139,12 @@
             <div class="item-title">{{ v.name }}</div>
             <div v-if="v.address" class="item-meta">{{ v.address }}</div>
           </li>
-          <li v-if="visibleVenues.length === 0" class="empty-msg">현재 지도 영역에 장소가 없습니다</li>
+          <li v-if="visibleVenues.length === 0" class="empty-state">
+            <div class="empty-icon">📍</div>
+            <div class="empty-title">이 지역에 등록된 장소가 없어요</div>
+            <div class="empty-hint">지도를 이동해서 다른 지역을 탐색해보세요</div>
+            <button v-if="currentUser?.is_organizer" class="btn-primary" @click="$emit('addVenue')">+ 장소 등록하기</button>
+          </li>          
         </ul>
       </template>      
 
