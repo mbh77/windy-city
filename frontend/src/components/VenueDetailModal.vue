@@ -17,6 +17,11 @@
 
         <p v-if="venue.description" class="venue-desc">{{ venue.description }}</p>
 
+        <!-- 이미지 갤러리 -->
+        <div v-if="venue.media && venue.media.length > 0" class="detail-gallery">
+          <img v-for="m in venue.media" :key="m.id" :src="m.url" class="detail-image" />
+        </div>
+
         <div v-if="venue.address" class="detail-row">
           <span class="detail-label">주소</span>{{ venue.address }}
         </div>

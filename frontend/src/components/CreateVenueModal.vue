@@ -251,6 +251,10 @@ watch(() => props.venueToEdit, (v) => {
       has_parking: !!v.has_parking,
       parking_info: v.parking_info || '',
     })
+    // 기존 이미지 로드
+    uploadedImages.value = (v.media || [])
+      .filter(m => m.media_type === 'image')
+      .map(m => ({ id: m.id, url: m.url }))
   }
 })
 
@@ -320,11 +324,38 @@ async function handleSubmit() {
     trial_class_fee: form.has_trial_class ? (form.trial_class_fee || null) : null,
   }
 
+  const venueId = editMode.value ? props.venueToEdit.id : null
   const result = editMode.value
-    ? await updateVenue(props.venueToEdit.id, body)
+    ? await updateVenue(venueId, body)
     : await createVenue(body)
 
   if (result.ok) {
+    const savedId = venueId || result.venueId
+
+    // 수정 모드: 삭제된 기존 이미지 제거
+    if (editMode.value && props.venueToEdit.media) {
+      const currentIds = uploadedImages.value.filter(img => img.id).map(img => img.id)
+      for (const m of props.venueToEdit.media) {
+        if (!currentIds.includes(m.id)) {
+          await apiFetch(`/api/venues/${savedId}/media/${m.id}`, { method: 'DELETE' })
+        }
+      }
+    }
+
+    // 새로 추가된 이미지 등록 (id가 없는 것만)
+    const newImages = uploadedImages.value.filter(img => !img.id)
+    for (let i = 0; i < newImages.length; i++) {
+      await apiFetch(`/api/venues/${savedId}/media`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          media_type: 'image',
+          url: newImages[i].url,
+          sort_order: i,
+        }),
+      })
+    }
+
     resetForm()
     emit('close')
     emit('created')
