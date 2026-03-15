@@ -74,8 +74,9 @@
   - 파일: `assets/style.css`
 - ⬜ **B-019** 지도 다크 필터 — CSS `filter: invert(90%) hue-rotate(180deg) brightness(0.85)`
   - 파일: `KakaoMap.vue`
-- 🚧 **B-020** 모바일 바텀시트 — 모바일에서 사이드바를 아래서 올라오는 패널로 교체
-  - 파일: `Sidebar.vue`, `App.vue`, `style.css`
+- ✅ **B-020** 모바일 바텀시트 — 모바일에서 사이드바를 아래서 올라오는 패널로 교체
+  - 기본 기능 완료: 접힘(80px)/펼침(60vh) 토글, 핸들 바, 검색 시 자동 펼침
+  - 추후 보완 검토: 드래그 제스처, 중간 높이 스냅 등
 - ⬜ **B-021** 스윙·왈츠 장르 추가 — DanceGenre Enum에 swing, waltz 추가, DB ALTER
   - DB: `ALTER TABLE` + 프론트 constants.js 업데이트
 - ⬜ **B-022** 현재 지역명 표시 — 카카오 역지오코딩으로 지도 중심 행정구역명 사이드바 헤더 표시
