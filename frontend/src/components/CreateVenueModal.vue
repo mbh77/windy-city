@@ -134,7 +134,8 @@
             </label>
           </div>
           <div v-if="uploadError" class="form-error">{{ uploadError }}</div>
-        </div>         
+          <div class="upload-hint">JPG/WEBP 3MB 이하 · PNG는 자동 변환 (10MB 이하)</div>
+        </div>
 
         <button type="submit" class="btn-primary w100">{{ editMode ? '수정하기' : '등록하기' }}</button>
         <p class="form-error">{{ error }}</p>
@@ -372,6 +373,16 @@ async function handleImageUpload(e) {
   const file = e.target.files[0]
   if (!file) return
   uploadError.value = ''
+
+  // 프론트 사전 크기 체크
+  const maxSize = file.type === 'image/png' ? 10 * 1024 * 1024 : 3 * 1024 * 1024
+  if (file.size > maxSize) {
+    uploadError.value = file.type === 'image/png'
+      ? 'PNG 파일은 10MB 이하만 가능합니다'
+      : 'JPG/WEBP 파일은 3MB 이하만 가능합니다'
+    e.target.value = ''
+    return
+  }
 
   const formData = new FormData()
   formData.append('file', file)
