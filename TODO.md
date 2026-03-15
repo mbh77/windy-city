@@ -51,10 +51,10 @@
   - 아이콘 + 안내 메시지 + 힌트 + 등록 유도 버튼 (is_organizer만)
 
 ### 4단계: 이미지 업로드
-- ⬜ **B-001** 이미지 업로드 — 이벤트/장소 등록 폼에 이미지 첨부, 서버 로컬 저장
-  - 파일: `CreateEventModal.vue`, `CreateVenueModal.vue`, 신규 `routers/upload.py`
-  - 저장 경로: `static/uploads/` (FastAPI StaticFiles로 그대로 서빙)
-  - 스펙: JPG/PNG/WEBP, 최대 5MB, 이벤트 5장/장소 10장
+- ✅ **B-001** 이미지 업로드 — 이벤트/장소 등록 폼에 이미지 첨부, 서버 로컬 저장
+  - 저장 경로: `uploads/` (빌드와 분리, FastAPI 별도 마운트)
+  - 상세 모달에 슬라이더 + 전체화면 뷰어 (ImageGallery.vue)
+  - 삭제 시 DB 레코드 + 실제 파일 동시 삭제
 
 ---
 

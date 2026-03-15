@@ -148,17 +148,22 @@ const visibleCategories = reactive({
   event: true,
 })
 
-// ── 초기화 ──
-onMounted(async () => {
-  await restoreSession()
+// ── 기본 날짜 필터 ──
+function getDefaultFilters() {
   const today = new Date()
   const weekLater = new Date()
   weekLater.setDate(today.getDate() + 7)
+  return {
+    date_from: today.toISOString(),
+    date_to: weekLater.toISOString(),
+  }
+}
+
+// ── 초기화 ──
+onMounted(async () => {
+  await restoreSession()
   await Promise.all([
-    loadEvents({
-      date_from: today.toISOString(),
-      date_to: weekLater.toISOString(),
-    }),
+    loadEvents(getDefaultFilters()),
     loadVenues()
   ])
 })
@@ -196,7 +201,7 @@ function openEventDetail(ev) {
 
 async function closeEventDetail() {
   showEventDetail.value = false
-  await getDefaultFilters()
+  await loadEvents(getDefaultFilters())
 }
 
 // ── 장소 상세 ──
@@ -230,7 +235,7 @@ async function handleEventCreated(data) {
     mapRef.value?.panTo(data.panTo.lat, data.panTo.lng)
     return
   }
-  await getDefaultFilters()
+  await loadEvents(getDefaultFilters())
 }
 
 // ── 장소 등록 ──

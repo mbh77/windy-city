@@ -17,6 +17,9 @@
 
         <p v-if="venue.description" class="venue-desc">{{ venue.description }}</p>
 
+        <!-- 이미지 갤러리 -->
+        <ImageGallery :images="venue.media || []" />
+
         <div v-if="venue.address" class="detail-row">
           <span class="detail-label">주소</span>{{ venue.address }}
         </div>
@@ -90,6 +93,7 @@ import { computed } from 'vue'
 import { VENUE_TYPE_LABELS, GENRE_LABELS } from '../utils/constants.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useVenues } from '../composables/useVenues.js'
+import ImageGallery from './ImageGallery.vue'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },

@@ -19,6 +19,9 @@
         <h2 style="margin-top:8px">{{ event.title }}</h2>
         <p v-if="event.description" style="margin:8px 0;color:#bbb;font-size:0.85rem">{{ event.description }}</p>
 
+        <!-- 이미지 갤러리 -->
+        <ImageGallery :images="event.media || []" />        
+
         <div class="detail-row"><span class="detail-label">장소</span>{{ event.location_name }}</div>
         <div v-if="event.address" class="detail-row"><span class="detail-label">주소</span>{{ event.address }}</div>
         <div class="detail-row"><span class="detail-label">시작</span>{{ formatDate(event.start_date) }}</div>
@@ -58,6 +61,7 @@ import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '../utils/constants
 import { formatDate } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
+import ImageGallery from './ImageGallery.vue'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },

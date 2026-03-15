@@ -321,3 +321,53 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 .empty-title { font-size: 0.9rem; color: #ccc; margin-bottom: 8px; }
 .empty-hint { font-size: 0.8rem; color: #888; margin-bottom: 16px; }
 .empty-state .btn-primary { font-size: 0.8rem; }
+
+/* 이미지 업로드 */
+.image-upload-area { display: flex; gap: 8px; flex-wrap: wrap; }
+.image-thumb { position: relative; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; }
+.image-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.image-remove { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; line-height: 20px; padding: 0; }
+.image-add { width: 80px; height: 80px; border: 2px dashed #555; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.image-add span { font-size: 1.5rem; color: #888; }
+.image-add:hover { border-color: #888; }
+
+/* ── 이미지 슬라이더 ── */
+.gallery-slider { position: relative; overflow: hidden; border-radius: 10px; margin: 12px 0; }
+.gallery-track { display: flex; transition: transform 0.3s ease; }
+.gallery-slide { min-width: 100%; cursor: pointer; }
+.gallery-slide img { width: 100%; height: 240px; object-fit: contain; display: block; background: #111; }
+.gallery-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,0.5); color: #fff; border: none;
+  width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  z-index: 2;
+}
+.gallery-prev { left: 8px; }
+.gallery-next { right: 8px; }
+.gallery-arrow:hover { background: rgba(0,0,0,0.7); }
+.gallery-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+.gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; }
+.gallery-dot.active { background: #fff; }
+
+/* ── 전체화면 이미지 뷰어 ── */
+.image-viewer {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+}
+.viewer-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; z-index: 3;
+}
+.viewer-image { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 8px; }
+.viewer-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,0.15); color: #fff; border: none;
+  width: 44px; height: 44px; border-radius: 50%; font-size: 1.5rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.viewer-prev { left: 16px; }
+.viewer-next { right: 16px; }
+.viewer-arrow:hover { background: rgba(255,255,255,0.3); }
+.viewer-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: #ccc; font-size: 0.85rem; }

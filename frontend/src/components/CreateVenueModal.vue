@@ -117,6 +117,25 @@
           <input v-if="form.has_parking" v-model="form.parking_info" type="text" placeholder="주차 정보 (예: 건물 지하 주차장)" />
         </div>
 
+        <!-- 이미지 첨부 (접이식) -->
+        <button type="button" class="collapsible-toggle" @click="showImages = !showImages">
+          이미지 첨부 ({{ uploadedImages.length }}/5)
+          <span class="collapse-arrow" :class="{ open: showImages }">&#9662;</span>
+        </button>
+        <div v-show="showImages" class="collapsible-body">
+          <div class="image-upload-area">
+            <div v-for="(img, idx) in uploadedImages" :key="idx" class="image-thumb">
+              <img :src="img.url" />
+              <button type="button" class="image-remove" @click="removeImage(idx)">✕</button>
+            </div>
+            <label v-if="uploadedImages.length < 5" class="image-add">
+              <input type="file" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload" hidden />
+              <span>+</span>
+            </label>
+          </div>
+          <div v-if="uploadError" class="form-error">{{ uploadError }}</div>
+        </div>         
+
         <button type="submit" class="btn-primary w100">{{ editMode ? '수정하기' : '등록하기' }}</button>
         <p class="form-error">{{ error }}</p>
       </form>
@@ -128,6 +147,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { VENUE_TYPE_OPTIONS, GENRE_OPTIONS } from '../utils/constants.js'
 import { useVenues } from '../composables/useVenues.js'
+import { apiFetch } from '../utils/api.js'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -193,6 +213,9 @@ function resetForm() {
   showGenres.value = false
   showTypeInfo.value = false
   showFacility.value = false
+  uploadedImages.value = []
+  uploadError.value = ''
+  showImages.value = false  
 }
 
 // 모달 열릴 때: 복원 데이터 적용
@@ -228,6 +251,10 @@ watch(() => props.venueToEdit, (v) => {
       has_parking: !!v.has_parking,
       parking_info: v.parking_info || '',
     })
+    // 기존 이미지 로드
+    uploadedImages.value = (v.media || [])
+      .filter(m => m.media_type === 'image')
+      .map(m => ({ id: m.id, url: m.url }))
   }
 })
 
@@ -297,17 +324,75 @@ async function handleSubmit() {
     trial_class_fee: form.has_trial_class ? (form.trial_class_fee || null) : null,
   }
 
+  const venueId = editMode.value ? props.venueToEdit.id : null
   const result = editMode.value
-    ? await updateVenue(props.venueToEdit.id, body)
+    ? await updateVenue(venueId, body)
     : await createVenue(body)
 
   if (result.ok) {
+    const savedId = venueId || result.venueId
+
+    // 수정 모드: 삭제된 기존 이미지 제거
+    if (editMode.value && props.venueToEdit.media) {
+      const currentIds = uploadedImages.value.filter(img => img.id).map(img => img.id)
+      for (const m of props.venueToEdit.media) {
+        if (!currentIds.includes(m.id)) {
+          await apiFetch(`/api/venues/${savedId}/media/${m.id}`, { method: 'DELETE' })
+        }
+      }
+    }
+
+    // 새로 추가된 이미지 등록 (id가 없는 것만)
+    const newImages = uploadedImages.value.filter(img => !img.id)
+    for (let i = 0; i < newImages.length; i++) {
+      await apiFetch(`/api/venues/${savedId}/media`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          media_type: 'image',
+          url: newImages[i].url,
+          sort_order: i,
+        }),
+      })
+    }
+
     resetForm()
     emit('close')
     emit('created')
   } else {
     error.value = result.error
   }
+}
+
+const showImages = ref(false)
+const uploadedImages = ref([])
+const uploadError = ref('')
+
+async function handleImageUpload(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  uploadError.value = ''
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await apiFetch('/api/upload/image', {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (res.ok) {
+    const data = await res.json()
+    uploadedImages.value.push({ url: data.url })
+  } else {
+    const err = await res.json()
+    uploadError.value = err.detail || '업로드에 실패했습니다'
+  }
+  e.target.value = ''
+}
+
+function removeImage(idx) {
+  uploadedImages.value.splice(idx, 1)
 }
 
 defineExpose({ resetForm })
