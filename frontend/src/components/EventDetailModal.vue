@@ -63,7 +63,7 @@
         </template>
         <div v-else-if="event.is_recurring" class="detail-row"><span class="detail-label">반복</span>반복 이벤트</div>
 
-        <div class="detail-row"><span class="detail-label">주최</span>{{ event.organizer_nickname || '-' }}</div>
+        <div class="detail-row"><span class="detail-label">작성자</span>{{ event.organizer_nickname || '-' }}</div>
 
         <div v-if="isOwner" class="action-row">
           <button class="btn-ghost" @click="$emit('edit', event)">수정</button>
