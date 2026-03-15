@@ -117,6 +117,25 @@
           <input v-if="form.has_parking" v-model="form.parking_info" type="text" placeholder="주차 정보 (예: 건물 지하 주차장)" />
         </div>
 
+        <!-- 이미지 첨부 (접이식) -->
+        <button type="button" class="collapsible-toggle" @click="showImages = !showImages">
+          이미지 첨부 ({{ uploadedImages.length }}/5)
+          <span class="collapse-arrow" :class="{ open: showImages }">&#9662;</span>
+        </button>
+        <div v-show="showImages" class="collapsible-body">
+          <div class="image-upload-area">
+            <div v-for="(img, idx) in uploadedImages" :key="idx" class="image-thumb">
+              <img :src="img.url" />
+              <button type="button" class="image-remove" @click="removeImage(idx)">✕</button>
+            </div>
+            <label v-if="uploadedImages.length < 5" class="image-add">
+              <input type="file" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload" hidden />
+              <span>+</span>
+            </label>
+          </div>
+          <div v-if="uploadError" class="form-error">{{ uploadError }}</div>
+        </div>         
+
         <button type="submit" class="btn-primary w100">{{ editMode ? '수정하기' : '등록하기' }}</button>
         <p class="form-error">{{ error }}</p>
       </form>
@@ -128,6 +147,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { VENUE_TYPE_OPTIONS, GENRE_OPTIONS } from '../utils/constants.js'
 import { useVenues } from '../composables/useVenues.js'
+import { apiFetch } from '../utils/api.js'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -193,6 +213,9 @@ function resetForm() {
   showGenres.value = false
   showTypeInfo.value = false
   showFacility.value = false
+  uploadedImages.value = []
+  uploadError.value = ''
+  showImages.value = false  
 }
 
 // 모달 열릴 때: 복원 데이터 적용
@@ -308,6 +331,37 @@ async function handleSubmit() {
   } else {
     error.value = result.error
   }
+}
+
+const showImages = ref(false)
+const uploadedImages = ref([])
+const uploadError = ref('')
+
+async function handleImageUpload(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  uploadError.value = ''
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await apiFetch('/api/upload/image', {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (res.ok) {
+    const data = await res.json()
+    uploadedImages.value.push({ url: data.url })
+  } else {
+    const err = await res.json()
+    uploadError.value = err.detail || '업로드에 실패했습니다'
+  }
+  e.target.value = ''
+}
+
+function removeImage(idx) {
+  uploadedImages.value.splice(idx, 1)
 }
 
 defineExpose({ resetForm })

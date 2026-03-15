@@ -111,6 +111,25 @@
           </div>
         </template>
 
+        <!-- 이미지 첨부 (접이식) -->
+        <button type="button" class="collapsible-toggle" @click="showImages = !showImages">
+          이미지 첨부 ({{ uploadedImages.length }}/5)
+          <span class="collapse-arrow" :class="{ open: showImages }">&#9662;</span>
+        </button>
+        <div v-show="showImages" class="collapsible-body">
+          <div class="image-upload-area">
+            <div v-for="(img, idx) in uploadedImages" :key="idx" class="image-thumb">
+              <img :src="img.url" />
+              <button type="button" class="image-remove" @click="removeImage(idx)">✕</button>
+            </div>
+            <label v-if="uploadedImages.length < 5" class="image-add">
+              <input type="file" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload" hidden />
+              <span>+</span>
+            </label>
+          </div>
+          <div v-if="uploadError" class="form-error">{{ uploadError }}</div>
+        </div>        
+
         <button type="submit" class="btn-primary w100">
           {{ editMode ? '수정하기' : '등록하기' }}
         </button>
@@ -124,6 +143,7 @@
 import { ref, reactive, watch, computed } from 'vue' // computed 추가
 import { TYPE_OPTIONS, GENRE_OPTIONS, DIFFICULTY_OPTIONS } from '../utils/constants.js'
 import { useEvents } from '../composables/useEvents.js'
+import { apiFetch } from '../utils/api.js'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -185,6 +205,9 @@ function resetForm() {
   showGenres.value = false
   showPrice.value = false
   showTypeInfo.value = false
+  uploadedImages.value = []
+  uploadError.value = ''
+  showImages.value = false  
 }
 
 watch(() => props.visible, (v) => {
@@ -284,6 +307,20 @@ async function handleSubmit() {
 
   const result = editMode.value ? await updateEvent(props.eventToEdit.id, body) : await createEvent(body)
   if (result.ok) {
+    // 이미지가 있으면 미디어 API로 등록
+    if (uploadedImages.value.length > 0 && result.eventId) {
+      for (let i = 0; i < uploadedImages.value.length; i++) {
+        await apiFetch(`/api/events/${result.eventId}/media`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            media_type: 'image',
+            url: uploadedImages.value[i].url,
+            sort_order: i,
+          }),
+        })
+      }
+    }
     resetForm()
     emit('close')
     emit('created')
@@ -300,6 +337,37 @@ function setLocation(lat, lng, address) {
   form.latitude = parseFloat(lat).toFixed(6)
   form.longitude = parseFloat(lng).toFixed(6)
   if (address) form.address = address
+}
+
+const showImages = ref(false)
+const uploadedImages = ref([])
+const uploadError = ref('')
+
+async function handleImageUpload(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  uploadError.value = ''
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await apiFetch('/api/upload/image', {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (res.ok) {
+    const data = await res.json()
+    uploadedImages.value.push({ url: data.url })
+  } else {
+    const err = await res.json()
+    uploadError.value = err.detail || '업로드에 실패했습니다'
+  }
+  e.target.value = ''
+}
+
+function removeImage(idx) {
+  uploadedImages.value.splice(idx, 1)
 }
 
 defineExpose({ resetForm, getFormData, setLocation })

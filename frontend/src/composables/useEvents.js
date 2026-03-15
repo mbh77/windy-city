@@ -24,7 +24,8 @@ export function useEvents() {
       body: JSON.stringify(eventData),
     })
     if (res.ok) {
-      return { ok: true }
+      const data = await res.json()
+      return { ok: true, eventId: data.id }
     } else {
       const err = await res.json()
       return { ok: false, error: err.detail || '등록에 실패했습니다' }
