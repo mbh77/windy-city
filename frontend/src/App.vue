@@ -93,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useAuth } from './composables/useAuth.js'
 import { useEvents } from './composables/useEvents.js'
 import { useVenues } from './composables/useVenues.js'
@@ -131,6 +131,35 @@ const selectedEvent = ref(null)
 const selectedVenue = ref(null)
 const eventToEdit = ref(null)
 const venueToEdit = ref(null)
+
+// 모달 뒤로가기 처리
+const anyModalOpen = computed(() =>
+  showEventDetail.value || showVenueDetail.value || showAuth.value || showCreateEvent.value || showCreateVenue.value
+)
+
+watch(anyModalOpen, (open) => {
+  if (open) {
+    history.pushState({ modal: true }, '')
+  }
+})
+
+function handlePopState() {
+  if (anyModalOpen.value) {
+    showEventDetail.value = false
+    showVenueDetail.value = false
+    showAuth.value = false
+    showCreateEvent.value = false
+    showCreateVenue.value = false
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('popstate', handlePopState)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('popstate', handlePopState)
+})
 
 // 위치 선택 상태
 const isPicking = ref(false)
