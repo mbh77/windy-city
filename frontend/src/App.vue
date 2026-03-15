@@ -43,6 +43,7 @@
       @selectEvent="openEventDetail"
       @addVenue="openCreateVenueModal"
       @selectVenue="openVenueDetail"
+      @dateFilterChange="handleDateFilter"
     />
   </main>
 
@@ -150,7 +151,16 @@ const visibleCategories = reactive({
 // ── 초기화 ──
 onMounted(async () => {
   await restoreSession()
-  await Promise.all([loadEvents(), loadVenues()])
+  const today = new Date()
+  const weekLater = new Date()
+  weekLater.setDate(today.getDate() + 7)
+  await Promise.all([
+    loadEvents({
+      date_from: today.toISOString(),
+      date_to: weekLater.toISOString(),
+    }),
+    loadVenues()
+  ])
 })
 
 // ── 카테고리 토글 ──
@@ -186,7 +196,7 @@ function openEventDetail(ev) {
 
 async function closeEventDetail() {
   showEventDetail.value = false
-  await loadEvents()
+  await getDefaultFilters()
 }
 
 // ── 장소 상세 ──
@@ -220,7 +230,7 @@ async function handleEventCreated(data) {
     mapRef.value?.panTo(data.panTo.lat, data.panTo.lng)
     return
   }
-  await loadEvents()
+  await getDefaultFilters()
 }
 
 // ── 장소 등록 ──
@@ -302,5 +312,9 @@ function cancelPick() {
   } else {
     showCreateVenue.value = true
   }
+}
+
+function handleDateFilter({ date_from, date_to }) {
+  loadEvents({ date_from, date_to })
 }
 </script>

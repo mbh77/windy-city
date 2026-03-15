@@ -69,6 +69,20 @@
             + 이벤트
           </button>
         </div>
+        <!-- 날짜 필터 -->
+        <div class="date-filter">
+          <div class="date-filter-summary" @click="showDatePicker = !showDatePicker">
+            📅 {{ formatFilterDate(dateFrom) }} ~ {{ formatFilterDate(dateTo) }}
+            <span class="date-toggle">{{ showDatePicker ? '▲' : '▼' }}</span>
+          </div>
+          <div v-if="showDatePicker" class="date-filter-inputs">
+            <input type="date" v-model="dateFrom" />
+            <span>~</span>
+            <input type="date" v-model="dateTo" />
+            <button class="btn-ghost" @click="applyDateFilter">적용</button>
+            <button class="btn-ghost" @click="resetDateFilter">초기화</button>
+          </div>
+        </div>        
         <ul class="sidebar-list">
           <li v-for="ev in visibleEvents" :key="ev.id" @click="$emit('selectEvent', ev)">
             <span :class="['event-type-badge', `type-${ev.event_type}`]">
@@ -132,7 +146,7 @@ import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
 
-const emit = defineEmits(['addEvent', 'selectEvent', 'addVenue', 'selectVenue'])
+const emit = defineEmits(['addEvent', 'selectEvent', 'addVenue', 'selectVenue', 'dateFilterChange'])
 const props = defineProps({
   mapBounds: { type: Object, default: null },
   visibleCategories: {
@@ -145,6 +159,30 @@ const { events } = useEvents()
 const { venues } = useVenues()
 
 const activeTab = ref('events')
+
+// 날짜 필터
+const showDatePicker = ref(false)
+const today = new Date().toISOString().slice(0, 10)
+const weekLater = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
+const dateFrom = ref(today)
+const dateTo = ref(weekLater)
+
+function formatFilterDate(dateStr) {
+  const d = new Date(dateStr)
+  return `${d.getMonth() + 1}/${d.getDate()}`
+}
+
+function applyDateFilter() {
+  emit('dateFilterChange', { date_from: dateFrom.value, date_to: dateTo.value })
+  showDatePicker.value = false
+}
+
+function resetDateFilter() {
+  dateFrom.value = today
+  dateTo.value = weekLater
+  emit('dateFilterChange', { date_from: today, date_to: weekLater })
+  showDatePicker.value = false
+}
 
 // 검색 관련
 const searchQuery = ref('')
@@ -197,4 +235,5 @@ const visibleVenues = computed(() =>
     props.visibleCategories[v.venue_type] && inBounds(v.latitude, v.longitude)
   )
 )
+
 </script>

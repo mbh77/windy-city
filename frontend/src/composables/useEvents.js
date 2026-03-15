@@ -8,12 +8,8 @@ export function useEvents() {
   // 이벤트 목록 로드
   async function loadEvents(filters = {}) {
     const params = new URLSearchParams()
-    if (filters.date) {
-      params.set('date_from', new Date(filters.date).toISOString())
-      const end = new Date(filters.date)
-      end.setDate(end.getDate() + 1)
-      params.set('date_to', end.toISOString())
-    }
+    if (filters.date_from) params.set('date_from', filters.date_from)
+    if (filters.date_to) params.set('date_to', filters.date_to)
     if (filters.eventType) params.set('event_type', filters.eventType)
     if (filters.danceGenre) params.set('dance_genre', filters.danceGenre)
 

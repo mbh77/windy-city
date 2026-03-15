@@ -295,3 +295,21 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 .search-box input:focus {
   border-color: #ff4d6d;
 }
+
+/* 날짜 필터 */
+.date-filter { padding: 8px 16px; border-bottom: 1px solid #2a2a2a; }
+.date-filter-summary { font-size: 0.8rem; color: #ccc; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.date-toggle { font-size: 0.6rem; color: #888; }
+.date-filter-inputs { display: flex; align-items: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.date-filter-inputs input[type="date"] { 
+  background: #2a2a2a; 
+  color: #e0e0e0; 
+  border: 1px solid #444; 
+  border-radius: 3px; 
+  padding: 4px 6px; 
+  font-size: 0.7rem; 
+  flex: 1;
+  min-width: 0;
+  max-width: 140px;  
+}
+.date-filter-inputs .btn-ghost { padding: 4px 6px; font-size: 0.7rem; }
