@@ -42,7 +42,26 @@
         <div v-if="event.requires_partner" class="detail-row"><span class="detail-label">파트너</span>필요</div>
 
         <!-- 반복 -->
-        <div v-if="event.is_recurring" class="detail-row"><span class="detail-label">반복</span>반복 이벤트</div>
+        <template v-if="event.is_recurring && event.recurrence_rule">
+          <div class="detail-row">
+            <span class="detail-label">반복</span>
+            {{ event.recurrence_rule.frequency === 'weekly' ? '매주' : '격주' }}
+            {{ (event.recurrence_rule.days || []).map(d => DAY_LABELS[d]).join(' · ') }}
+          </div>
+          <div v-if="event.recurrence_rule.skip_dates?.length" class="detail-row">
+            <span class="detail-label">휴강일</span>
+            <span class="date-tag-list-inline">
+              <span v-for="d in event.recurrence_rule.skip_dates" :key="d" class="date-tag">{{ d }}</span>
+            </span>
+          </div>
+          <div v-if="event.recurrence_rule.extra_dates?.length" class="detail-row">
+            <span class="detail-label">보강일</span>
+            <span class="date-tag-list-inline">
+              <span v-for="d in event.recurrence_rule.extra_dates" :key="d" class="date-tag">{{ d }}</span>
+            </span>
+          </div>
+        </template>
+        <div v-else-if="event.is_recurring" class="detail-row"><span class="detail-label">반복</span>반복 이벤트</div>
 
         <div class="detail-row"><span class="detail-label">주최</span>{{ event.organizer_nickname || '-' }}</div>
 
@@ -62,6 +81,8 @@ import { formatDate } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import ImageGallery from './ImageGallery.vue'
+
+const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' }
 
 const props = defineProps({
   visible: { type: Boolean, default: false },

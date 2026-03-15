@@ -181,6 +181,12 @@ const weekLater = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
 const dateFrom = ref(today)
 const dateTo = ref(weekLater)
 
+watch(dateFrom, (val) => {
+  if (dateTo.value < val) {
+    dateTo.value = val
+  }
+})
+
 function formatFilterDate(dateStr) {
   const d = new Date(dateStr)
   return `${d.getMonth() + 1}/${d.getDate()}`

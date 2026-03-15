@@ -104,12 +104,54 @@
           </div>
         </template>
 
-        <!-- 반복 이벤트 -->
-        <template v-if="form.event_type === 'regular_class'">
-          <div class="inline-checks" style="margin-top:8px">
-            <label class="checkbox-label"><input v-model="form.is_recurring" type="checkbox" /> 반복 이벤트 (매주)</label>
+        <!-- 반복 이벤트 (접이식) -->
+        <button type="button" class="collapsible-toggle" @click="showRecurring = !showRecurring">
+          반복 이벤트 설정
+          <span class="collapse-arrow" :class="{ open: showRecurring }">&#9662;</span>
+        </button>
+        <div v-show="showRecurring" class="collapsible-body">
+          <div class="inline-checks">
+            <label class="checkbox-label"><input v-model="form.is_recurring" type="checkbox" /> 반복 이벤트</label>
           </div>
-        </template>
+          <template v-if="form.is_recurring">
+            <!-- 주기 -->
+            <label class="form-label">주기</label>
+            <select v-model="form.recurrence_frequency">
+              <option value="weekly">매주</option>
+              <option value="biweekly">격주</option>
+            </select>
+            <!-- 요일 선택 -->
+            <label class="form-label">반복 요일</label>
+            <div class="genre-checkboxes">
+              <label v-for="day in DAY_OPTIONS" :key="day.value" class="checkbox-label">
+                <input v-model="form.recurrence_days" type="checkbox" :value="day.value" />
+                {{ day.label }}
+              </label>
+            </div>
+            <!-- 휴강일 -->
+            <label class="form-label">휴강일</label>
+            <div class="skip-date-row">
+              <input v-model="newSkipDate" type="date" />
+              <button type="button" class="btn-ghost" @click="addSkipDate">추가</button>
+            </div>
+            <div v-if="form.skip_dates.length > 0" class="date-tag-list">
+              <span v-for="(d, idx) in form.skip_dates" :key="idx" class="date-tag">
+                {{ d }} <button type="button" @click="form.skip_dates.splice(idx, 1)">✕</button>
+              </span>
+            </div>
+            <!-- 보강일 -->
+            <label class="form-label">보강일</label>
+            <div class="skip-date-row">
+              <input v-model="newExtraDate" type="date" />
+              <button type="button" class="btn-ghost" @click="addExtraDate">추가</button>
+            </div>
+            <div v-if="form.extra_dates.length > 0" class="date-tag-list">
+              <span v-for="(d, idx) in form.extra_dates" :key="idx" class="date-tag">
+                {{ d }} <button type="button" @click="form.extra_dates.splice(idx, 1)">✕</button>
+              </span>
+            </div>
+          </template>
+        </div>
 
         <!-- 이미지 첨부 (접이식) -->
         <button type="button" class="collapsible-toggle" @click="showImages = !showImages">
@@ -160,6 +202,36 @@ const editMode = computed(() => !!props.eventToEdit)
 const showGenres = ref(false)
 const showPrice = ref(false)
 const showTypeInfo = ref(false)
+const showRecurring = ref(false)
+
+const DAY_OPTIONS = [
+  { value: 'mon', label: '월' },
+  { value: 'tue', label: '화' },
+  { value: 'wed', label: '수' },
+  { value: 'thu', label: '목' },
+  { value: 'fri', label: '금' },
+  { value: 'sat', label: '토' },
+  { value: 'sun', label: '일' },
+]
+
+const newSkipDate = ref('')
+const newExtraDate = ref('')
+
+function addSkipDate() {
+  if (newSkipDate.value && !form.skip_dates.includes(newSkipDate.value)) {
+    form.skip_dates.push(newSkipDate.value)
+    form.skip_dates.sort()
+    newSkipDate.value = ''
+  }
+}
+
+function addExtraDate() {
+  if (newExtraDate.value && !form.extra_dates.includes(newExtraDate.value)) {
+    form.extra_dates.push(newExtraDate.value)
+    form.extra_dates.sort()
+    newExtraDate.value = ''
+  }
+}
 
 const form = reactive({
   title: '',
@@ -182,6 +254,10 @@ const form = reactive({
   max_participants: null,
   requires_partner: false,
   is_recurring: false,
+  recurrence_frequency: 'weekly',
+  recurrence_days: [],
+  skip_dates: [],
+  extra_dates: [],
 })
 
 const error = ref('')
@@ -198,6 +274,7 @@ function resetForm() {
     dj_name: '', dress_code: '', has_pre_lesson: false,
     instructor_name: '', difficulty: '', max_participants: null,
     requires_partner: false, is_recurring: false,
+    recurrence_frequency: 'weekly', recurrence_days: [], skip_dates: [], extra_dates: [],
   })
   error.value = ''
   searchQuery.value = ''
@@ -206,6 +283,9 @@ function resetForm() {
   showGenres.value = false
   showPrice.value = false
   showTypeInfo.value = false
+  showRecurring.value = false
+  newSkipDate.value = ''
+  newExtraDate.value = ''
   uploadedImages.value = []
   uploadError.value = ''
   showImages.value = false  
@@ -236,6 +316,10 @@ watch(() => props.visible, (v) => {
       max_participants: e.max_participants || null,
       requires_partner: e.requires_partner || false,
       is_recurring: e.is_recurring || false,
+      recurrence_frequency: e.recurrence_rule?.frequency || 'weekly',
+      recurrence_days: e.recurrence_rule?.days || [],
+      skip_dates: e.recurrence_rule?.skip_dates || [],
+      extra_dates: e.recurrence_rule?.extra_dates || [],
     })
     // 기존 이미지 로드
     uploadedImages.value = (e.media || [])
@@ -294,8 +378,8 @@ async function handleSubmit() {
     address: form.address || null,
     latitude: parseFloat(form.latitude),
     longitude: parseFloat(form.longitude),
-    start_date: new Date(form.start_date).toISOString(),
-    end_date: form.end_date ? new Date(form.end_date).toISOString() : null,
+    start_date: form.start_date,
+    end_date: form.end_date || null,
     event_type: form.event_type,
     dance_genres: form.dance_genres,
     price: form.price || null,
@@ -308,6 +392,12 @@ async function handleSubmit() {
     max_participants: form.max_participants || null,
     requires_partner: form.requires_partner,
     is_recurring: form.is_recurring,
+    recurrence_rule: form.is_recurring ? {
+      frequency: form.recurrence_frequency,
+      days: form.recurrence_days,
+      skip_dates: form.skip_dates,
+      extra_dates: form.extra_dates,
+    } : null,
   }
 
   const eventId = editMode.value ? props.eventToEdit.id : null
@@ -339,9 +429,10 @@ async function handleSubmit() {
       })
     }
 
+    const startDate = body.start_date
     resetForm()
     emit('close')
-    emit('created')
+    emit('created', { startDate })
   } else {
     error.value = result.error
   }
