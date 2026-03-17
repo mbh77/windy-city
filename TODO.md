@@ -101,3 +101,7 @@
 - ⬜ **B-032** 캘린더 뷰 — 주간/월간 캘린더로 이벤트 탐색
 - ⬜ **B-033** 관리자 페이지 — 전체 콘텐츠·유저 관리, 주최자 승인
 - ⬜ **B-034** PWA 지원 — 모바일 홈 화면 추가, 오프라인 기본 동작
+- ⬜ **B-035** 검색 효율화 — DB 인덱스 추가 (1단계), FULLTEXT 인덱스 (2단계), 검색엔진 도입 (3단계)
+  - 1단계: events.title, events.start_date, venues.name 인덱스
+  - 2단계: FULLTEXT 인덱스 (LIKE '%keyword%' → MATCH AGAINST)
+  - 3단계: Elasticsearch 등 검색 엔진 (데이터 수만 건 이상 시)
