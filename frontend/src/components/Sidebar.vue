@@ -12,15 +12,20 @@
         @keydown.esc="searchQuery = ''"
         @focus="isExpanded = true"
       />
+      <button
+        :class="['search-bounds-btn', { active: searchInBounds }]"
+        @click="searchInBounds = !searchInBounds">
+        📍 지도 내
+      </button>
     </div>
     <!-- 검색 모드: 검색어가 있을 때 -->
     <template v-if="searchQuery.trim()">
       <div class="sidebar-header">
-        <span>검색 결과 {{ searchResults.length }}건</span>        
+        <span>검색 결과 {{ filteredSearchResults.length }}건</span>
       </div>
       <ul class="sidebar-list">
         <li 
-          v-for="item in searchResults"
+          v-for="item in filteredSearchResults"
           :key="item.item_type + '-' + item.id"
           @click="handleSearchClick(item)"
         >
@@ -41,7 +46,7 @@
           <div class="item-meta">{{ item.item_type === 'event' ? item.location_name : item.address }}</div>
           <div v-if="item.item_type === 'event'" class="item-meta">{{ formatDate(item.start_date) }}</div>
         </li>
-        <li v-if="searchResults.length === 0" class="empty-state">
+        <li v-if="filteredSearchResults.length === 0" class="empty-state">
           <div class="empty-icon">🔍</div>
           <div class="empty-title">검색 결과가 없습니다</div>
           <div class="empty-hint">다른 키워드로 검색해보세요</div>
@@ -185,6 +190,8 @@ const weekLater = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
 const dateFrom = ref(today)
 const dateTo = ref(weekLater)
 
+const searchInBounds = ref(false)
+
 watch(dateFrom, (val) => {
   if (dateTo.value < val) {
     dateTo.value = val
@@ -320,5 +327,15 @@ const visibleVenues = computed(() =>
     props.visibleCategories[v.venue_type] && inBounds(v.latitude, v.longitude)
   )
 )
+
+const filteredSearchResults = computed(() => {
+  if (!searchInBounds.value || !props.mapBounds) return searchResults.value
+  return searchResults.value.filter(item => {
+    const lat = item.latitude
+    const lng = item.longitude
+    return lat >= props.mapBounds.swLat && lat <= props.mapBounds.neLat
+        && lng >= props.mapBounds.swLng && lng <= props.mapBounds.neLng
+  })
+})
 
 </script>

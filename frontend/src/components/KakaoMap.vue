@@ -26,6 +26,9 @@ let map = null
 let eventMarkers = []
 let venueMarkers = []
 let tempMarker = null
+let activeInfowindow = null
+let eventClusterer = null
+let venueClusterer = null
 
 // 커스텀 마커 SVG 생성
 function createMarkerImage(color) {
@@ -64,6 +67,31 @@ onMounted(async () => {
     level: 7,
   })
 
+  // 클러스터러 생성
+  eventClusterer = new window.kakao.maps.MarkerClusterer({
+    map: map,
+    averageCenter: true,
+    minLevel: 4,
+    styles: [{
+      width: '36px', height: '36px',
+      background: '#e74c3c', color: '#fff',
+      borderRadius: '18px', textAlign: 'center', lineHeight: '36px',
+      fontSize: '13px', fontWeight: 'bold'
+    }]
+  })
+
+  venueClusterer = new window.kakao.maps.MarkerClusterer({
+    map: map,
+    averageCenter: true,
+    minLevel: 4,
+    styles: [{
+      width: '36px', height: '36px',
+      background: '#9b59b6', color: '#fff',
+      borderRadius: '18px', textAlign: 'center', lineHeight: '36px',
+      fontSize: '13px', fontWeight: 'bold'
+    }]
+  })
+
   // 지도 영역 변경 시 bounds 전달
   function emitBounds() {
     const bounds = map.getBounds()
@@ -81,8 +109,15 @@ onMounted(async () => {
     window.kakao.maps.event.removeListener(map, 'tilesloaded', onTiles)
   })
 
+  // 지도 클릭/드래그 시 입력 포커스 해제
+  window.kakao.maps.event.addListener(map, 'dragstart', () => {
+    document.activeElement.blur()
+  })
+
   // 지도 클릭 → 위치 선택 모드
   window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
+    document.activeElement.blur()
+    if (activeInfowindow) { activeInfowindow.close(); activeInfowindow = null }
     if (!props.isPicking) return
     const latlng = mouseEvent.latLng
 
@@ -101,7 +136,7 @@ onMounted(async () => {
     })
   })
   if (events.value.length) renderEventMarkers(events.value)
-  if (venues.value.length) renderVenueMarkers(venues.value)  
+  if (venues.value.length) renderVenueMarkers(venues.value)
 })
 
 // 이벤트 마커 렌더링
@@ -116,21 +151,26 @@ watch(venues, (vns) => {
 
 // 카테고리 표시/숨김
 watch(() => props.visibleCategories, (cats) => {
-  eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
-  venueMarkers.forEach(m => {
-    m.setMap(cats[m._venueType] ? map : null)
-  })
+  if (eventClusterer) {
+    eventClusterer.clear()
+    if (cats.event) eventClusterer.addMarkers(eventMarkers)
+  }
+  if (venueClusterer) {
+    venueClusterer.clear()
+    const visibleMarkers = venueMarkers.filter(m => cats[m._venueType])
+    venueClusterer.addMarkers(visibleMarkers)
+  }
 }, { deep: true })
 
 function renderEventMarkers(evts) {
   eventMarkers.forEach(m => m.setMap(null))
+  if (eventClusterer) eventClusterer.clear()
   eventMarkers = []
 
   evts.forEach(ev => {
     const pos = new window.kakao.maps.LatLng(ev.latitude, ev.longitude)
     const marker = new window.kakao.maps.Marker({
       position: pos,
-      map: props.visibleCategories.event ? map : null,
       image: getMarkerImage(eventColor),
     })
 
@@ -141,16 +181,45 @@ function renderEventMarkers(evts) {
       </div>`
     const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent })
 
-    window.kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker))
-    window.kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close())
-    window.kakao.maps.event.addListener(marker, 'click', () => emit('markerClick', ev))
+    window.kakao.maps.event.addListener(marker, 'mouseover', () => {
+      if (!('ontouchstart' in window)) {
+        infowindow.open(map, marker)
+      }
+    })
+    window.kakao.maps.event.addListener(marker, 'mouseout', () => {
+      if (!('ontouchstart' in window)) {
+        infowindow.close()
+      }
+    })
+    window.kakao.maps.event.addListener(marker, 'click', () => {
+      document.activeElement.blur()
+
+      if ('ontouchstart' in window) {
+        if (activeInfowindow === infowindow) {
+          emit('markerClick', ev)
+          infowindow.close()
+          activeInfowindow = null
+        } else {
+          if (activeInfowindow) activeInfowindow.close()
+          infowindow.open(map, marker)
+          activeInfowindow = infowindow
+        }
+      } else {
+        emit('markerClick', ev)
+      }
+    })
 
     eventMarkers.push(marker)
   })
+
+  if (eventClusterer && props.visibleCategories.event) {
+    eventClusterer.addMarkers(eventMarkers)
+  }
 }
 
 function renderVenueMarkers(vns) {
   venueMarkers.forEach(m => m.setMap(null))
+  if (venueClusterer) venueClusterer.clear()
   venueMarkers = []
 
   vns.forEach(v => {
@@ -158,7 +227,6 @@ function renderVenueMarkers(vns) {
     const color = venueColors[v.venue_type] || '#999'
     const marker = new window.kakao.maps.Marker({
       position: pos,
-      map: props.visibleCategories[v.venue_type] ? map : null,
       image: getMarkerImage(color),
     })
     marker._venueType = v.venue_type
@@ -171,26 +239,56 @@ function renderVenueMarkers(vns) {
       </div>`
     const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent })
 
-    window.kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker))
-    window.kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close())
-    window.kakao.maps.event.addListener(marker, 'click', () => emit('venueMarkerClick', v))
+    window.kakao.maps.event.addListener(marker, 'mouseover', () => {
+      if (!('ontouchstart' in window)) {
+        infowindow.open(map, marker)
+      }
+    })
+    window.kakao.maps.event.addListener(marker, 'mouseout', () => {
+      if (!('ontouchstart' in window)) {
+        infowindow.close()
+      }
+    })
+    window.kakao.maps.event.addListener(marker, 'click', () => {
+      document.activeElement.blur()
+
+      if ('ontouchstart' in window) {
+        if (activeInfowindow === infowindow) {
+          emit('venueMarkerClick', v)
+          infowindow.close()
+          activeInfowindow = null
+        } else {
+          if (activeInfowindow) activeInfowindow.close()
+          infowindow.open(map, marker)
+          activeInfowindow = infowindow
+        }
+      } else {
+        emit('venueMarkerClick', v)
+      }
+    })
 
     venueMarkers.push(marker)
   })
+
+  if (venueClusterer) {
+    const visibleMarkers = venueMarkers.filter(m => props.visibleCategories[m._venueType])
+    venueClusterer.addMarkers(visibleMarkers)
+  }
 }
 
 // 위치 선택 모드 전환 시 마커 숨김/복원
 watch(() => props.isPicking, (picking) => {
   if (picking) {
-    eventMarkers.forEach(m => m.setMap(null))
-    venueMarkers.forEach(m => m.setMap(null))
+    if (eventClusterer) eventClusterer.clear()
+    if (venueClusterer) venueClusterer.clear()
   } else {
-    eventMarkers.forEach(m => {
-      if (props.visibleCategories.event) m.setMap(map)
-    })
-    venueMarkers.forEach(m => {
-      if (props.visibleCategories[m._venueType]) m.setMap(map)
-    })
+    if (eventClusterer && props.visibleCategories.event) {
+      eventClusterer.addMarkers(eventMarkers)
+    }
+    if (venueClusterer) {
+      const visibleMarkers = venueMarkers.filter(m => props.visibleCategories[m._venueType])
+      venueClusterer.addMarkers(visibleMarkers)
+    }
     if (tempMarker) { tempMarker.setMap(null); tempMarker = null }
   }
 })

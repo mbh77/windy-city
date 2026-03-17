@@ -214,6 +214,9 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
   .empty-title { font-size: 0.75rem; margin-bottom: 0; }
   .empty-hint { font-size: 0.65rem; margin-bottom: 0; }
   .empty-state .btn-primary { font-size: 0.7rem; padding: 5px 10px; }
+  /* 상세 모달: 하단 50% */
+  .modal-detail { align-items: flex-end; }
+  .modal-detail .modal-content { width: 100%; max-width: 100%; max-height: 50vh; max-height: 50dvh; border-radius: 16px 16px 0 0; padding: 16px; }
 }
 
 body.keyboard-open .sidebar { height: 50vh; }
@@ -298,8 +301,14 @@ body.keyboard-open .sidebar { height: 50vh; }
 /* 서치 박스 */
 .search-box {
   padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;  
 }
 .search-box input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;  
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #444;
@@ -416,3 +425,7 @@ body.keyboard-open .sidebar { height: 50vh; }
 .viewer-next { right: 16px; }
 .viewer-arrow:hover { background: rgba(255,255,255,0.3); }
 .viewer-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: #ccc; font-size: 0.85rem; }
+
+/* ── 지도내 검색 ── */
+.search-bounds-btn { background: transparent; border: 1px solid #555; color: #888; border-radius: 16px; padding: 4px 10px; font-size: 0.75rem; white-space: nowrap; cursor: pointer; }
+.search-bounds-btn.active { background: #e74c3c; border-color: #e74c3c; color: #fff; }
