@@ -51,67 +51,70 @@
 
     <!-- 탐색 모드: 검색어가 없을 때 -->
     <template v-else>
-      <!-- 탭 -->
+      <!-- 탭 + 등록 버튼 -->
       <div class="tab-group">
         <button :class="['tab', { active: activeTab === 'events' }]" @click="activeTab = 'events'">
-          이벤트 {{ visibleEvents.length }}
+          이벤트 {{ filteredEvents.length }}
         </button>
         <button :class="['tab', { active: activeTab === 'venues' }]" @click="activeTab = 'venues'">
           장소 {{ visibleVenues.length }}
         </button>
+        <button
+          v-if="currentUser?.is_organizer && activeTab === 'events'"
+          class="btn-primary tab-action"
+          @click="$emit('addEvent')"
+        >등록 +</button>
+        <button
+          v-if="currentUser?.is_organizer && activeTab === 'venues'"
+          class="btn-primary tab-action"
+          @click="$emit('addVenue')"
+        >등록 +</button>
       </div>
 
       <!-- 이벤트 탭 -->
       <template v-if="activeTab === 'events'">
-        <div class="sidebar-header">
-          <span>이벤트 {{ filteredEvents.length }}개</span>
-          <button
-            v-if="currentUser?.is_organizer"
-            class="btn-primary"
-            @click="$emit('addEvent')"
-          >
-            + 이벤트
-          </button>
-        </div>
-        <!-- 날짜 필터 -->
-        <div class="date-filter">
-          <div class="date-filter-summary" @click="showDatePicker = !showDatePicker">
-            📅 {{ formatFilterDate(dateFrom) }} ~ {{ formatFilterDate(dateTo) }}
-            <span class="date-toggle">{{ showDatePicker ? '▲' : '▼' }}</span>
+        <!-- 날짜+요일 필터 (접이식) -->
+        <div class="compact-filter">
+          <div class="compact-filter-summary" @click="showFilter = !showFilter">
+            <span>📅 {{ formatFilterDate(dateFrom) }}~{{ formatFilterDate(dateTo) }}</span>
+            <span v-if="selectedDays.length" class="filter-days-tag">{{ selectedDays.map(d => DAY_LABELS[d]).join('·') }}</span>
+            <span class="date-toggle">{{ showFilter ? '▲' : '▼' }}</span>
           </div>
-          <div v-if="showDatePicker" class="date-filter-inputs">
-            <input type="date" v-model="dateFrom" />
-            <span>~</span>
-            <input type="date" v-model="dateTo" />
-            <button class="btn-ghost" @click="applyDateFilter">적용</button>
-            <button class="btn-ghost" @click="resetDateFilter">초기화</button>
+          <div v-if="showFilter" class="compact-filter-body">
+            <div class="date-filter-inputs">
+              <input type="date" v-model="dateFrom" />
+              <span>~</span>
+              <input type="date" v-model="dateTo" />
+              <button class="btn-ghost" @click="applyDateFilter">적용</button>
+              <button class="btn-ghost" @click="resetDateFilter">초기화</button>
+            </div>
+            <div class="day-filter">
+              <button
+                v-for="day in DAY_OPTIONS"
+                :key="day.value"
+                :class="['day-chip', { active: selectedDays.includes(day.value) }]"
+                @click="toggleDay(day.value)"
+              >{{ day.label }}</button>
+            </div>
           </div>
-        </div>
-        <!-- 요일 필터 -->
-        <div class="day-filter">
-          <button
-            v-for="day in DAY_OPTIONS"
-            :key="day.value"
-            :class="['day-chip', { active: selectedDays.includes(day.value) }]"
-            @click="toggleDay(day.value)"
-          >{{ day.label }}</button>
         </div>
         <ul class="sidebar-list">
-          <li v-for="ev in filteredEvents" :key="ev.id" @click="$emit('selectEvent', ev)">
-            <span :class="['event-type-badge', `type-${ev.event_type}`]">
-              {{ TYPE_LABELS[ev.event_type] }}
-            </span>
-            <span
-              v-for="g in ev.dance_genres || []"
-              :key="g"
-              :class="['genre-badge', `genre-${g}`]"
-            >
-              {{ GENRE_LABELS[g] }}
-            </span>
-            <span v-if="ev.is_recurring" class="recurring-badge">🔄 {{ formatRecurring(ev.recurrence_rule) }}</span>
-            <div class="item-title">{{ ev.title }}</div>
-            <div class="item-meta">{{ ev.location_name }}</div>
-            <div class="item-meta">{{ ev.is_recurring ? formatRecurringSchedule(ev) : formatDate(ev.start_date) }}</div>
+          <li v-for="ev in filteredEvents" :key="ev.id" class="card-item" @click="$emit('selectEvent', ev)">
+            <div class="card-line1">
+              <span :class="['event-type-badge', `type-${ev.event_type}`]">{{ TYPE_LABELS[ev.event_type] }}</span>
+              <span
+                v-for="g in ev.dance_genres || []"
+                :key="g"
+                :class="['genre-badge', `genre-${g}`]"
+              >{{ GENRE_LABELS[g] }}</span>
+              <span class="item-title">{{ ev.title }}</span>
+            </div>
+            <div class="card-line2">
+              <span class="item-meta">{{ ev.location_name }}</span>
+              <span class="card-dot">·</span>
+              <span class="item-meta">{{ ev.is_recurring ? formatRecurringSchedule(ev) : formatDate(ev.start_date) }}</span>
+              <span v-if="ev.is_recurring" class="recurring-badge">🔄 {{ formatRecurring(ev.recurrence_rule) }}</span>
+            </div>
           </li>
           <li v-if="filteredEvents.length === 0" class="empty-state">
             <div class="empty-icon">📅</div>
@@ -124,30 +127,20 @@
 
       <!-- 장소 탭 -->
       <template v-if="activeTab === 'venues'">
-        <div class="sidebar-header">
-          <span>장소 {{ visibleVenues.length }}개</span>
-          <button
-            v-if="currentUser?.is_organizer"
-            class="btn-primary"
-            @click="$emit('addVenue')"
-          >
-            + 장소
-          </button>
-        </div>
         <ul class="sidebar-list">
-          <li v-for="v in visibleVenues" :key="v.id" @click="$emit('selectVenue', v)">
-            <span :class="['venue-type-badge', `vtype-${v.venue_type}`]">
-              {{ VENUE_TYPE_LABELS[v.venue_type] }}
-            </span>
-            <span
-              v-for="g in v.dance_genres || []"
-              :key="g"
-              :class="['genre-badge', `genre-${g}`]"
-            >
-              {{ GENRE_LABELS[g] }}
-            </span>
-            <div class="item-title">{{ v.name }}</div>
-            <div v-if="v.address" class="item-meta">{{ v.address }}</div>
+          <li v-for="v in visibleVenues" :key="v.id" class="card-item" @click="$emit('selectVenue', v)">
+            <div class="card-line1">
+              <span :class="['venue-type-badge', `vtype-${v.venue_type}`]">{{ VENUE_TYPE_LABELS[v.venue_type] }}</span>
+              <span
+                v-for="g in v.dance_genres || []"
+                :key="g"
+                :class="['genre-badge', `genre-${g}`]"
+              >{{ GENRE_LABELS[g] }}</span>
+              <span class="item-title">{{ v.name }}</span>
+            </div>
+            <div class="card-line2">
+              <span v-if="v.address" class="item-meta">{{ v.address }}</span>
+            </div>
           </li>
           <li v-if="visibleVenues.length === 0" class="empty-state">
             <div class="empty-icon">📍</div>
@@ -186,6 +179,7 @@ const activeTab = ref('events')
 
 // 날짜 필터
 const showDatePicker = ref(false)
+const showFilter = ref(false)
 const today = new Date().toISOString().slice(0, 10)
 const weekLater = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
 const dateFrom = ref(today)
@@ -204,7 +198,7 @@ function formatFilterDate(dateStr) {
 
 function applyDateFilter() {
   emit('dateFilterChange', { date_from: dateFrom.value, date_to: dateTo.value })
-  showDatePicker.value = false
+  showFilter.value = false
 }
 
 function resetDateFilter() {
@@ -212,7 +206,7 @@ function resetDateFilter() {
   dateTo.value = weekLater
   selectedDays.value = []
   emit('dateFilterChange', { date_from: today, date_to: weekLater })
-  showDatePicker.value = false
+  showFilter.value = false
 }
 
 // 검색 관련
