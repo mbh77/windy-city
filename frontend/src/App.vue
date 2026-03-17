@@ -200,6 +200,12 @@ onMounted(async () => {
     loadEvents(currentFilters.value),
     loadVenues()
   ])
+  // 가상 키보드 감지
+  const initialHeight = window.innerHeight
+  window.visualViewport?.addEventListener('resize', () => {
+    const isKeyboard = window.visualViewport.height < initialHeight * 0.75
+    document.body.classList.toggle('keyboard-open', isKeyboard)
+  })  
 })
 
 // ── 카테고리 토글 ──
