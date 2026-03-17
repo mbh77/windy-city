@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" class="modal" @click.self="$emit('close')">
+  <div v-if="visible" class="modal modal-detail" @click.self="$emit('close')">
     <div class="modal-content">
       <button class="modal-close" @click="$emit('close')">✕</button>
       <template v-if="venue">

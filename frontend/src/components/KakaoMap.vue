@@ -26,6 +26,7 @@ let map = null
 let eventMarkers = []
 let venueMarkers = []
 let tempMarker = null
+let activeInfowindow = null
 
 // 커스텀 마커 SVG 생성
 function createMarkerImage(color) {
@@ -89,6 +90,7 @@ onMounted(async () => {
   // 지도 클릭 → 위치 선택 모드
   window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
     document.activeElement.blur()
+    if (activeInfowindow) { activeInfowindow.close(); activeInfowindow = null }
     if (!props.isPicking) return
     const latlng = mouseEvent.latLng
 
@@ -147,9 +149,33 @@ function renderEventMarkers(evts) {
       </div>`
     const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent })
 
-    window.kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker))
-    window.kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close())
-    window.kakao.maps.event.addListener(marker, 'click', () => emit('markerClick', ev))
+    window.kakao.maps.event.addListener(marker, 'mouseover', () => {
+      if (!('ontouchstart' in window)) {
+        infowindow.open(map, marker)
+      }
+    })
+    window.kakao.maps.event.addListener(marker, 'mouseout', () => {
+      if (!('ontouchstart' in window)) {
+        infowindow.close()
+      }
+    })
+    window.kakao.maps.event.addListener(marker, 'click', () => {
+      document.activeElement.blur()
+      
+      if ('ontouchstart' in window) {
+        if (activeInfowindow === infowindow) {
+          emit('markerClick', ev)
+          infowindow.close()
+          activeInfowindow = null
+        } else {
+          if (activeInfowindow) activeInfowindow.close()
+          infowindow.open(map, marker)
+          activeInfowindow = infowindow
+        }
+      } else {
+        emit('markerClick', ev)
+      }
+    })
 
     eventMarkers.push(marker)
   })
@@ -177,9 +203,33 @@ function renderVenueMarkers(vns) {
       </div>`
     const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent })
 
-    window.kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker))
-    window.kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close())
-    window.kakao.maps.event.addListener(marker, 'click', () => emit('venueMarkerClick', v))
+    window.kakao.maps.event.addListener(marker, 'mouseover', () => {
+      if (!('ontouchstart' in window)) {
+        infowindow.open(map, marker)
+      }
+    })
+    window.kakao.maps.event.addListener(marker, 'mouseout', () => {
+      if (!('ontouchstart' in window)) {
+        infowindow.close()
+      }
+    })
+    window.kakao.maps.event.addListener(marker, 'click', () => {
+      document.activeElement.blur()
+
+      if ('ontouchstart' in window) {
+        if (activeInfowindow === infowindow) {
+          emit('venueMarkerClick', v)
+          infowindow.close()
+          activeInfowindow = null
+        } else {
+          if (activeInfowindow) activeInfowindow.close()
+          infowindow.open(map, marker)
+          activeInfowindow = infowindow
+        }
+      } else {
+        emit('venueMarkerClick', v)
+      }
+    })
 
     venueMarkers.push(marker)
   })
