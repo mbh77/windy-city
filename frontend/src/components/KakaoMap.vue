@@ -81,8 +81,14 @@ onMounted(async () => {
     window.kakao.maps.event.removeListener(map, 'tilesloaded', onTiles)
   })
 
+  // 지도 클릭/드래그 시 입력 포커스 해제
+  window.kakao.maps.event.addListener(map, 'dragstart', () => {
+    document.activeElement.blur()
+  })
+
   // 지도 클릭 → 위치 선택 모드
   window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
+    document.activeElement.blur()
     if (!props.isPicking) return
     const latlng = mouseEvent.latLng
 
