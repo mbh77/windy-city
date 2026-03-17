@@ -100,17 +100,19 @@ onMounted(async () => {
       emit('locationPicked', { lat: latlng.getLat(), lng: latlng.getLng(), address })
     })
   })
+  if (events.value.length) renderEventMarkers(events.value)
+  if (venues.value.length) renderVenueMarkers(venues.value)  
 })
 
 // 이벤트 마커 렌더링
 watch(events, (evts) => {
-  renderEventMarkers(evts)
-}, { immediate: false })
+  if (map) renderEventMarkers(evts)
+}, { immediate: true })
 
 // 장소 마커 렌더링
 watch(venues, (vns) => {
-  renderVenueMarkers(vns)
-}, { immediate: false })
+  if (map) renderVenueMarkers(vns)
+}, { immediate: true })
 
 // 카테고리 표시/숨김
 watch(() => props.visibleCategories, (cats) => {
