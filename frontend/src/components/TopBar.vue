@@ -2,7 +2,24 @@
   <header class="topbar">
     <!-- 1단: 로고 + 장소 검색 + 로그인 -->
     <div class="topbar-row topbar-main">
-      <div class="logo">바람난 도시</div>
+      <div class="logo-area">
+        <div class="nav-menu" ref="navMenuRef">
+          <button class="nav-menu-btn" @click="showNavMenu = !showNavMenu" title="메뉴">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div v-if="showNavMenu" class="nav-dropdown">
+            <button class="nav-dropdown-item" @click="showNavMenu = false">📢 공지사항</button>
+            <button class="nav-dropdown-item" @click="showNavMenu = false">💃 열린 플로어</button>
+            <button class="nav-dropdown-item" @click="showNavMenu = false">ℹ️ About</button>
+            <button class="nav-dropdown-item" @click="showNavMenu = false">💡 제보/제안</button>
+          </div>
+        </div>
+        <div class="logo">바람난 도시</div>
+      </div>
 
       <div class="place-search" ref="searchWrapRef">
         <input
@@ -63,6 +80,10 @@ const props = defineProps({
 
 const { currentUser } = useAuth()
 
+// 네비게이션 메뉴
+const showNavMenu = ref(false)
+const navMenuRef = ref(null)
+
 // 유저 메뉴
 const showUserMenu = ref(false)
 const userMenuRef = ref(null)
@@ -113,6 +134,9 @@ function handleClickOutside(e) {
   }
   if (userMenuRef.value && !userMenuRef.value.contains(e.target)) {
     showUserMenu.value = false
+  }
+  if (navMenuRef.value && !navMenuRef.value.contains(e.target)) {
+    showNavMenu.value = false
   }
 }
 
