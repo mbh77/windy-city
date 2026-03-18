@@ -134,7 +134,7 @@ a { text-decoration: none; }
 .facility-tag { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; background: #2a2a2a; color: #ccc; margin-right: 4px; }
 
 /* ── 장소 상세 ── */
-.venue-desc { margin: 8px 0; color: #bbb; font-size: 0.85rem; line-height: 1.5; }
+.venue-desc { margin: 8px 0; color: #bbb; font-size: 0.85rem; line-height: 1.5; white-space: pre-wrap; }
 .venue-link { color: #6b9dff; text-decoration: none; word-break: break-all; }
 .venue-link:hover { text-decoration: underline; }
 
