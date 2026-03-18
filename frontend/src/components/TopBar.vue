@@ -15,7 +15,7 @@
             <button class="nav-dropdown-item" @click="showNavMenu = false">📢 공지사항</button>
             <button class="nav-dropdown-item" @click="showNavMenu = false">💃 열린 플로어</button>
             <router-link to="/about" class="nav-dropdown-item" @click="showNavMenu = false">ℹ️ About</router-link>
-            <button class="nav-dropdown-item" @click="showNavMenu = false">💡 제보/제안</button>
+            <router-link to="/feedback" class="nav-dropdown-item" @click="showNavMenu = false">💡 제보/제안</router-link>
           </div>
         </div>
         <div class="logo">바람난 도시</div>

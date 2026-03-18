@@ -49,3 +49,20 @@ def send_verify_email(to_email: str, code: str) -> bool:
     except Exception as e:
         print(f"이메일 발송 실패: {e}")
         return False
+
+def send_email(to_email: str, subject: str, body: str) -> bool:
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = SMTP_USER
+        msg["To"] = to_email
+        msg["Subject"] = subject
+        msg.attach(MIMEText(body, "plain"))
+
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.sendmail(SMTP_USER, to_email, msg.as_string())
+        return True
+    except Exception as e:
+        print(f"이메일 발송 실패: {e}")
+        return False
