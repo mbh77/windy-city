@@ -31,9 +31,23 @@
       </div>
 
       <div class="auth-area">
-        <button class="btn-ghost" @click="$emit('authClick')">
-          {{ currentUser ? `${currentUser.nickname} 로그아웃` : '로그인' }}
+        <!-- 로그아웃 상태: 로그인 아이콘 -->
+        <button v-if="!currentUser" class="auth-icon-btn" @click="$emit('authClick')" title="로그인">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
         </button>
+        <!-- 로그인 상태: 이름 약자 아바타 -->
+        <div v-else class="user-menu" ref="userMenuRef">
+          <button class="user-avatar" @click="showUserMenu = !showUserMenu">
+            {{ currentUser.nickname?.charAt(0)?.toUpperCase() || 'U' }}
+          </button>
+          <div v-if="showUserMenu" class="user-dropdown">
+            <div class="user-dropdown-name">{{ currentUser.nickname }}</div>
+            <button class="user-dropdown-item" @click="handleLogout">로그아웃</button>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -48,6 +62,15 @@ const props = defineProps({
 })
 
 const { currentUser } = useAuth()
+
+// 유저 메뉴
+const showUserMenu = ref(false)
+const userMenuRef = ref(null)
+
+function handleLogout() {
+  showUserMenu.value = false
+  emit('authClick')
+}
 
 // 장소 검색 상태
 const searchQuery = ref('')
@@ -87,6 +110,9 @@ onBeforeUnmount(() => {
 function handleClickOutside(e) {
   if (searchWrapRef.value && !searchWrapRef.value.contains(e.target)) {
     showResults.value = false
+  }
+  if (userMenuRef.value && !userMenuRef.value.contains(e.target)) {
+    showUserMenu.value = false
   }
 }
 

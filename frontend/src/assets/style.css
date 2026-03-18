@@ -14,7 +14,16 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0;
 .filters { display: flex; gap: 8px; }
 .filters input[type="date"],
 .filters select { background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; }
-.auth-area { margin-left: auto; }
+.auth-area { margin-left: auto; position: relative; }
+.auth-icon-btn { background: none; border: none; color: #aaa; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+.auth-icon-btn:hover { color: #fff; }
+.user-menu { position: relative; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #ff6b6b; color: #fff; border: none; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.user-avatar:hover { background: #ff5252; }
+.user-dropdown { position: absolute; top: 40px; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; min-width: 140px; z-index: 100; overflow: hidden; }
+.user-dropdown-name { padding: 10px 14px; font-size: 0.8rem; color: #ccc; border-bottom: 1px solid #333; }
+.user-dropdown-item { width: 100%; background: none; border: none; color: #e0e0e0; padding: 10px 14px; font-size: 0.8rem; cursor: pointer; text-align: left; }
+.user-dropdown-item:hover { background: #333; }
 
 /* ── 장소 검색 ── */
 .place-search { position: relative; flex: 1; max-width: 400px; }
