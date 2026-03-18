@@ -14,7 +14,7 @@
           <div v-if="showNavMenu" class="nav-dropdown">
             <button class="nav-dropdown-item" @click="showNavMenu = false">📢 공지사항</button>
             <button class="nav-dropdown-item" @click="showNavMenu = false">💃 열린 플로어</button>
-            <button class="nav-dropdown-item" @click="showNavMenu = false">ℹ️ About</button>
+            <router-link to="/about" class="nav-dropdown-item" @click="showNavMenu = false">ℹ️ About</router-link>
             <button class="nav-dropdown-item" @click="showNavMenu = false">💡 제보/제안</button>
           </div>
         </div>
