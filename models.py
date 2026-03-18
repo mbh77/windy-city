@@ -14,6 +14,10 @@ class DanceGenre(str, enum.Enum):
     zouk = "zouk"
     tango = "tango"
     merengue = "merengue"
+    lindy_hop = "lindy_hop"
+    balboa = "balboa"
+    blues = "blues"
+    west_coast_swing = "west_coast_swing"
     other = "other"
 
 

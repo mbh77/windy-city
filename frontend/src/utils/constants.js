@@ -20,6 +20,10 @@ export const GENRE_LABELS = {
   zouk: '주크',
   tango: '탱고',
   merengue: '메렝게',
+  lindy_hop: '린디합',
+  balboa: '발보아',
+  blues: '블루스',
+  west_coast_swing: '웨스트코스트스윙',
   other: '기타',
 }
 

@@ -67,6 +67,7 @@ a { text-decoration: none; }
 .layout { display: flex; flex: 1; overflow: hidden; }
 .map-wrap { position: relative; flex: 1; overflow: hidden; }
 #map { width: 100%; height: 100%; }
+@keyframes markerPop { from { transform: scale(0.5); opacity: 0.5; } to { transform: scale(1); opacity: 1; } }
 
 /* ── 카테고리 칩 ── */
 .category-bar {
@@ -119,6 +120,10 @@ a { text-decoration: none; }
 .genre-zouk { background: #6bffd022; color: #6bffd0; }
 .genre-tango { background: #ff6ba822; color: #ff6ba8; }
 .genre-merengue { background: #ffd06b22; color: #ffd06b; }
+.genre-lindy_hop { background: #f9a82622; color: #f9a826; }
+.genre-balboa { background: #26c6da22; color: #26c6da; }
+.genre-blues { background: #5c6bc022; color: #5c6bc0; }
+.genre-west_coast_swing { background: #66bb6a22; color: #66bb6a; }
 .genre-other { background: #99999922; color: #999; }
 
 /* ── 장소 유형 배지 ── */
