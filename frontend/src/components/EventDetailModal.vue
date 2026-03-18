@@ -17,7 +17,7 @@
           {{ DIFFICULTY_LABELS[event.difficulty] }}
         </span>
         <h2 style="margin-top:8px">{{ event.title }}</h2>
-        <p v-if="event.description" style="margin:8px 0;color:#bbb;font-size:0.85rem">{{ event.description }}</p>
+        <p v-if="event.description" style="margin:8px 0;color:#bbb;font-size:0.85rem;white-space:pre-wrap">{{ event.description }}</p>
 
         <!-- 이미지 갤러리 -->
         <ImageGallery :images="event.media || []" />        
