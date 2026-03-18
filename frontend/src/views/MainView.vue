@@ -90,6 +90,13 @@
     @pickLocation="startPickLocation('venue', $event)"
     @created="handleVenueCreated"
   />
+
+  <!-- 온보딩 (첫 방문 시) -->
+  <OnboardingOverlay
+    @goEvents="handleOnboardingEvents"
+    @goVenues="handleOnboardingVenues"
+    @close="() => {}"
+  />
 </template>
 
 <script setup>
@@ -108,6 +115,7 @@ import AuthModal from '../components/AuthModal.vue'
 import CreateEventModal from '../components/CreateEventModal.vue'
 import CreateVenueModal from '../components/CreateVenueModal.vue'
 import CategoryBar from '../components/CategoryBar.vue'
+import OnboardingOverlay from '../components/OnboardingOverlay.vue'
 
 const { currentUser, restoreSession, logout } = useAuth()
 const { events, loadEvents } = useEvents()
@@ -372,5 +380,14 @@ function cancelPick() {
 function handleDateFilter({ date_from, date_to }) {
   currentFilters.value = { date_from, date_to }
   loadEvents(currentFilters.value)
+}
+
+// ── 온보딩 ──
+function handleOnboardingEvents() {
+  localStorage.setItem('onboarding_done', '1')
+}
+
+function handleOnboardingVenues() {
+  localStorage.setItem('onboarding_done', '1')
 }
 </script>
