@@ -49,6 +49,8 @@
 - ✅ SEO 메타 태그 — title, description, Open Graph
 - ✅ 회원가입 시 is_organizer 기본 false + 프론트 체크박스 숨김
 - ✅ 이벤트 상세 "주최" → "작성자" 변경
+- ✅ 설명 줄바꿈 적용 (white-space: pre-wrap)
+- ✅ 댄스 장르 추가 (lindy_hop, balboa, blues, west_coast_swing) — DB + models + constants
 
 ---
 
@@ -62,9 +64,11 @@
   - DB: events 테이블에 `instagram_url`, `kakao_url`, `ticket_url` 컬럼 추가
 - ⬜ **B-018** 색상/무드 리디자인 — 배경 #0f0f1a, 강조 #ff4d6d/#a855f7 전체 교체
 - ⬜ **B-019** 지도 다크 필터 — CSS filter로 다크 처리
-- ⬜ **B-021** 스윙·왈츠 장르 추가 — DanceGenre Enum에 swing, waltz 추가, DB ALTER
+- ✅ **B-021** 추가 장르 확장 — lindy_hop/balboa/blues/west_coast_swing 추가 완료
 - ⬜ **B-022** 현재 지역명 표시 — 카카오 역지오코딩으로 사이드바 헤더에 행정구역명
 - ⬜ **B-036** 동일 좌표 마커 목록 팝업 — 최대 줌인 클러스터 시 항목 목록 표시
+- ⏸ **B-037** 마커 이모지 아이콘 + 선택 마커 — CustomOverlay 이벤트 전파 문제 해결 필요
+- ⏸ **B-038** 말풍선 클릭 → 상세 보기 연결 — 카카오맵 오버레이 이벤트 처리 조사 필요
 
 ---
 

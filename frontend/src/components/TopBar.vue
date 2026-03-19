@@ -16,6 +16,7 @@
             <button class="nav-dropdown-item" @click="showNavMenu = false">💃 열린 플로어</button>
             <router-link to="/about" class="nav-dropdown-item" @click="showNavMenu = false">ℹ️ About</router-link>
             <router-link to="/feedback" class="nav-dropdown-item" @click="showNavMenu = false">💡 제보/제안</router-link>
+            <router-link v-if="currentUser?.is_admin" to="/admin" class="nav-dropdown-item" @click="showNavMenu = false">⚙️ 관리자</router-link>
           </div>
         </div>
         <div class="logo">바람난 도시</div>

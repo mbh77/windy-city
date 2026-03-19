@@ -62,3 +62,10 @@ def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+def get_current_admin(user: models.User = Depends(get_current_user)) -> models.User:
+    """관리자 권한 검증"""
+    if not user.is_admin:
+        raise HTTPException(status_code=403, detail="관리자 권한이 필요합니다")
+    return user
