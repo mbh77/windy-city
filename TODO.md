@@ -75,10 +75,12 @@
 ## P-ADMIN — 관리자 페이지
 
 ### Phase 1: 기반 구축
-- ⬜ **A-001** 관리자 권한 시스템
-  - DB: users 테이블에 `is_admin` BOOL 컬럼 추가
-  - 백엔드: 관리자 검증 의존성 함수 (`get_current_admin`)
-  - 최초 관리자 계정은 DB에서 직접 설정
+- ✅ **A-001** 관리자 권한 시스템
+  - DB: users 테이블에 `is_admin` 컬럼 추가 (dev/prod 완료)
+  - 백엔드: `get_current_admin` 검증 함수, `/me` 응답에 is_admin 포함
+  - 프론트: 햄버거 메뉴에 관리자 항목 표시, `/admin` 라우트
+  - 관리자는 모든 이벤트/장소 수정/삭제 가능
+  - 금지 닉네임 검증 (admin, 관리자 등)
 
 ### Phase 2: 대시보드 (통계)
 - ⬜ **A-002** 방문자 추적 시스템
@@ -86,26 +88,27 @@
   - 백엔드: 미들웨어로 페이지 요청 기록
 - ⬜ **A-003** 대시보드 통계 API + UI
   - API: `GET /api/admin/stats` (오늘/주간/월간 방문자, 총 회원/이벤트/장소 수)
-  - 프론트: AdminPage.vue 대시보드 탭 (숫자 카드 + 간단 차트)
+  - 프론트: AdminView.vue 대시보드 탭 (숫자 카드 + 간단 차트)
   - 최근 가입자, 최근 등록 이벤트/장소 목록
 
 ### Phase 3: 회원 관리
-- ⬜ **A-004** 회원 목록 API + UI
+- ✅ **A-004** 회원 목록 API + UI
   - API: `GET /api/admin/users` (검색, 페이징)
-  - 프론트: 회원 목록 탭 (이메일, 닉네임, 가입일, 주최자 여부)
-- ⬜ **A-005** 회원 권한 관리
-  - API: `PUT /api/admin/users/{id}` (is_organizer 토글, 계정 비활성화)
-  - 프론트: 회원 목록에서 주최자 권한 부여/해제 버튼
+  - 프론트: 회원 탭 (이메일, 닉네임, 인증여부, 주최자여부, 가입일)
+- ✅ **A-005** 회원 권한 관리
+  - API: `PUT /api/admin/users/{id}` (is_organizer 토글)
+  - API: `DELETE /api/admin/users/{id}` (게시물 없는 계정 삭제)
+  - 프론트: 주최자 ON/OFF 토글 + 삭제 버튼 (관리자 계정 삭제 불가)
 
 ### Phase 4: 콘텐츠 관리
-- ⬜ **A-006** 이벤트 관리 API + UI
-  - API: `GET /api/admin/events` (전체 이벤트, 검색/필터/페이징)
-  - API: `DELETE /api/admin/events/{id}` (관리자 삭제)
-  - 프론트: 이벤트 목록 탭 (제목, 작성자, 등록일, 삭제 버튼)
-- ⬜ **A-007** 장소 관리 API + UI
-  - API: `GET /api/admin/venues` (전체 장소, 검색/필터/페이징)
-  - API: `DELETE /api/admin/venues/{id}` (관리자 삭제)
-  - 프론트: 장소 목록 탭 (이름, 유형, 등록자, 삭제 버튼)
+- ✅ **A-006** 이벤트 관리 API + UI
+  - API: `GET /api/admin/events` (전체 이벤트, 검색/페이징)
+  - API: `DELETE /api/admin/events/{id}` (관리자 삭제, 미디어 파일 포함)
+  - 프론트: 이벤트 탭 (제목, 장소, 유형, 시작일, 작성자, 삭제)
+- ✅ **A-007** 장소 관리 API + UI
+  - API: `GET /api/admin/venues` (전체 장소, 검색/페이징)
+  - API: `DELETE /api/admin/venues/{id}` (관리자 삭제, 미디어 파일 포함)
+  - 프론트: 장소 탭 (이름, 유형, 주소, 등록자, 삭제)
 
 ### Phase 5: 운영 도구
 - ⬜ **A-008** 이벤트/장소 승인 시스템 — 등록 시 관리자 승인 후 공개
