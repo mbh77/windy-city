@@ -105,7 +105,7 @@ const { currentUser } = useAuth()
 const { deleteVenue } = useVenues()
 
 const isOwner = computed(() => {
-  return currentUser.value && props.venue && currentUser.value.id === props.venue.owner_id
+  return currentUser.value && props.venue && (currentUser.value.id === props.venue.owner_id || currentUser.value.is_admin)
 })
 
 async function handleDelete() {

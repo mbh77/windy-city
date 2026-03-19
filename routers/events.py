@@ -163,7 +163,7 @@ def update_event(
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=404, detail="이벤트를 찾을 수 없습니다")
-    if event.organizer_id != current_user.id:
+    if event.organizer_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=403, detail="수정 권한이 없습니다")
 
     # 변경된 필드만 업데이트 (dance_genres 제외)
