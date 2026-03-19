@@ -13,7 +13,7 @@
           </button>
           <div v-if="showNavMenu" class="nav-dropdown">
             <button class="nav-dropdown-item" @click="showNavMenu = false">📢 공지사항</button>
-            <button class="nav-dropdown-item" @click="showNavMenu = false">💃 열린 플로어</button>
+            <button class="nav-dropdown-item" @click="showNavMenu = false">💬 열린 플로어 - 자유게시판</button>
             <router-link to="/about" class="nav-dropdown-item" @click="showNavMenu = false">ℹ️ About</router-link>
             <router-link to="/feedback" class="nav-dropdown-item" @click="showNavMenu = false">💡 제보/제안</router-link>
             <router-link v-if="currentUser?.is_admin" to="/admin" class="nav-dropdown-item" @click="showNavMenu = false">⚙️ 관리자</router-link>
