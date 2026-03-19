@@ -245,6 +245,7 @@ function openEventDetail(ev) {
   selectedEvent.value = ev
   showEventDetail.value = true
   mapRef.value?.panTo(ev.latitude, ev.longitude)
+  mapRef.value?.selectMarkerById(ev.id, 'event')
 }
 
 async function closeEventDetail() {
@@ -257,6 +258,7 @@ function openVenueDetail(v) {
   selectedVenue.value = v
   showVenueDetail.value = true
   mapRef.value?.panTo(v.latitude, v.longitude)
+  mapRef.value?.selectMarkerById(v.id, 'venue')
 }
 
 async function closeVenueDetail() {
