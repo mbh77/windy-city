@@ -13,10 +13,16 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 # 인증 코드 유효 시간 (분)
 VERIFY_CODE_EXPIRE_MINUTES = 10
 
+# 금지 닉네임 목록
+RESERVED_NICKNAMES = ['admin', 'administrator', '관리자', '운영자', '바람난도시', 'windycity', '어드민']
+
 
 @router.post("/register", status_code=201)
 def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
     """회원가입 → 인증 코드 이메일 발송"""
+    # 금지 닉네임 확인
+    if user_data.nickname.lower().strip() in RESERVED_NICKNAMES:
+        raise HTTPException(status_code=400, detail="사용할 수 없는 닉네임입니다")
     # 이메일 중복 확인
     existing = db.query(models.User).filter(models.User.email == user_data.email).first()
     if existing:

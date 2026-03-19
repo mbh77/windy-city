@@ -30,25 +30,60 @@ let activeInfowindow = null
 let eventClusterer = null
 let venueClusterer = null
 
-// 커스텀 마커 SVG 생성
-function createMarkerImage(color) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="40" viewBox="0 0 28 40">
-    <path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 26 14 26s14-15.5 14-26C28 6.3 21.7 0 14 0z" fill="${color}"/>
-    <circle cx="14" cy="14" r="6" fill="white" opacity="0.9"/>
+// 커스텀 마커 SVG 생성 (small: 기본, large: 선택됨)
+function createMarkerImage(color, size = 'small') {
+  const w = size === 'large' ? 36 : 24
+  const h = size === 'large' ? 52 : 34
+  const cx = w / 2
+  const cy = Math.floor(w / 2)
+  const r = size === 'large' ? 8 : 5
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    <path d="M${cx} 0C${cx * 0.45} 0 0 ${cy * 0.45} 0 ${cy}c0 ${Math.floor(h * 0.375)} ${cx} ${h - cy} ${cx} ${h - cy}s${cx}-${Math.floor(h * 0.554)} ${cx}-${h - cy}C${w} ${cy * 0.45} ${cx * 1.55} 0 ${cx} 0z" fill="${color}" stroke="${size === 'large' ? '#fff' : 'none'}" stroke-width="${size === 'large' ? 2 : 0}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="white" opacity="0.9"/>
   </svg>`
-  const size = new window.kakao.maps.Size(28, 40)
-  const opt = { offset: new window.kakao.maps.Point(14, 40) }
+  const imgSize = new window.kakao.maps.Size(w, h)
+  const opt = { offset: new window.kakao.maps.Point(cx, h) }
   return new window.kakao.maps.MarkerImage(
     'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg),
-    size, opt
+    imgSize, opt
   )
 }
 
 // 마커 이미지 캐시
 const markerImages = {}
-function getMarkerImage(color) {
-  if (!markerImages[color]) markerImages[color] = createMarkerImage(color)
-  return markerImages[color]
+function getMarkerImage(color, size = 'small') {
+  const key = `${color}_${size}`
+  if (!markerImages[key]) markerImages[key] = createMarkerImage(color, size)
+  return markerImages[key]
+}
+
+// 선택된 마커 추적
+let selectedMarker = null
+let selectedMarkerColor = null
+let selectedMarkerId = null
+let selectedMarkerType = null  // 'event' or 'venue'
+
+function selectMarker(marker, color, id, type) {
+  // 이전 선택 해제
+  if (selectedMarker) {
+    selectedMarker.setImage(getMarkerImage(selectedMarkerColor, 'small'))
+  }
+  // 새 마커 선택
+  selectedMarker = marker
+  selectedMarkerColor = color
+  selectedMarkerId = id
+  selectedMarkerType = type
+  marker.setImage(getMarkerImage(color, 'large'))
+}
+
+function deselectMarker() {
+  if (selectedMarker) {
+    selectedMarker.setImage(getMarkerImage(selectedMarkerColor, 'small'))
+  }
+  selectedMarker = null
+  selectedMarkerColor = null
+  selectedMarkerId = null
+  selectedMarkerType = null
 }
 
 // 유형별 색상
@@ -118,6 +153,7 @@ onMounted(async () => {
   window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
     document.activeElement.blur()
     if (activeInfowindow) { activeInfowindow.close(); activeInfowindow = null }
+    deselectMarker()
     if (!props.isPicking) return
     const latlng = mouseEvent.latLng
 
@@ -193,6 +229,7 @@ function renderEventMarkers(evts) {
     })
     window.kakao.maps.event.addListener(marker, 'click', () => {
       document.activeElement.blur()
+      selectMarker(marker, eventColor, ev.id, 'event')
 
       if ('ontouchstart' in window) {
         if (activeInfowindow === infowindow) {
@@ -208,6 +245,13 @@ function renderEventMarkers(evts) {
         emit('markerClick', ev)
       }
     })
+
+    // 선택 상태 복원
+    if (selectedMarkerType === 'event' && selectedMarkerId === ev.id) {
+      marker.setImage(getMarkerImage(eventColor, 'large'))
+      selectedMarker = marker
+      selectedMarkerColor = eventColor
+    }
 
     eventMarkers.push(marker)
   })
@@ -251,6 +295,7 @@ function renderVenueMarkers(vns) {
     })
     window.kakao.maps.event.addListener(marker, 'click', () => {
       document.activeElement.blur()
+      selectMarker(marker, color, v.id, 'venue')
 
       if ('ontouchstart' in window) {
         if (activeInfowindow === infowindow) {
@@ -266,6 +311,13 @@ function renderVenueMarkers(vns) {
         emit('venueMarkerClick', v)
       }
     })
+
+    // 선택 상태 복원
+    if (selectedMarkerType === 'venue' && selectedMarkerId === v.id) {
+      marker.setImage(getMarkerImage(color, 'large'))
+      selectedMarker = marker
+      selectedMarkerColor = color
+    }
 
     venueMarkers.push(marker)
   })
@@ -301,5 +353,17 @@ function clearTempMarker() {
   if (tempMarker) { tempMarker.setMap(null); tempMarker = null }
 }
 
-defineExpose({ panTo, clearTempMarker, renderEventMarkers, renderVenueMarkers })
+function selectMarkerById(id, type) {
+  const markers = type === 'event' ? eventMarkers : venueMarkers
+  const color = type === 'event' ? eventColor : null
+  // 이벤트 목록이나 장소 목록에서 해당 항목 찾기
+  const items = type === 'event' ? events.value : venues.value
+  const idx = items.findIndex(item => item.id === id)
+  if (idx >= 0 && markers[idx]) {
+    const c = type === 'event' ? eventColor : (venueColors[items[idx].venue_type] || '#999')
+    selectMarker(markers[idx], c, id, type)
+  }
+}
+
+defineExpose({ panTo, clearTempMarker, renderEventMarkers, renderVenueMarkers, selectMarkerById })
 </script>

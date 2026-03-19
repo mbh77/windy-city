@@ -110,7 +110,7 @@ def update_venue(
     venue = db.query(models.Venue).filter(models.Venue.id == venue_id).first()
     if not venue:
         raise HTTPException(status_code=404, detail="장소를 찾을 수 없습니다")
-    if venue.owner_id != current_user.id:
+    if venue.owner_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=403, detail="수정 권한이 없습니다")
 
     # 변경된 필드만 업데이트 (dance_genres 제외)

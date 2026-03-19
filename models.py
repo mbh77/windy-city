@@ -56,6 +56,7 @@ class User(Base):
     hashed_password = Column(String(255), nullable=True)  # 소셜 로그인은 비밀번호 없음
     nickname = Column(String(100), nullable=False)
     is_organizer = Column(Boolean, default=False)
+    is_admin = Column(Boolean, default=False)
     is_verified = Column(Boolean, default=False)
     verify_code = Column(String(6))
     verify_code_expires = Column(DateTime)

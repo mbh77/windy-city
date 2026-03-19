@@ -23,6 +23,7 @@ class UserResponse(BaseModel):
     email: str
     nickname: str
     is_organizer: bool
+    is_admin: bool = False
     created_at: datetime
 
     class Config:
