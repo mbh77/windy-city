@@ -280,3 +280,51 @@ class EventResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ── 게시판 스키마 ──────────────────────────────────────────────
+
+class PostCreate(BaseModel):
+    category: str = "free"
+    title: str
+    content: str
+
+
+class PostUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+
+
+class CommentCreate(BaseModel):
+    content: str
+
+
+class CommentResponse(BaseModel):
+    id: int
+    post_id: int
+    author_id: int
+    author_nickname: Optional[str] = None
+    content: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class PostResponse(BaseModel):
+    id: int
+    category: str
+    title: str
+    content: str
+    author_id: int
+    author_nickname: Optional[str] = None
+    comment_count: int = 0
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
+
+
+class PostDetailResponse(PostResponse):
+    comments: List[CommentResponse] = []

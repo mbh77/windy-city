@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 
 from database import engine
 import models
-from routers import auth, events, venues, search, upload, feedback, admin
+from routers import auth, events, venues, search, upload, feedback, admin, posts
 
 # DB 테이블 생성
 models.Base.metadata.create_all(bind=engine)
@@ -28,6 +28,7 @@ app.include_router(search.router)
 app.include_router(upload.router)
 app.include_router(feedback.router)
 app.include_router(admin.router)
+app.include_router(posts.router)
 
 # 업로드 이미지 서빙 (빌드와 분리)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
