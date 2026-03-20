@@ -120,52 +120,17 @@
 ## P-BOARD — 게시판 (공지사항 + 열린 플로어)
 
 ### Phase 1: DB + 백엔드 API
-- ⬜ **BD-001** DB 테이블 생성
-  - `posts` (id, category, title, content, author_id, created_at, updated_at)
-  - `comments` (id, post_id, author_id, content, created_at)
-  - category: `notice` (공지사항) / `free` (열린 플로어)
-  - dev/prod 양쪽 DB에 적용
-- ⬜ **BD-002** models.py + schemas.py 추가
-  - Post, Comment 모델 + Pydantic 스키마
-- ⬜ **BD-003** 게시글 CRUD API (`routers/posts.py`)
-  - `GET /api/posts?category=` — 목록 (페이징, 검색)
-  - `POST /api/posts` — 작성 (notice는 관리자만)
-  - `GET /api/posts/{id}` — 상세 (댓글 포함)
-  - `PUT /api/posts/{id}` — 수정 (본인 또는 관리자)
-  - `DELETE /api/posts/{id}` — 삭제 (본인 또는 관리자)
-- ⬜ **BD-004** 댓글 API
-  - `POST /api/posts/{id}/comments` — 댓글 작성 (로그인 필요)
-  - `DELETE /api/posts/{id}/comments/{comment_id}` — 삭제 (본인 또는 관리자)
+- ✅ **BD-001** DB 테이블 생성 (posts, comments — dev/prod 완료)
+- ✅ **BD-002** models.py + schemas.py 추가 (Post, Comment 모델 + 스키마)
+- ✅ **BD-003** 게시글 CRUD API (`routers/posts.py`)
+- ✅ **BD-004** 댓글 API (작성/삭제)
 
-### Phase 2: 프론트 — 게시판 목록
-- ⬜ **BD-005** 게시판 목록 UI (`views/BoardView.vue`)
-  - `/board?category=notice` → 공지사항
-  - `/board?category=free` → 열린 플로어
-  - 글 목록 (제목, 작성자, 날짜, 댓글 수)
-  - 페이징 + 검색
-  - router/index.js에 `/board` 라우트 추가
-  - TopBar 햄버거 메뉴에서 router-link 연결
-
-### Phase 3: 프론트 — 글 상세 + 댓글
-- ⬜ **BD-006** 글 상세 UI
-  - 제목, 내용 (마크다운 렌더링), 작성자, 날짜
-  - 본인/관리자에게 수정/삭제 버튼
-- ⬜ **BD-007** 댓글 UI
-  - 댓글 목록 (작성자, 내용, 날짜)
-  - 댓글 입력창 (로그인 필요)
-  - 본인/관리자 댓글 삭제
-
-### Phase 4: 프론트 — 글 작성/수정
-- ⬜ **BD-008** 글 작성 UI
-  - 제목 입력 + 내용 textarea
-  - 툴바: [📷 이미지] [▶️ 영상] [B 굵게] [I 기울임]
-  - 이미지: 기존 업로드 시스템 재활용 → 본문에 `![](url)` 삽입
-  - 영상: YouTube/Instagram URL 입력 → 본문에 URL 삽입
-  - 미리보기 토글
-  - 마크다운 지원 안내 문구 (간단한 문법 예시 포함)
-- ⬜ **BD-009** 글 수정 UI
-  - 기존 데이터 프리필
-  - 작성 UI 재사용 (editMode)
+### Phase 2~4: 프론트 — 목록 + 상세 + 작성/수정
+- ✅ **BD-005** 게시판 목록 UI (`views/BoardView.vue`, 검색, 페이징)
+- ✅ **BD-006** 글 상세 UI (`views/PostDetailView.vue`, 수정/삭제 버튼)
+- ✅ **BD-007** 댓글 UI (목록, 입력, 삭제)
+- ✅ **BD-008** 글 작성 UI (`views/PostWriteView.vue`, 미리보기 토글, 마크다운 안내)
+- ✅ **BD-009** 글 수정 UI (기존 데이터 프리필, editMode)
 
 ### Phase 5: 마크다운 + 미디어 렌더링
 - ⬜ **BD-010** 마크다운 라이브러리 설치 (`marked`)
