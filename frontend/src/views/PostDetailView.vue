@@ -1,11 +1,12 @@
 <template>
-  <div class="board-page">
-    <header class="board-header">
-      <a class="board-back" @click="goBack">← 목록으로</a>
-      <h1 class="board-logo">{{ post.category === 'notice' ? '📢 공지사항' : '💬 열린 플로어' }}</h1>
+  <div class="page-container">
+    <header class="page-header">
+      <router-link to="/" class="page-nav-btn" title="지도">지도</router-link>
+      <a class="page-nav-btn" @click="goBack">목록</a>
+      <h1 class="page-title">{{ post.category === 'notice' ? '📢 공지사항' : '💬 열린 플로어' }}</h1>
     </header>
-    
-    <main class="board-content" v-if="post.id">
+
+    <main class="page-body" v-if="post.id">
       <!-- 글 헤더 -->
       <h2 class="post-title">{{ post.title }}</h2>
       <div class="post-meta">
@@ -123,12 +124,6 @@ function formatDate(dateStr) {
 </script>
 
 <style scoped>
-.board-page { min-height: 100vh; background: #0f0f0f; color: #e0e0e0; padding: 20px; max-width: 720px; margin: 0 auto; }
-.board-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-.board-back { color: #aaa; font-size: 0.85rem; cursor: pointer; }
-.board-back:hover { color: #fff; }
-.board-logo { font-size: 1.2rem; font-weight: 700; }
-.board-content { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 20px; }
 .post-title { font-size: 1.2rem; margin-bottom: 8px; }
 .post-meta { font-size: 0.8rem; color: #888; display: flex; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #2a2a2a; }
 .post-body { font-size: 0.9rem; line-height: 1.6; min-height: 100px; margin-bottom: 16px; }

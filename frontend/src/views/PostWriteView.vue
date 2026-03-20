@@ -1,11 +1,12 @@
 <template>
-  <div class="board-page">
-    <header class="board-header">
-      <a class="board-back" @click="goBack">← 취소</a>
-      <h1 class="board-logo">{{ editMode ? '글 수정' : '글 작성' }}</h1>
+  <div class="page-container">
+    <header class="page-header">
+      <router-link to="/" class="page-nav-btn" title="지도">지도</router-link>
+      <a class="page-nav-btn" @click="goBack">목록</a>
+      <h1 class="page-title">{{ editMode ? '글 수정' : '글 작성' }}</h1>
     </header>
 
-    <main class="board-content">
+    <main class="page-body">
       <p class="write-hint">💡 마크다운 형식을 지원합니다. 미리보기로 작성된 내용을 확인할 수 있습니다.<br>
         <code>**굵게**</code> <code>*기울임*</code> <code>[링크](url)</code> <code>![이미지](url)</code>
       </p>
@@ -104,12 +105,6 @@ async function submitPost() {
 </script>
 
 <style scoped>
-.board-page { min-height: 100vh; background: #0f0f0f; color: #e0e0e0; padding: 20px; max-width: 720px; margin: 0 auto; }
-.board-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-.board-back { color: #aaa; font-size: 0.85rem; cursor: pointer; }
-.board-back:hover { color: #fff; }
-.board-logo { font-size: 1.2rem; font-weight: 700; }
-.board-content { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 20px; }
 .write-hint { font-size: 0.75rem; color: #888; margin-bottom: 12px; line-height: 1.5; }
 .write-hint code { background: #2a2a2a; padding: 1px 4px; border-radius: 3px; font-size: 0.7rem; }
 .write-title { width: 100%; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 10px; font-size: 1rem; margin-bottom: 8px; }

@@ -1,11 +1,11 @@
 <template>
-  <div class="board-page">
-    <header class="board-header">
-      <router-link to="/" class="board-back">← 지도로 돌아가기</router-link>
-      <h1 class="board-logo">{{ categoryLabel }}</h1>
+  <div class="page-container">
+    <header class="page-header">
+      <router-link to="/" class="page-nav-btn" title="지도">지도</router-link>
+      <h1 class="page-title">{{ categoryLabel }}</h1>
     </header>
 
-    <main class="board-content">
+    <main class="page-body">
       <!-- 검색 + 글쓰기 -->
       <div class="board-toolbar">
         <input v-model="searchQuery" placeholder="제목 또는 내용 검색..." @input="debouncedSearch" />
@@ -54,7 +54,7 @@ const searchQuery = ref('')
 let debounceTimer = null
 
 const category = computed(() => route.query.category || 'free')
-const categoryLabel = computed(() => category.value === 'notice' ? '📢 공지사항' : '💬 열린 플로어 - 자유게시판')
+const categoryLabel = computed(() => category.value === 'notice' ? '📢 공지사항' : '💬 열린 플로어')
 const totalPages = computed(() => Math.ceil(total.value / limit))
 
 // 공지사항은 관리자만, 자유게시판은 로그인 사용자
@@ -116,12 +116,6 @@ function formatDate(dateStr) {
 </script>
 
 <style scoped>
-.board-page { min-height: 100vh; background: #0f0f0f; color: #e0e0e0; padding: 20px; max-width: 720px; margin: 0 auto; }
-.board-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-.board-back { color: #aaa; font-size: 0.85rem; }
-.board-back:hover { color: #fff; }
-.board-logo { font-size: 1.2rem; font-weight: 700; }
-.board-content { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
 .board-toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
 .board-toolbar input { flex: 1; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; }
 .board-toolbar .btn-primary { padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; }

@@ -1,11 +1,11 @@
 <template>
-  <div class="feedback-page">
-    <header class="feedback-header">
-      <router-link to="/" class="feedback-back">← 지도로 돌아가기</router-link>
-      <h1 class="feedback-logo">제보 / 제안</h1>
+  <div class="page-container">
+    <header class="page-header">
+      <router-link to="/" class="page-nav-btn" title="지도">지도</router-link>
+      <h1 class="page-title">제보 / 제안</h1>
     </header>
 
-    <main class="feedback-content">
+    <main class="page-body">
       <p class="feedback-desc">바람난 도시에 대한 제보, 제안, 버그 신고 등 자유롭게 보내주세요.</p>
 
       <form @submit.prevent="submitFeedback">
@@ -70,12 +70,6 @@ async function submitFeedback() {
 </script>
 
 <style scoped>
-.feedback-page { min-height: 100vh; background: #0f0f0f; color: #e0e0e0; padding: 20px; max-width: 720px; margin: 0 auto; }
-.feedback-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
-.feedback-back { color: #aaa; text-decoration: none; font-size: 0.85rem; }
-.feedback-back:hover { color: #fff; }
-.feedback-logo { font-size: 1.3rem; font-weight: 700; color: #ff6b6b; }
-.feedback-content { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 24px; }
 .feedback-desc { font-size: 0.85rem; color: #aaa; margin-bottom: 20px; line-height: 1.5; }
 .feedback-label { font-size: 0.8rem; color: #999; margin-bottom: 4px; display: block; }
 input, textarea { width: 100%; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; margin-bottom: 12px; }
