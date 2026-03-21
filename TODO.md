@@ -151,7 +151,7 @@
   - DB: posts 테이블에 `view_count` INT DEFAULT 0 컬럼 추가
   - 백엔드: 상세 조회 시 view_count +1 (중복 방지는 추후)
   - 프론트: 목록·상세에 조회수 표시
-- ⬜ **BD-014** 댓글 수정
+- ✅ **BD-014** 댓글 수정
   - 백엔드: `PUT /api/posts/{post_id}/comments/{comment_id}` 추가
   - 프론트: 댓글 수정 버튼 + 인라인 편집 UI
 - ⬜ **BD-015** 공지 상단 고정

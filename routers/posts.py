@@ -199,6 +199,32 @@ def create_comment(
         "created_at": comment.created_at,
     }
 
+@router.put("/{post_id}/comments/{comment_id}")
+def update_comment(
+    post_id: int,
+    comment_id: int,
+    req: schemas.CommentCreate,
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    comment = db.query(models.Comment).filter(
+        models.Comment.id == comment_id,
+        models.Comment.post_id == post_id,
+    ).first()
+    if not comment:
+        raise HTTPException(404, "댓글을 찾을 수 없습니다")
+    if comment.author_id != user.id and not user.is_admin:
+        raise HTTPException(403, "수정 권한이 없습니다")
+    comment.content = req.content
+    db.commit()
+    return {
+        "id": comment.id,
+        "post_id": comment.post_id,
+        "author_id": comment.author_id,
+        "author_nickname": comment.author.nickname if comment.author else None,
+        "content": comment.content,
+        "created_at": comment.created_at,
+    }
 
 @router.delete("/{post_id}/comments/{comment_id}", status_code=204)
 def delete_comment(

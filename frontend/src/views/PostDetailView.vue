@@ -26,7 +26,7 @@
 
       <!-- 댓글 영역 -->
       <div class="comment-section">
-         <h3>댓글 {{ post.comments?.length || 0 }}개</h3>
+        <h3>댓글 {{ post.comments?.length || 0 }}개</h3>
 
         <!-- 댓글 목록 -->
         <ul class="comment-list">
@@ -34,9 +34,21 @@
             <div class="comment-header">
               <span class="comment-author">{{ c.author_nickname }}</span>
               <span class="comment-date">{{ formatDate(c.created_at) }}</span>
-              <button v-if="canDeleteComment(c)" class="comment-delete" @click="deleteComment(c.id)">삭제</button>
+              <template v-if="canDeleteComment(c)">
+                <button v-if="editingCommentId !== c.id" class="comment-edit" @click="startEditComment(c)">수정</button>
+                <button class="comment-delete" @click="deleteComment(c.id)">삭제</button>
+              </template>
             </div>
-            <div class="comment-body">{{ c.content }}</div>
+            <!-- 수정 모드 -->
+            <div v-if="editingCommentId === c.id" class="comment-edit-form">
+              <textarea v-model="editCommentText" rows="2"></textarea>
+              <div class="comment-edit-actions">
+                <button class="btn-ghost" @click="cancelEditComment">취소</button>
+                <button class="btn-primary" @click="submitEditComment(c.id)" :disabled="!editCommentText.trim()">저장</button>
+              </div>
+            </div>
+            <!-- 일반 모드 -->
+            <div v-else class="comment-body">{{ c.content }}</div>
           </li>
         </ul>
         
@@ -69,10 +81,23 @@ const { currentUser } = useAuth()
 const post = ref({})
 const commentText = ref('')
 
+const editingCommentId = ref(null)
+const editCommentText = ref('')
+
 const canEdit = computed(() => {
   if (!currentUser.value || !post.value.id) return false
   return post.value.author_id === currentUser.value.id || currentUser.value.is_admin
 })
+
+function startEditComment(c) {
+  editingCommentId.value = c.id
+  editCommentText.value = c.content
+}
+
+function cancelEditComment() {
+  editingCommentId.value = null
+  editCommentText.value = ''
+}
 
 // marked 옵션 설정
 marked.setOptions({
@@ -160,6 +185,19 @@ async function submitComment() {
   }
 }
 
+async function submitEditComment(commentId) {
+  if (!editCommentText.value.trim()) return
+  const res = await apiJson(`/api/posts/${post.value.id}/comments/${commentId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ content: editCommentText.value }),
+  })
+  if (res.ok) {
+    editingCommentId.value = null
+    editCommentText.value = ''
+    loadPost()
+  }
+}
+
 async function deleteComment(commentId) {
   if (!confirm('댓글을 삭제하시겠습니까?')) return
   await apiJson(`/api/posts/${post.value.id}/comments/${commentId}`, { method: 'DELETE' })
@@ -195,6 +233,11 @@ function formatDate(dateStr) {
 .comment-form textarea { flex: 1; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; }
 .comment-form .btn-primary { padding: 8px 16px; font-size: 0.8rem; white-space: nowrap; align-self: flex-end; }
 .comment-login-msg { font-size: 0.8rem; color: #888; }
+.comment-edit { background: none; border: none; color: #888; font-size: 0.7rem; cursor: pointer; }
+.comment-edit:hover { color: #6bc1ff; }
+.comment-edit-form textarea { width: 100%; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; margin-top: 4px; }
+.comment-edit-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px; }
+.comment-edit-actions button { padding: 4px 12px; font-size: 0.75rem; }
 
 /* 마크다운 렌더링 스타일 */
 .markdown-body :deep(h1) { font-size: 1.3rem; margin: 16px 0 8px; }
