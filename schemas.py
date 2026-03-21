@@ -288,11 +288,13 @@ class PostCreate(BaseModel):
     category: str = "free"
     title: str
     content: str
+    is_pinned: bool = False
 
 
 class PostUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
+    is_pinned: Optional[bool] = None
 
 
 class CommentCreate(BaseModel):
@@ -319,6 +321,8 @@ class PostResponse(BaseModel):
     author_id: int
     author_nickname: Optional[str] = None
     comment_count: int = 0
+    view_count: int = 0
+    is_pinned: bool = False
     created_at: datetime
     updated_at: Optional[datetime]
 

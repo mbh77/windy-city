@@ -20,6 +20,31 @@ def list_posts(
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
+    # 고정 공지 (자유게시판, 1페이지, 검색 없을 때만)
+    pinned_posts = []
+    if category == "free" and page == 1 and not q:
+        pinned = db.query(models.Post).filter(
+            models.Post.category == "notice",
+            models.Post.is_pinned == True,
+        ).order_by(models.Post.created_at.desc()).all()
+        pinned_posts = [
+            {
+                "id": p.id,
+                "category": p.category,
+                "title": p.title,
+                "content": p.content,
+                "author_id": p.author_id,
+                "author_nickname": p.author.nickname if p.author else None,
+                "comment_count": len(p.comments),
+                "created_at": p.created_at,
+                "updated_at": p.updated_at,
+                "view_count": p.view_count,
+                "is_pinned": p.is_pinned,
+            }
+            for p in pinned
+        ]
+
+    # 일반 글 조회
     query = db.query(models.Post).filter(models.Post.category == category)
     if q:
         keyword = f"%{q}%"
@@ -32,6 +57,7 @@ def list_posts(
     return {
         "total": total,
         "page": page,
+        "pinned": pinned_posts,
         "posts": [
             {
                 "id": p.id,
@@ -43,6 +69,8 @@ def list_posts(
                 "comment_count": len(p.comments),
                 "created_at": p.created_at,
                 "updated_at": p.updated_at,
+                "view_count": p.view_count,
+                "is_pinned": p.is_pinned,
             }
             for p in posts
         ],
@@ -64,6 +92,7 @@ def create_post(
         title=req.title,
         content=req.content,
         author_id=user.id,
+        is_pinned=req.is_pinned if user.is_admin else False,
         created_at=datetime.now(),
         updated_at=datetime.now(),
     )
@@ -80,6 +109,8 @@ def create_post(
         "comment_count": 0,
         "created_at": post.created_at,
         "updated_at": post.updated_at,
+        "view_count": 0,
+        "is_pinned": post.is_pinned,
     }
 
 
@@ -88,6 +119,10 @@ def get_post(post_id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not post:
         raise HTTPException(404, "게시글을 찾을 수 없습니다")
+        
+    post.view_count = (post.view_count or 0) + 1
+    db.commit()
+
     return {
         "id": post.id,
         "category": post.category,
@@ -98,6 +133,8 @@ def get_post(post_id: int, db: Session = Depends(get_db)):
         "comment_count": len(post.comments),
         "created_at": post.created_at,
         "updated_at": post.updated_at,
+        "view_count": post.view_count,
+        "is_pinned": post.is_pinned,
         "comments": [
             {
                 "id": c.id,
@@ -128,6 +165,8 @@ def update_post(
         post.title = req.title
     if req.content is not None:
         post.content = req.content
+    if req.is_pinned is not None and user.is_admin:
+        post.is_pinned = req.is_pinned
     post.updated_at = datetime.now()
     db.commit()
     db.refresh(post)
@@ -141,6 +180,8 @@ def update_post(
         "comment_count": len(post.comments),
         "created_at": post.created_at,
         "updated_at": post.updated_at,
+        "view_count": post.view_count,
+        "is_pinned": post.is_pinned,
     }
 
 
@@ -192,6 +233,32 @@ def create_comment(
         "created_at": comment.created_at,
     }
 
+@router.put("/{post_id}/comments/{comment_id}")
+def update_comment(
+    post_id: int,
+    comment_id: int,
+    req: schemas.CommentCreate,
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    comment = db.query(models.Comment).filter(
+        models.Comment.id == comment_id,
+        models.Comment.post_id == post_id,
+    ).first()
+    if not comment:
+        raise HTTPException(404, "댓글을 찾을 수 없습니다")
+    if comment.author_id != user.id and not user.is_admin:
+        raise HTTPException(403, "수정 권한이 없습니다")
+    comment.content = req.content
+    db.commit()
+    return {
+        "id": comment.id,
+        "post_id": comment.post_id,
+        "author_id": comment.author_id,
+        "author_nickname": comment.author.nickname if comment.author else None,
+        "content": comment.content,
+        "created_at": comment.created_at,
+    }
 
 @router.delete("/{post_id}/comments/{comment_id}", status_code=204)
 def delete_comment(
