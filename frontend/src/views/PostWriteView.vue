@@ -18,8 +18,31 @@
         <button :class="{ active: previewing }" @click="previewing = true">미리보기</button>
       </div>
 
-      <textarea v-if="!previewing" v-model="form.content" placeholder="내용을 입력하세요..." rows="12" class="write-content"></textarea>
+      <!-- 글 작성 툴바 -->
+      <div class="write-toolbar" v-if="!previewing">
+        <button @click="insertBold" title="굵게">B</button>
+        <button @click="insertItalic" title="기울임"><em>I</em></button>
+        <button @click="insertLink" title="링크">🔗</button>
+        <button @click="triggerImageUpload" title="이미지 업로드">📷</button>
+        <button @click="showVideoDialog = true" title="영상 URL">▶️</button>
+        <input type="file" ref="imageInput" accept="image/*" style="display:none" @change="uploadImage" />
+      </div>
+
+      <textarea v-if="!previewing" ref="contentArea" v-model="form.content" placeholder="내용을 입력하세요..." rows="12" class="write-content"></textarea>
       <div v-else class="write-preview markdown-body" v-html="renderMarkdown(form.content)"></div>
+
+      <!-- 영상 URL 입력 다이얼로그 -->
+      <div class="dialog-overlay" v-if="showVideoDialog" @click.self="showVideoDialog = false">
+        <div class="dialog-box">
+          <h4>영상 URL 입력</h4>
+          <p class="dialog-hint">YouTube 또는 Instagram 영상 URL을 입력하세요</p>
+          <input v-model="videoUrl" placeholder="https://www.youtube.com/watch?v=..." class="dialog-input" @keyup.enter="insertVideo" />
+          <div class="dialog-actions">
+            <button class="btn-ghost" @click="showVideoDialog = false">취소</button>
+            <button class="btn-primary" @click="insertVideo" :disabled="!videoUrl.trim()">삽입</button>
+          </div>
+        </div>
+      </div>      
 
       <p v-if="error" class="write-error">{{ error }}</p>
 
@@ -31,7 +54,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiJson } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
@@ -46,6 +69,11 @@ const form = ref({ title: '', content: '' })
 const previewing = ref(false)
 const error = ref('')
 const sending = ref(false)
+
+const contentArea = ref(null)
+const imageInput = ref(null)
+const showVideoDialog = ref(false)
+const videoUrl = ref('')
 
 const category = computed(() => route.query.category || 'free')
 const editId = computed(() => route.query.edit || null)
@@ -148,6 +176,61 @@ async function submitPost() {
     sending.value = false
   }
 }
+
+// 커서 위치에 텍스트 삽입
+function insertAtCursor(before, after = '') {
+  const ta = contentArea.value
+  if (!ta) return
+  const start = ta.selectionStart
+  const end = ta.selectionEnd
+  const selected = form.value.content.substring(start, end)
+  const text = before + (selected || '') + after
+  form.value.content = form.value.content.substring(0, start) + text + form.value.content.substring(end)
+  // 커서 위치 복원
+  const cursorPos = start + before.length + (selected || '').length
+  nextTick(() => {
+    ta.focus()
+    ta.setSelectionRange(cursorPos, cursorPos)
+  })
+}
+
+function insertBold() { insertAtCursor('**', '**') }
+function insertItalic() { insertAtCursor('*', '*') }
+function insertLink() { insertAtCursor('[링크 텍스트](', ')') }
+
+function triggerImageUpload() { imageInput.value?.click() }
+
+async function uploadImage(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  const formData = new FormData()
+  formData.append('file', file)
+  try {
+    const token = localStorage.getItem('token')
+    const res = await fetch('/api/upload/image', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData,
+    })
+    if (res.ok) {
+      const data = await res.json()
+      insertAtCursor(`![이미지](${data.url})`)
+    } else {
+      alert('이미지 업로드에 실패했습니다')
+    }
+  } catch {
+    alert('이미지 업로드에 실패했습니다')
+  }
+  imageInput.value.value = ''
+}
+
+function insertVideo() {
+  if (!videoUrl.value.trim()) return
+  insertAtCursor('\n' + videoUrl.value.trim() + '\n')
+  videoUrl.value = ''
+  showVideoDialog.value = false
+}
+
 </script>
 
 <style scoped>
@@ -179,4 +262,17 @@ async function submitPost() {
 /* 미디어 임베드 */
 .markdown-body :deep(.embed-video) { position: relative; width: 100%; padding-bottom: 56.25%; margin: 12px 0; }
 .markdown-body :deep(.embed-video iframe) { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; }
+
+/* 글 작성 툴바 */
+.write-toolbar { display: flex; gap: 4px; margin-bottom: 4px; }
+.write-toolbar button { padding: 4px 10px; background: #2a2a2a; border: 1px solid #444; color: #ccc; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+.write-toolbar button:hover { background: #3a3a4a; color: #fff; }
+
+/* 영상 URL 다이얼로그 */
+.dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.dialog-box { background: #1e1e2e; border: 1px solid #444; border-radius: 10px; padding: 20px; width: 90%; max-width: 400px; }
+.dialog-box h4 { margin: 0 0 8px; font-size: 1rem; }
+.dialog-hint { font-size: 0.75rem; color: #888; margin-bottom: 12px; }
+.dialog-input { width: 100%; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 8px; font-size: 0.85rem; margin-bottom: 12px; }
+.dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
 </style>
