@@ -19,10 +19,10 @@
             <router-link v-if="currentUser?.is_admin" to="/admin" class="nav-dropdown-item" @click="showNavMenu = false">⚙️ 관리자</router-link>
           </div>
         </div>
-        <div class="logo">바람난 도시</div>
+        <router-link to="/" class="logo"><img src="@/assets/windycity_logo.png" alt="바람난 도시" class="logo-img" /></router-link>
       </div>
 
-      <div class="place-search" ref="searchWrapRef">
+      <div v-if="showSearch" class="place-search" ref="searchWrapRef">
         <input
           type="text"
           v-model="searchQuery"
@@ -77,6 +77,7 @@ import { useAuth } from '../composables/useAuth.js'
 
 const emit = defineEmits(['authClick', 'placeSelect'])
 const props = defineProps({
+  showSearch: { type: Boolean, default: true },
 })
 
 const { currentUser } = useAuth()
