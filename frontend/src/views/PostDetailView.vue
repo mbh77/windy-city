@@ -15,7 +15,7 @@
       </div>
 
       <!-- 글 내용 -->
-      <div class="post-body" style="white-space: pre-wrap;">{{ post.content }}</div>
+      <div class="post-body markdown-body" v-html="renderMarkdown(post.content)" ></div>
 
       <!-- 수정/삭제 (본인 또는 관리자) -->
       <div class="post-actions" v-if="canEdit">
@@ -58,6 +58,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiJson } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 const route = useRoute()
 const router = useRouter()
@@ -70,6 +72,54 @@ const canEdit = computed(() => {
   if (!currentUser.value || !post.value.id) return false
   return post.value.author_id === currentUser.value.id || currentUser.value.is_admin
 })
+
+// marked 옵션 설정
+marked.setOptions({
+  breaks: true,  // 줄바꿈을 <br>로 변환 (기존 pre-wrap 동작 유지)
+})
+
+// YouTube URL → iframe 변환
+function embedYouTube(html) {
+  // 일반 URL: youtube.com/watch?v=ID
+  // 짧은 URL: youtu.be/ID  
+  // Shorts: youtube.com/shorts/ID
+  const ytRegex = /<a[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^"]*"[^>]*>[^<]*<\/a>/g
+  html = html.replace(ytRegex, (match, id) => {
+    return `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`
+  })
+
+  // <a> 태그 없이 텍스트로 된 URL도 처리
+  const ytTextRegex = /(?:<p>)?(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^\s<]*)(?:<\/p>)?/g
+  html = html.replace(ytTextRegex, (match, url, id) => {
+    // 이미 iframe으로 변환된 건 스킵
+    if (match.includes('<iframe')) return match
+    return `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`
+  })
+
+  return html
+}
+
+// Instagram URL → iframe 변환
+function embedInstagram(html) {
+  // instagram.com/p/CODE/ 또는 /reel/CODE/
+  const igRegex = /(?:<a[^>]*href=")?https?:\/\/(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)\/?[^"<\s]*"?[^<]*(?:<\/a>)?/g
+  html = html.replace(igRegex, (match, type, code) => {
+    return `<div class="embed-video"><iframe src="https://www.instagram.com/${type}/${code}/embed" frameborder="0" scrolling="no"></iframe></div>`
+  })
+  return html
+}
+
+// 마크다운 → 안전한 HTML 변환 함수
+function renderMarkdown(content) {
+  if (!content) return ''
+  let html = marked(content)
+  html = embedYouTube(html)
+  html = embedInstagram(html)  
+  return DOMPurify.sanitize(html, {
+    ADD_TAGS: ['iframe'],
+    ADD_ATTR: ['allowfullscreen', 'frameborder', 'src', 'scrolling'],
+  })  
+}
 
 function canDeleteComment(c) {
   if (!currentUser.value) return false
@@ -144,4 +194,22 @@ function formatDate(dateStr) {
 .comment-form textarea { flex: 1; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; }
 .comment-form .btn-primary { padding: 8px 16px; font-size: 0.8rem; white-space: nowrap; align-self: flex-end; }
 .comment-login-msg { font-size: 0.8rem; color: #888; }
+
+/* 마크다운 렌더링 스타일 */
+.markdown-body :deep(h1) { font-size: 1.3rem; margin: 16px 0 8px; }
+.markdown-body :deep(h2) { font-size: 1.15rem; margin: 14px 0 6px; }
+.markdown-body :deep(h3) { font-size: 1.05rem; margin: 12px 0 4px; }
+.markdown-body :deep(p) { margin: 0 0 8px; }
+.markdown-body :deep(a) { color: #6bc1ff; text-decoration: underline; }
+.markdown-body :deep(code) { background: #1a1a2e; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+.markdown-body :deep(pre) { background: #1a1a2e; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
+.markdown-body :deep(pre code) { background: none; padding: 0; }
+.markdown-body :deep(blockquote) { border-left: 3px solid #555; padding-left: 12px; color: #999; margin: 8px 0; }
+.markdown-body :deep(ul), .markdown-body :deep(ol) { padding-left: 20px; margin: 8px 0; }
+.markdown-body :deep(img) { max-width: 100%; border-radius: 6px; }
+.markdown-body :deep(hr) { border: none; border-top: 1px solid #2a2a2a; margin: 16px 0; }
+
+/* 미디어 임베드 */
+.markdown-body :deep(.embed-video) { position: relative; width: 100%; padding-bottom: 56.25%; margin: 12px 0; }
+.markdown-body :deep(.embed-video iframe) { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; }
 </style>
