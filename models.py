@@ -221,6 +221,7 @@ class Post(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     view_count = Column(Integer, default=0, nullable=False)
+    is_pinned = Column(Boolean, default=False, nullable=False)
 
     author = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")

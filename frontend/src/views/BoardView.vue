@@ -14,6 +14,17 @@
       
       <!-- 글 목록 -->
       <ul class="board-list">
+        <!-- 고정 공지 -->
+        <li v-for="post in pinnedPosts" :key="'pin-'+post.id" class="board-item board-item-pinned" @click="goDetail(post.id)">
+          <div class="board-item-title">📌 {{ post.title }}</div>
+          <div class="board-item-meta">
+            <span>공지</span>
+            <span>{{ formatDate(post.created_at) }}</span>
+            <span>👁 {{ post.view_count }}</span>
+            <span v-if="post.comment_count > 0">💬 {{ post.comment_count }}</span>
+          </div>
+        </li>
+        <!-- 일반 글 -->
         <li v-for="post in posts" :key="post.id" class="board-item" @click="goDetail(post.id)">
           <div class="board-item-title">{{ post.title }}</div>
           <div class="board-item-meta">
@@ -23,7 +34,7 @@
             <span v-if="post.comment_count > 0">💬 {{ post.comment_count }}</span>
           </div>
         </li>
-        <li v-if="posts.length === 0" class="board-empty">게시글이 없습니다</li>
+        <li v-if="posts.length === 0 && pinnedPosts.length === 0" class="board-empty">게시글이 없습니다</li>
       </ul>
       
       <!-- 페이징 -->
@@ -48,6 +59,7 @@ const router = useRouter()
 const { currentUser } = useAuth()
 
 const posts = ref([])
+const pinnedPosts = ref([])
 const total = ref(0)
 const page = ref(1)
 const limit = 20
@@ -84,6 +96,7 @@ async function loadPosts() {
   const res = await apiJson(`/api/posts/?${params}`)
   const data = await res.json()
   posts.value = data.posts
+  pinnedPosts.value = data.pinned || []
   total.value = data.total
 }
 
@@ -123,6 +136,7 @@ function formatDate(dateStr) {
 .board-list { list-style: none; padding: 0; margin: 0; }
 .board-item { padding: 12px 0; border-bottom: 1px solid #2a2a2a; cursor: pointer; }
 .board-item:hover { background: #222; }
+.board-item-pinned { background: #1a1a2e; border-left: 3px solid #ff4d6d; }
 .board-item-title { font-size: 0.9rem; margin-bottom: 4px; }
 .board-item-meta { font-size: 0.75rem; color: #888; display: flex; gap: 12px; }
 .board-empty { padding: 40px 0; text-align: center; color: #888; font-size: 0.85rem; }

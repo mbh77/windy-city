@@ -154,7 +154,7 @@
 - ✅ **BD-014** 댓글 수정
   - 백엔드: `PUT /api/posts/{post_id}/comments/{comment_id}` 추가
   - 프론트: 댓글 수정 버튼 + 인라인 편집 UI
-- ⬜ **BD-015** 공지 상단 고정
+- ✅ **BD-015** 공지 상단 고정
   - DB: posts 테이블에 `is_pinned` TINYINT(1) DEFAULT 0 컬럼 추가
   - 백엔드: 공지 작성/수정 시 is_pinned 저장 (관리자만), 목록 API에서 고정 공지 별도 반환
   - 프론트: 공지 작성 시 "상단 고정" 체크박스, 자유게시판에서도 고정 공지 상단 표시

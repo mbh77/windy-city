@@ -13,6 +13,11 @@
 
       <input v-model="form.title" placeholder="제목을 입력하세요" class="write-title" />
 
+      <label v-if="category === 'notice'" class="write-pin-check">
+        <input type="checkbox" v-model="form.is_pinned" />
+        📌 상단 고정
+      </label>
+
       <div class="write-tabs">
         <button :class="{ active: !previewing }" @click="previewing = false">작성</button>
         <button :class="{ active: previewing }" @click="previewing = true">미리보기</button>
@@ -65,7 +70,7 @@ const route = useRoute()
 const router = useRouter()
 const { currentUser } = useAuth()
 
-const form = ref({ title: '', content: '' })
+const form = ref({ title: '', content: '', is_pinned: false })
 const previewing = ref(false)
 const error = ref('')
 const sending = ref(false)
@@ -137,6 +142,7 @@ onMounted(async () => {
     const data = await res.json()
     form.value.title = data.title
     form.value.content = data.content
+    form.value.is_pinned = data.is_pinned || false
   }
 })
 
@@ -155,12 +161,12 @@ async function submitPost() {
     if (editMode.value) {
       res = await apiJson(`/api/posts/${editId.value}`, {
         method: 'PUT',
-        body: JSON.stringify({ title: form.value.title, content: form.value.content }),
+        body: JSON.stringify({ title: form.value.title, content: form.value.content, is_pinned: form.value.is_pinned }),
       })
     } else {
       res = await apiJson('/api/posts/', {
         method: 'POST',
-        body: JSON.stringify({ category: category.value, title: form.value.title, content: form.value.content }),
+        body: JSON.stringify({ category: category.value, title: form.value.title, content: form.value.content, is_pinned: form.value.is_pinned }),
       })
     }
     if (res.ok) {
@@ -237,6 +243,8 @@ function insertVideo() {
 .write-hint { font-size: 0.75rem; color: #888; margin-bottom: 12px; line-height: 1.5; }
 .write-hint code { background: #2a2a2a; padding: 1px 4px; border-radius: 3px; font-size: 0.7rem; }
 .write-title { width: 100%; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 10px; font-size: 1rem; margin-bottom: 8px; }
+.write-pin-check { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #ccc; margin-bottom: 8px; cursor: pointer; }
+.write-pin-check input { accent-color: #ff4d6d; }
 .write-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
 .write-tabs button { padding: 4px 12px; border: 1px solid #444; background: transparent; color: #888; border-radius: 6px 6px 0 0; font-size: 0.8rem; cursor: pointer; }
 .write-tabs button.active { background: #2a2a2a; color: #e0e0e0; border-bottom-color: #2a2a2a; }
