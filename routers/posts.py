@@ -43,6 +43,7 @@ def list_posts(
                 "comment_count": len(p.comments),
                 "created_at": p.created_at,
                 "updated_at": p.updated_at,
+                "view_count": p.view_count,
             }
             for p in posts
         ],
@@ -80,6 +81,7 @@ def create_post(
         "comment_count": 0,
         "created_at": post.created_at,
         "updated_at": post.updated_at,
+        "view_count": 0,
     }
 
 
@@ -88,6 +90,10 @@ def get_post(post_id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not post:
         raise HTTPException(404, "게시글을 찾을 수 없습니다")
+        
+    post.view_count = (post.view_count or 0) + 1
+    db.commit()
+
     return {
         "id": post.id,
         "category": post.category,
@@ -98,6 +104,7 @@ def get_post(post_id: int, db: Session = Depends(get_db)):
         "comment_count": len(post.comments),
         "created_at": post.created_at,
         "updated_at": post.updated_at,
+        "view_count": post.view_count,
         "comments": [
             {
                 "id": c.id,

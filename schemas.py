@@ -319,6 +319,7 @@ class PostResponse(BaseModel):
     author_id: int
     author_nickname: Optional[str] = None
     comment_count: int = 0
+    view_count: int = 0
     created_at: datetime
     updated_at: Optional[datetime]
 

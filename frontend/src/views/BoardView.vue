@@ -19,6 +19,7 @@
           <div class="board-item-meta">
             <span>{{ post.author_nickname }}</span>
             <span>{{ formatDate(post.created_at) }}</span>
+            <span>👁 {{ post.view_count }}</span>
             <span v-if="post.comment_count > 0">💬 {{ post.comment_count }}</span>
           </div>
         </li>

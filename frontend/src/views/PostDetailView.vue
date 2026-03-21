@@ -12,6 +12,7 @@
       <div class="post-meta">
         <span>{{ post.author_nickname }}</span>
         <span>{{ formatDate(post.created_at) }}</span>
+        <span>조회 {{ post.view_count }}</span>
       </div>
 
       <!-- 글 내용 -->
