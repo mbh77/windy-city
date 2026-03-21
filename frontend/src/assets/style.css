@@ -393,7 +393,7 @@ body.keyboard-open .sidebar { height: 50vh; }
 .date-filter-inputs .btn-ghost { padding: 4px 6px; font-size: 0.7rem; }
 
 /* 탭 내 등록 버튼 */
-.tab-action { padding: 4px 10px; font-size: 0.8rem; margin-left: auto; }
+.tab-action { padding: 4px 10px; font-size: 0.8rem; margin-left: auto; margin-right: 8px; }
 
 /* 빈 페이지 안내 */
 .empty-state { padding: 16px; text-align: center; cursor: default; }
