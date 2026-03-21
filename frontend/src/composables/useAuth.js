@@ -91,6 +91,19 @@ export function useAuth() {
     currentUser.value = null
   }
 
+  // 회원 탈퇴
+  async function withdraw() {
+    const res = await apiJson('/api/auth/me', { method: 'DELETE' })
+    if (res.ok) {
+      clearToken()
+      currentUser.value = null
+      return { ok: true }
+    } else {
+      const err = await res.json()
+      return { ok: false, error: err.detail || '탈퇴에 실패했습니다' }
+    }
+  }
+
   return {
     currentUser,
     restoreSession,
@@ -99,5 +112,6 @@ export function useAuth() {
     verifyEmail,
     resendCode,
     logout,
+    withdraw,
   }
 }

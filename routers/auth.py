@@ -134,3 +134,25 @@ def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
 def get_me(current_user: models.User = Depends(auth_utils.get_current_user)):
     """내 정보 조회"""
     return current_user
+
+
+@router.delete("/me", status_code=200)
+def delete_me(current_user: models.User = Depends(auth_utils.get_current_user), db: Session = Depends(get_db)):
+    """회원 탈퇴 — 계정 비활성화, 작성물은 유지"""
+    if current_user.is_admin:
+        raise HTTPException(status_code=400, detail="관리자 계정은 탈퇴할 수 없습니다")
+
+    user = db.query(models.User).filter(models.User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다")
+
+    user.nickname = "탈퇴한 사용자"
+    user.email = f"deleted_{user.id}@deleted"
+    user.hashed_password = "WITHDRAWN"
+    user.is_verified = False
+    user.is_organizer = False
+    user.verify_code = None
+    user.verify_code_expires = None
+    db.commit()
+
+    return {"message": "회원 탈퇴가 완료되었습니다"}

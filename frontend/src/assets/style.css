@@ -47,6 +47,8 @@ a { text-decoration: none; }
 .user-dropdown-name { padding: 10px 14px; font-size: 0.8rem; color: #8B7B6B; border-bottom: 1px solid #EDE5DB; }
 .user-dropdown-item { width: 100%; background: none; border: none; color: #3D3029; padding: 10px 14px; font-size: 0.8rem; cursor: pointer; text-align: left; }
 .user-dropdown-item:hover { background: #FFFFFF; }
+.user-dropdown-danger { color: #c0392b; }
+.user-dropdown-danger:hover { background: #fde8e8; }
 
 /* ── 장소 검색 ── */
 .place-search { position: relative; flex: 1; max-width: 400px; }

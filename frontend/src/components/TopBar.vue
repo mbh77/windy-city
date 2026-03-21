@@ -64,6 +64,7 @@
           <div v-if="showUserMenu" class="user-dropdown">
             <div class="user-dropdown-name">{{ currentUser.nickname }}</div>
             <button class="user-dropdown-item" @click="handleLogout">로그아웃</button>
+            <button v-if="!currentUser.is_admin" class="user-dropdown-item user-dropdown-danger" @click="handleWithdraw">회원 탈퇴</button>
           </div>
         </div>
       </div>
@@ -80,7 +81,7 @@ const props = defineProps({
   showSearch: { type: Boolean, default: true },
 })
 
-const { currentUser } = useAuth()
+const { currentUser, withdraw } = useAuth()
 
 // 네비게이션 메뉴
 const showNavMenu = ref(false)
@@ -93,6 +94,18 @@ const userMenuRef = ref(null)
 function handleLogout() {
   showUserMenu.value = false
   emit('authClick')
+}
+
+async function handleWithdraw() {
+  if (!confirm('정말 탈퇴하시겠습니까?\n작성한 글과 댓글은 유지되며, 작성자는 "탈퇴한 사용자"로 표시됩니다.')) return
+  const result = await withdraw()
+  if (result.ok) {
+    showUserMenu.value = false
+    alert('회원 탈퇴가 완료되었습니다.')
+    window.location.href = '/'
+  } else {
+    alert(result.error)
+  }
 }
 
 // 장소 검색 상태
