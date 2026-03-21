@@ -117,6 +117,49 @@
 
 ---
 
+## P-BOARD — 게시판 (공지사항 + 열린 플로어)
+
+### Phase 1: DB + 백엔드 API
+- ✅ **BD-001** DB 테이블 생성 (posts, comments — dev/prod 완료)
+- ✅ **BD-002** models.py + schemas.py 추가 (Post, Comment 모델 + 스키마)
+- ✅ **BD-003** 게시글 CRUD API (`routers/posts.py`)
+- ✅ **BD-004** 댓글 API (작성/삭제)
+
+### Phase 2~4: 프론트 — 목록 + 상세 + 작성/수정
+- ✅ **BD-005** 게시판 목록 UI (`views/BoardView.vue`, 검색, 페이징)
+- ✅ **BD-006** 글 상세 UI (`views/PostDetailView.vue`, 수정/삭제 버튼)
+- ✅ **BD-007** 댓글 UI (목록, 입력, 삭제)
+- ✅ **BD-008** 글 작성 UI (`views/PostWriteView.vue`, 미리보기 토글, 마크다운 안내)
+- ✅ **BD-009** 글 수정 UI (기존 데이터 프리필, editMode)
+
+### Phase 5: 마크다운 + 미디어 렌더링
+- ✅ **BD-010** 마크다운 라이브러리 설치 (`marked` + `DOMPurify`)
+  - 글 상세 + 미리보기에서 마크다운 → HTML 렌더링
+  - XSS 방지 (`DOMPurify`)
+- ✅ **BD-011** 미디어 자동 임베드
+  - YouTube URL → `<iframe>` 플레이어 자동 변환
+  - Instagram 릴스 URL → 임베드 변환
+  - 이미지 마크다운 `![](url)` → `<img>` 렌더링
+- ⬜ **BD-012** 글 작성 툴바 컴포넌트
+  - 📷 이미지 업로드 버튼 (파일 선택 → 업로드 → URL 삽입)
+  - ▶️ 영상 URL 입력 다이얼로그
+  - **B** 굵게, *I* 기울임 버튼
+  - 미리보기 토글 (작성 ↔ 미리보기 전환)
+
+### Phase 6: 게시판 기능 보강
+- ⬜ **BD-013** 조회수
+  - DB: posts 테이블에 `view_count` INT DEFAULT 0 컬럼 추가
+  - 백엔드: 상세 조회 시 view_count +1 (중복 방지는 추후)
+  - 프론트: 목록·상세에 조회수 표시
+- ⬜ **BD-014** 댓글 수정
+  - 백엔드: `PUT /api/posts/{post_id}/comments/{comment_id}` 추가
+  - 프론트: 댓글 수정 버튼 + 인라인 편집 UI
+- ⬜ **BD-015** 공지 상단 고정
+  - 자유게시판(free) 탭에서도 공지사항 최신 N개를 상단에 고정 표시
+  - 고정 공지는 별도 스타일로 구분 (배경색, 📌 아이콘 등)
+
+---
+
 ## P3 — 성장
 
 - ⬜ **B-023** 카카오 소셜 로그인 — OAuth 연동 (DB·앱키 준비 완료)

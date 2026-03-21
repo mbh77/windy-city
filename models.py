@@ -67,6 +67,8 @@ class User(Base):
     # 관계
     events = relationship("Event", back_populates="organizer")
     venues = relationship("Venue", back_populates="owner")
+    posts = relationship("Post", back_populates="author")
+    comments = relationship("Comment", back_populates="author")
 
 
 # ── 장소 (Venue) ─────────────────────────────────────────────
@@ -204,3 +206,33 @@ class Media(Base):
     thumbnail_url = Column(String(1000))  # 썸네일 (영상용)
     sort_order = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ── 게시판 (Board) ─────────────────────────────────────────────
+
+class Post(Base):
+    __tablename__ = "posts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    category = Column(Enum("notice", "free", name="post_category"), nullable=False, default="free")
+    title = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False)
+    author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    author = relationship("User", back_populates="posts")
+    comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+    author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    post = relationship("Post", back_populates="comments")
+    author = relationship("User", back_populates="comments")

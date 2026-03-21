@@ -1,11 +1,11 @@
 <template>
-  <div class="admin-page">
-    <header class="admin-header">
-      <router-link to="/" class="admin-back">← 지도로 돌아가기</router-link>
-      <h1 class="admin-logo">⚙️ 관리자</h1>
+  <div class="page-container wide">
+    <header class="page-header">
+      <router-link to="/" class="page-nav-btn" title="지도">지도</router-link>
+      <h1 class="page-title">⚙️ 관리자</h1>
     </header>
 
-    <main class="admin-content">
+    <main class="page-body">
       <div class="admin-tabs">
         <button :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">회원</button>
         <button :class="{ active: activeTab === 'events' }" @click="activeTab = 'events'">이벤트</button>
@@ -297,22 +297,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.admin-page { min-height: 100vh; background: #0f0f0f; color: #e0e0e0; padding: 20px; max-width: 900px; margin: 0 auto; }
-.admin-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
-.admin-back { color: #aaa; font-size: 0.85rem; }
-.admin-back:hover { color: #fff; }
-.admin-logo { font-size: 1.3rem; font-weight: 700; }
 .admin-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
 .admin-tabs button { padding: 6px 16px; border: 1px solid #444; background: transparent; color: #888; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
 .admin-tabs button.active { background: #ff6b6b; border-color: #ff6b6b; color: #fff; }
-.admin-content h2 { font-size: 1.1rem; margin-bottom: 12px; }
+.page-body h2 { font-size: 1.1rem; margin-bottom: 12px; }
 .admin-search { margin-bottom: 12px; }
 .admin-search input { width: 100%; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; }
 .admin-total { font-size: 0.8rem; color: #888; margin-bottom: 8px; }
 .admin-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
 .admin-table th { text-align: left; padding: 8px; border-bottom: 1px solid #444; color: #aaa; }
 .admin-table td { padding: 8px; border-bottom: 1px solid #2a2a2a; }
-.admin-content { max-height: 80vh; overflow-y: auto; }
 .role-btn { padding: 2px 10px; border-radius: 10px; border: 1px solid #555; background: transparent; color: #888; font-size: 0.75rem; cursor: pointer; }
 .role-btn.active { background: #ff6b6b; border-color: #ff6b6b; color: #fff; }
 .admin-paging { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 16px; margin-bottom: 16px; }
