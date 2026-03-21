@@ -26,6 +26,8 @@
         :visibleCategories="visibleCategories"
         @toggle="toggleCategory"
       ></CategoryBar>
+
+      <div v-if="regionName" class="region-overlay">📍 {{ regionName }}</div>
     </div>
 
 
@@ -121,6 +123,34 @@ const createVenueRef = ref(null)
 
 // 지도 영역
 const mapBounds = ref(null)
+const mapCenter = computed(() => {
+  if (!mapBounds.value) return null
+  return { lat: mapBounds.value.centerLat, lng: mapBounds.value.centerLng }
+})
+
+// 현재 지역명 (역지오코딩)
+const regionName = ref('')
+let geocoder = null
+let geoTimer = null
+
+watch(mapCenter, (center) => {
+  if (!center) return
+  if (!geocoder && window.kakao?.maps?.services) {
+    geocoder = new window.kakao.maps.services.Geocoder()
+  }
+  if (!geocoder) return
+  clearTimeout(geoTimer)
+  geoTimer = setTimeout(() => {
+    geocoder.coord2RegionCode(center.lng, center.lat, (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        const region = result.find(r => r.region_type === 'H') || result[0]
+        if (region) {
+          regionName.value = `${region.region_1depth_name} ${region.region_2depth_name}`
+        }
+      }
+    })
+  }, 500)
+})
 
 // 모달 상태
 const showEventDetail = ref(false)

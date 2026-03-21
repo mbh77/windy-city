@@ -176,6 +176,7 @@ const props = defineProps({
     default: () => ({ club: true, academy: true, practice_room: true, event: true }),
   },
 })
+
 const { currentUser } = useAuth()
 const { events } = useEvents()
 const { venues } = useVenues()

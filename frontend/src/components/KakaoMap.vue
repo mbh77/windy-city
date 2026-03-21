@@ -132,9 +132,11 @@ onMounted(async () => {
     const bounds = map.getBounds()
     const sw = bounds.getSouthWest()
     const ne = bounds.getNorthEast()
+    const center = map.getCenter()
     emit('boundsChanged', {
       swLat: sw.getLat(), swLng: sw.getLng(),
       neLat: ne.getLat(), neLng: ne.getLng(),
+      centerLat: center.getLat(), centerLng: center.getLng(),
     })
   }
   window.kakao.maps.event.addListener(map, 'idle', emitBounds)
