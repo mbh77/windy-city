@@ -4,11 +4,9 @@
     @authClick="handleAuthClick"
     @placeSelect="handlePlaceSelect"
   />
-  <router-view
-    ref="routerViewRef"
-    @authClick="handleAuthClick"
-    @placeSelect="handlePlaceSelect"
-  />
+  <router-view v-slot="{ Component }">
+    <component :is="Component" ref="routerViewRef" />
+  </router-view>
 </template>
 
 <script setup>
