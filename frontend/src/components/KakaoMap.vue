@@ -8,6 +8,10 @@ import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
 import { formatDate } from '../utils/api.js'
 import { VENUE_TYPE_LABELS } from '../utils/constants.js'
+import markerClubImg from '@/assets/maker_club.png'
+import markerSchoolImg from '@/assets/maker_shcool.png'
+import markerPracticeImg from '@/assets/maker_practice.png'
+import markerEventImg from '@/assets/maker_event.png'
 
 const emit = defineEmits(['markerClick', 'venueMarkerClick', 'locationPicked', 'boundsChanged'])
 const props = defineProps({
@@ -30,31 +34,72 @@ let activeInfowindow = null
 let eventClusterer = null
 let venueClusterer = null
 
-// 커스텀 마커 SVG 생성 (small: 기본, large: 선택됨)
-function createMarkerImage(color, size = 'small') {
-  const w = size === 'large' ? 36 : 24
-  const h = size === 'large' ? 52 : 34
-  const cx = w / 2
-  const cy = Math.floor(w / 2)
-  const r = size === 'large' ? 8 : 5
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-    <path d="M${cx} 0C${cx * 0.45} 0 0 ${cy * 0.45} 0 ${cy}c0 ${Math.floor(h * 0.375)} ${cx} ${h - cy} ${cx} ${h - cy}s${cx}-${Math.floor(h * 0.554)} ${cx}-${h - cy}C${w} ${cy * 0.45} ${cx * 1.55} 0 ${cx} 0z" fill="${color}" stroke="${size === 'large' ? '#fff' : 'none'}" stroke-width="${size === 'large' ? 2 : 0}"/>
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="white" opacity="0.9"/>
-  </svg>`
-  const imgSize = new window.kakao.maps.Size(w, h)
-  const opt = { offset: new window.kakao.maps.Point(cx, h) }
-  return new window.kakao.maps.MarkerImage(
-    'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg),
-    imgSize, opt
-  )
+// 카테고리별 마커 이미지 매핑
+const markerImageSrc = {
+  club: markerClubImg,
+  academy: markerSchoolImg,
+  practice_room: markerPracticeImg,
+  event: markerEventImg,
 }
 
-// 마커 이미지 캐시
+// 색상→타입 매핑
+const colorToType = {
+  '#2E6EB5': 'club', '#D4A84C': 'academy', '#4EA89E': 'practice_room', '#7B2D8E': 'event',
+}
+
+// 원형 마커 이미지를 Canvas로 생성
+function createCircleMarkerImage(src, size) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = size
+      canvas.height = size
+      const ctx = canvas.getContext('2d')
+      // 원형 클리핑
+      ctx.beginPath()
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
+      ctx.closePath()
+      ctx.clip()
+      // 이미지 그리기
+      ctx.drawImage(img, 0, 0, size, size)
+      // 원형 테두리
+      ctx.beginPath()
+      ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2)
+      ctx.strokeStyle = '#fff'
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      resolve(new window.kakao.maps.MarkerImage(
+        canvas.toDataURL(),
+        new window.kakao.maps.Size(size, size),
+        { offset: new window.kakao.maps.Point(size / 2, size / 2) }
+      ))
+    }
+    img.src = src
+  })
+}
+
+// 마커 이미지 캐시 (비동기 로드)
 const markerImages = {}
-function getMarkerImage(color, size = 'small') {
-  const key = `${color}_${size}`
-  if (!markerImages[key]) markerImages[key] = createMarkerImage(color, size)
-  return markerImages[key]
+const markerImagePromises = {}
+
+function preloadMarkerImages() {
+  const sizes = { small: 40, large: 55 }
+  for (const [type, src] of Object.entries(markerImageSrc)) {
+    for (const [sizeName, sizeVal] of Object.entries(sizes)) {
+      const key = `${type}_${sizeName}`
+      markerImagePromises[key] = createCircleMarkerImage(src, sizeVal).then(img => {
+        markerImages[key] = img
+      })
+    }
+  }
+}
+
+function getMarkerImage(colorOrType, size = 'small') {
+  const type = colorToType[colorOrType] || colorOrType
+  const key = `${type}_${size}`
+  return markerImages[key] || null
 }
 
 // 선택된 마커 추적
@@ -87,14 +132,18 @@ function deselectMarker() {
 }
 
 // 유형별 색상
-const venueColors = { club: '#9b59b6', academy: '#3498db', practice_room: '#2ecc71' }
-const eventColor = '#e74c3c'
+const venueColors = { club: '#2E6EB5', academy: '#D4A84C', practice_room: '#4EA89E' }
+const eventColor = '#7B2D8E'
 
 // 지도 초기화
 onMounted(async () => {
   if (window.kakao && window.kakao.maps) {
     await new Promise(resolve => window.kakao.maps.load(resolve))
   }
+
+  // 마커 이미지 프리로드
+  preloadMarkerImages()
+  await Promise.all(Object.values(markerImagePromises))
 
   const container = document.getElementById('map')
   map = new window.kakao.maps.Map(container, {
@@ -132,9 +181,11 @@ onMounted(async () => {
     const bounds = map.getBounds()
     const sw = bounds.getSouthWest()
     const ne = bounds.getNorthEast()
+    const center = map.getCenter()
     emit('boundsChanged', {
       swLat: sw.getLat(), swLng: sw.getLng(),
       neLat: ne.getLat(), neLng: ne.getLng(),
+      centerLat: center.getLat(), centerLng: center.getLng(),
     })
   }
   window.kakao.maps.event.addListener(map, 'idle', emitBounds)

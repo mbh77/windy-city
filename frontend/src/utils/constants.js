@@ -54,8 +54,8 @@ export const DIFFICULTY_OPTIONS = Object.entries(DIFFICULTY_LABELS).map(([value,
 
 // 지도 마커 카테고리 (체크박스 필터용)
 export const MAP_CATEGORIES = [
-  { key: 'club', label: '클럽', color: '#9b59b6' },       // 보라색
-  { key: 'academy', label: '학원', color: '#3498db' },     // 파란색
-  { key: 'practice_room', label: '연습실', color: '#2ecc71' }, // 초록색
-  { key: 'event', label: '이벤트', color: '#e74c3c' },     // 빨간색
+  { key: 'club', label: '클럽', color: '#2E6EB5' },         // 파랑
+  { key: 'academy', label: '학원', color: '#D4A84C' },     // 노랑
+  { key: 'practice_room', label: '연습실', color: '#4EA89E' }, // 틸
+  { key: 'event', label: '이벤트', color: '#7B2D8E' },     // 보라
 ]
