@@ -162,6 +162,48 @@
 
 ---
 
+## P-OPS — 서비스 안정성 확보
+
+### Phase 1: 데이터 보호 (최우선)
+- ⬜ **OPS-001** DB 자동 백업
+  - 크론잡: mysqldump 매일 1회 실행 → 로컬 백업 디렉토리 저장
+  - 보관 정책: 최근 7일치 유지, 이전 파일 자동 삭제
+  - 선택: OCI Object Storage로 원격 백업 (서버 장애 대비)
+- ⬜ **OPS-002** uploads 파일 백업
+  - 크론잡: uploads/ 디렉토리 tar 압축 → 백업 디렉토리 저장
+  - 주기: 주 1회 (이미지는 변경 빈도 낮음)
+- ⬜ **OPS-003** 백업 복원 테스트
+  - 백업 파일로 실제 복원 가능한지 1회 검증
+
+### Phase 2: 모니터링
+- ⬜ **OPS-004** 서버 다운 알림
+  - 외부 모니터링 서비스 (UptimeRobot 무료) 연동
+  - HTTPS 엔드포인트 주기적 체크 → 다운 시 이메일/슬랙 알림
+- ⬜ **OPS-005** 헬스체크 API
+  - `GET /api/health` — 앱 + DB 연결 상태 확인 엔드포인트
+  - 모니터링 서비스가 이 엔드포인트를 체크
+- ⬜ **OPS-006** 디스크/메모리 알림
+  - 크론잡: 디스크 사용률 90% 이상 시 이메일 알림
+  - uploads 폴더 용량 모니터링
+
+### Phase 3: 보안 강화
+- ⬜ **OPS-007** API rate limiting
+  - FastAPI 미들웨어로 IP당 요청 제한 (예: 분당 60회)
+  - 로그인 시도 제한 (예: 5회 실패 시 5분 차단)
+- ⬜ **OPS-008** CORS 설정 점검
+  - 허용 도메인을 windycity.co.kr로 제한
+- ⬜ **OPS-009** 보안 헤더 추가
+  - Nginx: X-Frame-Options, X-Content-Type-Options, CSP 등
+
+### Phase 4: 배포 안정화
+- ⬜ **OPS-010** 배포 스크립트 자동화
+  - deploy.sh: git pull → npm install → build → restart를 한 번에
+  - 빌드 실패 시 자동 롤백 (이전 빌드 보관)
+- ⬜ **OPS-011** 무중단 배포 검토
+  - uvicorn 워커 graceful restart 또는 블루-그린 배포
+
+---
+
 ## P3 — 성장
 
 - ⬜ **B-023** 카카오 소셜 로그인 — OAuth 연동 (DB·앱키 준비 완료)
