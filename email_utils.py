@@ -21,15 +21,17 @@ def generate_verify_code() -> str:
 def send_verify_email(to_email: str, code: str) -> bool:
     """인증 코드 이메일 발송"""
     msg = MIMEMultipart()
-    msg["From"] = f"Windy City <{SMTP_USER}>"
+    msg["From"] = f"바람난 도시 <{SMTP_USER}>"
     msg["To"] = to_email
-    msg["Subject"] = "[Windy City] 이메일 인증 코드"
+    msg["Subject"] = "[바람난 도시] 이메일 인증 코드"
 
     body = f"""
     <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #ff6b6b;">🌀 Windy City</h2>
+        <div style="background: #5BA89E; text-align: center; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+            <img src="https://windycity.co.kr/uploads/windycity_logo.png" alt="바람난 도시" style="height: 48px;" />
+        </div>
         <p>아래 인증 코드를 입력해 주세요.</p>
-        <div style="background: #1a1a1a; color: #fff; font-size: 32px; font-weight: bold;
+        <div style="background: #5BA89E; color: #fff; font-size: 32px; font-weight: bold;
                     letter-spacing: 8px; text-align: center; padding: 20px; border-radius: 8px;">
             {code}
         </div>
