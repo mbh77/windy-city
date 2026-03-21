@@ -214,28 +214,28 @@ function formatDate(dateStr) {
 
 <style scoped>
 .post-title { font-size: 1.2rem; margin-bottom: 8px; }
-.post-meta { font-size: 0.8rem; color: #888; display: flex; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #2a2a2a; }
+.post-meta { font-size: 0.8rem; color: #8B7B6B; display: flex; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #EDE5DB; }
 .post-body { font-size: 0.9rem; line-height: 1.6; min-height: 100px; margin-bottom: 16px; }
-.post-actions { display: flex; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #2a2a2a; }
-.btn-ghost { padding: 6px 14px; background: transparent; border: 1px solid #555; color: #ccc; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
-.btn-danger { padding: 6px 14px; background: #dc3545; border: none; color: #fff; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
+.post-actions { display: flex; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #EDE5DB; }
+.btn-ghost { padding: 6px 14px; background: transparent; border: 1px solid #E0D5C8; color: #5A4A3A; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
+.btn-danger { padding: 6px 14px; background: #c0392b; border: none; color: #fff; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
 .comment-section { margin-top: 16px; }
 .comment-section h3 { font-size: 0.9rem; margin-bottom: 12px; }
 .comment-list { list-style: none; padding: 0; margin: 0 0 12px 0; }
-.comment-item { padding: 10px 0; border-bottom: 1px solid #2a2a2a; }
+.comment-item { padding: 10px 0; border-bottom: 1px solid #EDE5DB; }
 .comment-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
 .comment-author { font-size: 0.8rem; font-weight: 600; }
-.comment-date { font-size: 0.7rem; color: #888; }
-.comment-delete { background: none; border: none; color: #888; font-size: 0.7rem; cursor: pointer; margin-left: auto; }
-.comment-delete:hover { color: #dc3545; }
+.comment-date { font-size: 0.7rem; color: #8B7B6B; }
+.comment-delete { background: none; border: none; color: #8B7B6B; font-size: 0.7rem; cursor: pointer; margin-left: auto; }
+.comment-delete:hover { color: #c0392b; }
 .comment-body { font-size: 0.85rem; line-height: 1.5; }
 .comment-form { display: flex; gap: 8px; align-items: flex-start; }
-.comment-form textarea { flex: 1; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; }
+.comment-form textarea { flex: 1; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; }
 .comment-form .btn-primary { padding: 8px 16px; font-size: 0.8rem; white-space: nowrap; align-self: flex-end; }
-.comment-login-msg { font-size: 0.8rem; color: #888; }
-.comment-edit { background: none; border: none; color: #888; font-size: 0.7rem; cursor: pointer; }
-.comment-edit:hover { color: #6bc1ff; }
-.comment-edit-form textarea { width: 100%; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; margin-top: 4px; }
+.comment-login-msg { font-size: 0.8rem; color: #8B7B6B; }
+.comment-edit { background: none; border: none; color: #8B7B6B; font-size: 0.7rem; cursor: pointer; }
+.comment-edit:hover { color: #5BA89E; }
+.comment-edit-form textarea { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; margin-top: 4px; }
 .comment-edit-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px; }
 .comment-edit-actions button { padding: 4px 12px; font-size: 0.75rem; }
 
@@ -244,14 +244,14 @@ function formatDate(dateStr) {
 .markdown-body :deep(h2) { font-size: 1.15rem; margin: 14px 0 6px; }
 .markdown-body :deep(h3) { font-size: 1.05rem; margin: 12px 0 4px; }
 .markdown-body :deep(p) { margin: 0 0 8px; }
-.markdown-body :deep(a) { color: #6bc1ff; text-decoration: underline; }
-.markdown-body :deep(code) { background: #1a1a2e; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
-.markdown-body :deep(pre) { background: #1a1a2e; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
+.markdown-body :deep(a) { color: #5BA89E; text-decoration: underline; }
+.markdown-body :deep(code) { background: #F0E8DE; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+.markdown-body :deep(pre) { background: #F0E8DE; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
 .markdown-body :deep(pre code) { background: none; padding: 0; }
-.markdown-body :deep(blockquote) { border-left: 3px solid #555; padding-left: 12px; color: #999; margin: 8px 0; }
+.markdown-body :deep(blockquote) { border-left: 3px solid #E0D5C8; padding-left: 12px; color: #8B7B6B; margin: 8px 0; }
 .markdown-body :deep(ul), .markdown-body :deep(ol) { padding-left: 20px; margin: 8px 0; }
 .markdown-body :deep(img) { max-width: 100%; border-radius: 6px; }
-.markdown-body :deep(hr) { border: none; border-top: 1px solid #2a2a2a; margin: 16px 0; }
+.markdown-body :deep(hr) { border: none; border-top: 1px solid #EDE5DB; margin: 16px 0; }
 
 /* 미디어 임베드 */
 .markdown-body :deep(.embed-video) { position: relative; width: 100%; padding-bottom: 56.25%; margin: 12px 0; }

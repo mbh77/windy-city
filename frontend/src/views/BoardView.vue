@@ -131,16 +131,16 @@ function formatDate(dateStr) {
 
 <style scoped>
 .board-toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
-.board-toolbar input { flex: 1; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; }
+.board-toolbar input { flex: 1; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; }
 .board-toolbar .btn-primary { padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; }
 .board-list { list-style: none; padding: 0; margin: 0; }
-.board-item { padding: 12px 0; border-bottom: 1px solid #2a2a2a; cursor: pointer; }
-.board-item:hover { background: #222; }
-.board-item-pinned { background: #1a1a2e; border-left: 3px solid #ff4d6d; }
+.board-item { padding: 12px 0; border-bottom: 1px solid #EDE5DB; cursor: pointer; }
+.board-item:hover { background: #FFFFFF; }
+.board-item-pinned { background: #FFF5EE; border-left: 3px solid #D4725C; }
 .board-item-title { font-size: 0.9rem; margin-bottom: 4px; }
-.board-item-meta { font-size: 0.75rem; color: #888; display: flex; gap: 12px; }
-.board-empty { padding: 40px 0; text-align: center; color: #888; font-size: 0.85rem; }
+.board-item-meta { font-size: 0.75rem; color: #8B7B6B; display: flex; gap: 12px; }
+.board-empty { padding: 40px 0; text-align: center; color: #8B7B6B; font-size: 0.85rem; }
 .board-paging { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 16px; }
-.board-paging button { background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 6px; padding: 4px 12px; font-size: 0.8rem; cursor: pointer; }
+.board-paging button { background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 4px 12px; font-size: 0.8rem; cursor: pointer; }
 .board-paging button:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

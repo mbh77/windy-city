@@ -1,10 +1,4 @@
 <template>
-  <!-- 상단 필터 바 -->
-  <TopBar
-    @authClick="handleAuthClick"
-    @placeSelect="handlePlaceSelect"
-  />
-
   <!-- 위치 선택 모드 오버레이 -->
   <PickLocationBar
     :visible="isPicking"
@@ -105,7 +99,6 @@ import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
 
-import TopBar from '../components/TopBar.vue'
 import Sidebar from '../components/Sidebar.vue'
 import KakaoMap from '../components/KakaoMap.vue'
 import PickLocationBar from '../components/PickLocationBar.vue'
@@ -392,4 +385,6 @@ function handleOnboardingEvents() {
 function handleOnboardingVenues() {
   localStorage.setItem('onboarding_done', '1')
 }
+
+defineExpose({ handleAuthClick, handlePlaceSelect })
 </script>
