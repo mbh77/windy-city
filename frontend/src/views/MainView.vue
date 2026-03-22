@@ -40,6 +40,7 @@
       @addVenue="openCreateVenueModal"
       @selectVenue="openVenueDetail"
       @dateFilterChange="handleDateFilter"
+      @click="closeMapInfowindows"
     />
   </main>
 
@@ -405,6 +406,10 @@ function cancelPick() {
 function handleDateFilter({ date_from, date_to }) {
   currentFilters.value = { date_from, date_to }
   loadEvents(currentFilters.value)
+}
+
+function closeMapInfowindows() {
+  window.__windycity_closeInfowindows?.()
 }
 
 // ── 온보딩 ──
