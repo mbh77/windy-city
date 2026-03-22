@@ -231,16 +231,28 @@ watch(venues, (vns) => {
 // 카테고리 표시/숨김
 watch(() => props.visibleCategories, (cats) => {
   eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
+  eventBadgeOverlays.forEach(o => o.setMap(cats.event ? map : null))
   venueMarkers.forEach(m => m.setMap(cats[m._venueType] ? map : null))
 }, { deep: true })
 
 let eventInfowindows = []
 let venueInfowindows = []
+let eventBadgeOverlays = []
 
 function renderEventMarkers(evts) {
   eventMarkers.forEach(m => m.setMap(null))
+  eventBadgeOverlays.forEach(o => o.setMap(null))
   eventMarkers = []
   eventInfowindows = []
+  eventBadgeOverlays = []
+
+  // 좌표별 이벤트 그룹핑
+  const coordMap = {}
+  evts.forEach(ev => {
+    const key = `${ev.latitude.toFixed(6)}_${ev.longitude.toFixed(6)}`
+    if (!coordMap[key]) coordMap[key] = []
+    coordMap[key].push(ev)
+  })
 
   evts.forEach(ev => {
     const pos = new window.kakao.maps.LatLng(ev.latitude, ev.longitude)
@@ -275,22 +287,51 @@ function renderEventMarkers(evts) {
         infowindow.close()
       }
     })
+    // 동일 좌표 그룹 정보
+    const coordKey = `${ev.latitude.toFixed(6)}_${ev.longitude.toFixed(6)}`
+    const group = coordMap[coordKey]
+
     window.kakao.maps.event.addListener(marker, 'click', () => {
       document.activeElement.blur()
       selectMarker(marker, eventColor, ev.id, 'event')
 
-      if ('ontouchstart' in window) {
-        if (activeInfowindow === infowindow) {
-          closeAllInfowindows()
-          emit('markerClick', ev)
+      if (group.length >= 2) {
+        // 동일 좌표 이벤트 목록 말풍선
+        closeAllInfowindows()
+        const listItems = group.map(e => {
+          const listKey = `event_${e.id}`
+          infoItemStore[listKey] = { type: 'event', data: e }
+          const listThumb = e.media?.[0]?.url
+          return `<div onclick="window.__windycity_infoClick('${listKey}')" style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;border-bottom:1px solid #EDE5DB;">
+            <img src="${listThumb || defaultThumbImg}" style="width:36px;height:36px;border-radius:4px;object-fit:cover;background:#EDE5DB;" />
+            <div>
+              <strong style="font-size:12px;">${e.title}</strong><br/>
+              <span style="color:#888;font-size:10px">${formatDate(e.start_date)}</span>
+            </div>
+          </div>`
+        }).join('')
+        const groupContent = `<div style="padding:8px 10px;font-size:13px;max-width:250px;max-height:200px;overflow-y:auto;">
+          <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 이벤트 ${group.length}건</div>
+          ${listItems}
+        </div>`
+        const groupInfowindow = new window.kakao.maps.InfoWindow({ content: groupContent })
+        groupInfowindow.open(map, marker)
+        activeInfowindow = groupInfowindow
+        eventInfowindows.push(groupInfowindow)
+      } else {
+        if ('ontouchstart' in window) {
+          if (activeInfowindow === infowindow) {
+            closeAllInfowindows()
+            emit('markerClick', ev)
+          } else {
+            closeAllInfowindows()
+            infowindow.open(map, marker)
+            activeInfowindow = infowindow
+          }
         } else {
           closeAllInfowindows()
-          infowindow.open(map, marker)
-          activeInfowindow = infowindow
+          emit('markerClick', ev)
         }
-      } else {
-        closeAllInfowindows()
-        emit('markerClick', ev)
       }
     })
 
@@ -303,6 +344,26 @@ function renderEventMarkers(evts) {
 
     if (props.visibleCategories.event) marker.setMap(map)
     eventMarkers.push(marker)
+  })
+
+  // 동일 좌표 숫자 뱃지 표시
+  const shownBadgeKeys = new Set()
+  evts.forEach(ev => {
+    const key = `${ev.latitude.toFixed(6)}_${ev.longitude.toFixed(6)}`
+    const group = coordMap[key]
+    if (group.length >= 2 && !shownBadgeKeys.has(key)) {
+      shownBadgeKeys.add(key)
+      const pos = new window.kakao.maps.LatLng(ev.latitude, ev.longitude)
+      const badge = new window.kakao.maps.CustomOverlay({
+        position: pos,
+        content: `<div style="background:#E74C3C;color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;line-height:20px;font-size:11px;font-weight:700;border:2px solid #fff;transform:translate(12px,-12px);pointer-events:none;">${group.length}</div>`,
+        yAnchor: 1,
+        xAnchor: 0,
+        zIndex: 10,
+      })
+      if (props.visibleCategories.event) badge.setMap(map)
+      eventBadgeOverlays.push(badge)
+    }
   })
 }
 
@@ -382,10 +443,12 @@ function renderVenueMarkers(vns) {
 watch(() => props.isPicking, (picking) => {
   if (picking) {
     eventMarkers.forEach(m => m.setMap(null))
+    eventBadgeOverlays.forEach(o => o.setMap(null))
     venueMarkers.forEach(m => m.setMap(null))
   } else {
     const cats = props.visibleCategories
     eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
+    eventBadgeOverlays.forEach(o => o.setMap(cats.event ? map : null))
     venueMarkers.forEach(m => m.setMap(cats[m._venueType] ? map : null))
     if (tempMarker) { tempMarker.setMap(null); tempMarker = null }
   }
