@@ -392,7 +392,9 @@ watch(() => props.isPicking, (picking) => {
 })
 
 function panTo(lat, lng) {
-  if (map) map.panTo(new window.kakao.maps.LatLng(lat, lng))
+  if (!map) return
+  if (map.getLevel() > 4) map.setLevel(4)
+  map.panTo(new window.kakao.maps.LatLng(lat, lng))
 }
 
 function clearTempMarker() {
