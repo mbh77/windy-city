@@ -42,6 +42,7 @@
             {{ form.latitude ? (form.address || '위치 선택됨') : '위치를 선택해 주세요' }}
           </span>
         </div>
+        <input v-model="form.address_detail" type="text" placeholder="상세 주소 (층수, 호수 등)" />
 
         <div class="date-row">
           <input v-model="form.start_date" type="datetime-local" required />
@@ -276,6 +277,7 @@ const form = reactive({
   description: '',
   location_name: '',
   address: '',
+  address_detail: '',
   latitude: '',
   longitude: '',
   start_date: '',
@@ -305,7 +307,7 @@ const searchStatus = ref('')
 
 function resetForm() {
   Object.assign(form, {
-    title: '', description: '', location_name: '', address: '',
+    title: '', description: '', location_name: '', address: '', address_detail: '',
     latitude: '', longitude: '', start_date: '', end_date: '',
     event_type: 'social', dance_genres: [],
     price: '', early_bird_price: '',
@@ -338,6 +340,7 @@ watch(() => props.visible, (v) => {
       description: e.description || '',
       location_name: e.location_name || '',
       address: e.address || '',
+      address_detail: e.address_detail || '',
       latitude: e.latitude || '',
       longitude: e.longitude || '',
       start_date: e.start_date ? e.start_date.slice(0, 16) : '',
@@ -414,6 +417,7 @@ async function handleSubmit() {
     description: form.description || null,
     location_name: form.location_name,
     address: form.address || null,
+    address_detail: form.address_detail || null,
     latitude: parseFloat(form.latitude),
     longitude: parseFloat(form.longitude),
     start_date: form.start_date,
