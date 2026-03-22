@@ -5,7 +5,13 @@
       <h2>{{ editMode ? '이벤트 수정' : '이벤트 등록'}}</h2>
       <form @submit.prevent="handleSubmit">
         <input v-model="form.title" type="text" placeholder="이벤트 제목" required />
-        <textarea v-model="form.description" placeholder="설명 (선택)"></textarea>
+        <label class="form-label">설명 (마크다운 지원)</label>
+        <div class="write-tabs">
+          <button type="button" :class="{ active: !descPreview }" @click="descPreview = false">작성</button>
+          <button type="button" :class="{ active: descPreview }" @click="descPreview = true">미리보기</button>
+        </div>
+        <textarea v-if="!descPreview" v-model="form.description" placeholder="설명 (선택, 마크다운 지원)"></textarea>
+        <div v-else class="markdown-preview markdown-body" v-html="renderMarkdown(form.description)" style="background:#FFFFFF;border:1px solid #E0D5C8;border-radius:6px;padding:10px;min-height:70px;font-size:0.85rem;line-height:1.6;margin-bottom:10px;"></div>
         <input v-model="form.location_name" type="text" placeholder="장소명" required />
 
         <label class="form-label">위치 지정</label>
@@ -187,6 +193,38 @@ import { ref, reactive, watch, computed } from 'vue' // computed 추가
 import { TYPE_OPTIONS, GENRE_OPTIONS, DIFFICULTY_OPTIONS } from '../utils/constants.js'
 import { useEvents } from '../composables/useEvents.js'
 import { apiFetch } from '../utils/api.js'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
+
+marked.setOptions({ breaks: true })
+
+function embedYouTube(html) {
+  const ytRegex = /<a[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^"]*"[^>]*>[^<]*<\/a>/g
+  html = html.replace(ytRegex, (m, id) => `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`)
+  const ytText = /(?:<p>)?(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^\s<]*)(?:<\/p>)?/g
+  html = html.replace(ytText, (m, u, id) => m.includes('<iframe') ? m : `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`)
+  return html
+}
+
+function embedInstagram(html) {
+  const igRegex = /(?:<a[^>]*href=")?https?:\/\/(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)\/?[^"<\s]*"?[^<]*(?:<\/a>)?/g
+  html = html.replace(igRegex, (m, type, code) => `<div class="embed-video"><iframe src="https://www.instagram.com/${type}/${code}/embed" frameborder="0" scrolling="no"></iframe></div>`)
+  return html
+}
+
+function renderMarkdown(content) {
+  if (!content) return ''
+  let html = marked(content)
+  html = embedYouTube(html)
+  html = embedInstagram(html)
+  return DOMPurify.sanitize(html, {
+    ADD_TAGS: ['iframe'],
+    ADD_ATTR: ['allowfullscreen', 'frameborder', 'src', 'scrolling'],
+  })
+}
+
+const descPreview = ref(false)
+
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
