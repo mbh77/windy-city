@@ -48,7 +48,7 @@
               <td>{{ formatDate(user.created_at) }}</td>
               <td>
                 <button
-                  v-if="!user.is_admin"
+                  v-if="!user.is_admin && user.email !== 'ghost@windycity.internal'"
                   class="delete-btn"
                   @click="deleteUser(user)"
                 >삭제</button>

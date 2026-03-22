@@ -207,6 +207,33 @@
 
 ---
 
+## P-ADS — 수익화 (Google AdSense)
+
+### Phase 1: 가입 및 승인
+- ⬜ **ADS-001** AdSense 가입 신청
+  - Google AdSense 사이트에서 windycity.co.kr 등록
+  - 승인 심사 대기 (1~14일)
+- ⬜ **ADS-002** 승인 확인 코드 삽입
+  - Google이 제공하는 `<script>` 코드를 `frontend/index.html`의 `<head>`에 삽입
+  - prod 빌드 + 배포
+
+### Phase 2: 광고 배치
+- ⬜ **ADS-003** 사이드바 하단 광고
+  - Sidebar.vue 리스트 하단에 AdSense 배너 배치
+- ⬜ **ADS-004** 게시판 목록 광고
+  - BoardView.vue 글 목록 사이에 네이티브 광고 삽입
+- ⬜ **ADS-005** 상세 모달 하단 광고
+  - EventDetailModal.vue / VenueDetailModal.vue 하단에 배너
+
+### Phase 3: 최적화
+- ⬜ **ADS-006** 모바일 광고 위치 조정
+  - 바텀시트, 상세 모달 등 모바일 레이아웃에 맞는 광고 크기/위치 최적화
+- ⬜ **ADS-007** 광고 수익 모니터링
+  - AdSense 대시보드에서 노출/클릭/수익 추이 확인
+  - 위치별 성과 비교 → 저성과 위치 제거 또는 변경
+
+---
+
 ## P3 — 성장
 
 - ⬜ **B-023** 카카오 소셜 로그인 — OAuth 연동 (DB·앱키 준비 완료)

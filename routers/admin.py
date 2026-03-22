@@ -67,6 +67,8 @@ def delete_user(
         raise HTTPException(404, "사용자를 찾을 수 없습니다")
     if user.is_admin:
         raise HTTPException(400, "관리자 계정은 삭제할 수 없습니다")
+    if user.email == 'ghost@windycity.internal':
+        raise HTTPException(400, "시스템 계정은 삭제할 수 없습니다")
 
     # 게시물(이벤트/장소) 존재 여부 확인
     event_count = db.query(models.Event).filter(models.Event.organizer_id == user_id).count()
