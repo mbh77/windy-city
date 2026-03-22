@@ -12,6 +12,7 @@ import markerClubImg from '@/assets/maker_club.png'
 import markerSchoolImg from '@/assets/maker_shcool.png'
 import markerPracticeImg from '@/assets/maker_practice.png'
 import markerEventImg from '@/assets/maker_event.png'
+import defaultThumbImg from '@/assets/camera.png'
 
 const emit = defineEmits(['markerClick', 'venueMarkerClick', 'locationPicked', 'boundsChanged'])
 const props = defineProps({
@@ -253,7 +254,7 @@ function renderEventMarkers(evts) {
     infoItemStore[infoKey] = { type: 'event', data: ev }
     const infoContent = `
       <div onclick="window.__windycity_infoClick('${infoKey}')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;white-space:nowrap;cursor:pointer">
-        ${thumb ? `<img src="${thumb}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;" />` : ''}
+        <img src="${thumb || defaultThumbImg}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;background:#EDE5DB;" />
         <div>
           <strong>${ev.title}</strong><br/>
           <span style="color:#888;font-size:11px">${formatDate(ev.start_date)}</span>
@@ -325,7 +326,7 @@ function renderVenueMarkers(vns) {
     infoItemStore[infoKey] = { type: 'venue', data: v }
     const infoContent = `
       <div onclick="window.__windycity_infoClick('${infoKey}')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;white-space:nowrap;cursor:pointer">
-        ${thumb ? `<img src="${thumb}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;" />` : ''}
+        <img src="${thumb || defaultThumbImg}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;background:#EDE5DB;" />
         <div>
           <span style="color:${color};font-size:11px;font-weight:600">${typeLabel}</span><br/>
           <strong>${v.name}</strong>
