@@ -81,6 +81,7 @@ class Venue(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text)  # 리치 텍스트 HTML
     address = Column(String(500))
+    address_detail = Column(String(255))
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     phone = Column(String(50))
@@ -152,6 +153,7 @@ class Event(Base):
     description = Column(Text)  # 리치 텍스트 HTML
     location_name = Column(String(255), nullable=False)
     address = Column(String(500))
+    address_detail = Column(String(255))
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     start_date = Column(DateTime, nullable=False)

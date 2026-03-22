@@ -23,7 +23,7 @@
         <ImageGallery :images="event.media || []" />        
 
         <div class="detail-row"><span class="detail-label">장소</span>{{ event.location_name }}</div>
-        <div v-if="event.address" class="detail-row"><span class="detail-label">주소</span>{{ event.address }}</div>
+        <div v-if="event.address" class="detail-row"><span class="detail-label">주소</span>{{ event.address }}<span v-if="event.address_detail"> {{ event.address_detail }}</span></div>
         <div class="detail-row"><span class="detail-label">시작</span>{{ formatDate(event.start_date) }}</div>
         <div v-if="event.end_date" class="detail-row"><span class="detail-label">종료</span>{{ formatDate(event.end_date) }}</div>
 

@@ -48,6 +48,7 @@
             {{ form.latitude ? (form.address || '위치 선택됨') : '위치를 선택해 주세요' }}
           </span>
         </div>
+        <input v-model="form.address_detail" type="text" placeholder="상세 주소 (층수, 호수 등)" />
 
         <!-- 연락처 -->
         <input v-model="form.phone" type="text" placeholder="전화번호 (선택)" />
@@ -208,6 +209,7 @@ const form = reactive({
   name: '',
   description: '',
   address: '',
+  address_detail: '',
   latitude: '',
   longitude: '',
   phone: '',
@@ -238,7 +240,7 @@ const searchStatus = ref('')
 
 function resetForm() {
   Object.assign(form, {
-    venue_type: 'club', name: '', description: '', address: '',
+    venue_type: 'club', name: '', description: '', address: '', address_detail: '',
     latitude: '', longitude: '', phone: '', website: '',
     dance_genres: [], cover_charge: '', has_bar: false,
     has_trial_class: false, trial_class_fee: '',
@@ -272,6 +274,7 @@ watch(() => props.venueToEdit, (v) => {
       name: v.name,
       description: v.description || '',
       address: v.address || '',
+      address_detail: v.address_detail || '',
       latitude: v.latitude,
       longitude: v.longitude,
       phone: v.phone || '',
@@ -344,6 +347,7 @@ async function handleSubmit() {
     name: form.name,
     description: form.description || null,
     address: form.address || null,
+    address_detail: form.address_detail || null,
     latitude: parseFloat(form.latitude),
     longitude: parseFloat(form.longitude),
     phone: form.phone || null,

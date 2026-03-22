@@ -74,6 +74,7 @@ class VenueCreate(BaseModel):
     name: str
     description: Optional[str] = None
     address: Optional[str] = None
+    address_detail: Optional[str] = None
     latitude: float
     longitude: float
     phone: Optional[str] = None
@@ -110,6 +111,7 @@ class VenueUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     address: Optional[str] = None
+    address_detail: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     phone: Optional[str] = None
@@ -143,6 +145,7 @@ class VenueResponse(BaseModel):
     name: str
     description: Optional[str]
     address: Optional[str]
+    address_detail: Optional[str] = None
     latitude: float
     longitude: float
     phone: Optional[str]
@@ -186,6 +189,7 @@ class EventCreate(BaseModel):
     description: Optional[str] = None
     location_name: str
     address: Optional[str] = None
+    address_detail: Optional[str] = None
     latitude: float
     longitude: float
     start_date: datetime
@@ -223,6 +227,7 @@ class EventUpdate(BaseModel):
     description: Optional[str] = None
     location_name: Optional[str] = None
     address: Optional[str] = None
+    address_detail: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     start_date: Optional[datetime] = None
@@ -251,6 +256,7 @@ class EventResponse(BaseModel):
     description: Optional[str]
     location_name: str
     address: Optional[str]
+    address_detail: Optional[str] = None
     latitude: float
     longitude: float
     start_date: datetime

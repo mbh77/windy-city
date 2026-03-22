@@ -21,7 +21,7 @@
         <ImageGallery :images="venue.media || []" />
 
         <div v-if="venue.address" class="detail-row">
-          <span class="detail-label">주소</span>{{ venue.address }}
+          <span class="detail-label">주소</span>{{ venue.address }}<span v-if="venue.address_detail"> {{ venue.address_detail }}</span>
         </div>
         <div v-if="venue.phone" class="detail-row">
           <span class="detail-label">전화</span>{{ venue.phone }}
