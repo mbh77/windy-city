@@ -393,7 +393,7 @@ watch(() => props.isPicking, (picking) => {
 
 function panTo(lat, lng) {
   if (!map) return
-  if (map.getLevel() > 4) map.setLevel(4)
+  if (map.getLevel() > 5) map.setLevel(5)
   map.panTo(new window.kakao.maps.LatLng(lat, lng))
 }
 
