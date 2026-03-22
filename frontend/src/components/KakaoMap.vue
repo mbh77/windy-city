@@ -7,7 +7,7 @@ import { onMounted, watch } from 'vue'
 import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
 import { formatDate } from '../utils/api.js'
-import { VENUE_TYPE_LABELS } from '../utils/constants.js'
+import { VENUE_TYPE_LABELS, GENRE_LABELS } from '../utils/constants.js'
 import markerClubImg from '@/assets/maker_club.png'
 import markerSchoolImg from '@/assets/maker_shcool.png'
 import markerPracticeImg from '@/assets/maker_practice.png'
@@ -226,10 +226,16 @@ function renderEventMarkers(evts) {
       image: getMarkerImage(eventColor),
     })
 
+    const thumb = ev.media?.[0]?.url
+    const genres = (ev.dance_genres || []).map(g => GENRE_LABELS[g] || g).join(' · ')
     const infoContent = `
-      <div style="padding:6px 10px;font-size:13px;white-space:nowrap">
-        <strong>${ev.title}</strong><br/>
-        <span style="color:#888;font-size:11px">${formatDate(ev.start_date)}</span>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;white-space:nowrap">
+        ${thumb ? `<img src="${thumb}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;" />` : ''}
+        <div>
+          <strong>${ev.title}</strong><br/>
+          <span style="color:#888;font-size:11px">${formatDate(ev.start_date)}</span>
+          ${genres ? `<br/><span style="font-size:10px;color:#5BA89E">${genres}</span>` : ''}
+        </div>
       </div>`
     const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent })
 
@@ -288,10 +294,16 @@ function renderVenueMarkers(vns) {
     marker._venueType = v.venue_type
 
     const typeLabel = VENUE_TYPE_LABELS[v.venue_type] || ''
+    const thumb = v.media?.[0]?.url
+    const vGenres = (v.dance_genres || []).map(g => GENRE_LABELS[g] || g).join(' · ')
     const infoContent = `
-      <div style="padding:6px 10px;font-size:13px;white-space:nowrap">
-        <span style="color:${color};font-size:11px;font-weight:600">${typeLabel}</span><br/>
-        <strong>${v.name}</strong>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;white-space:nowrap">
+        ${thumb ? `<img src="${thumb}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;" />` : ''}
+        <div>
+          <span style="color:${color};font-size:11px;font-weight:600">${typeLabel}</span><br/>
+          <strong>${v.name}</strong>
+          ${vGenres ? `<br/><span style="font-size:10px;color:#5BA89E">${vGenres}</span>` : ''}
+        </div>
       </div>`
     const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent })
 
