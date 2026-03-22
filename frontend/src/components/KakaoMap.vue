@@ -164,7 +164,7 @@ onMounted(async () => {
 
   const container = document.getElementById('map')
   map = new window.kakao.maps.Map(container, {
-    center: new window.kakao.maps.LatLng(37.5665, 126.9780),
+    center: new window.kakao.maps.LatLng(37.4979, 127.0276),
     level: 7,
   })
 
