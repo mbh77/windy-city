@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 
 from database import engine
 import models
@@ -34,4 +36,12 @@ app.include_router(posts.router)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # 정적 파일 서빙 (프론트엔드)
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+app.mount("/static-files", StaticFiles(directory="static"), name="static")
+
+# SPA fallback: 정적 파일이 있으면 반환, 없으면 index.html 반환
+@app.get("/{full_path:path}")
+async def spa_fallback(request: Request, full_path: str):
+    file_path = os.path.join("static", full_path)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
+    return FileResponse("static/index.html")
