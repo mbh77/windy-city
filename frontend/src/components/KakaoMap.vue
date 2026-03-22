@@ -427,7 +427,8 @@ function goToMyLocation() {
     },
     () => {
       alert('위치 정보를 가져올 수 없습니다. 위치 권한을 확인해주세요.')
-    }
+    },
+    { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
   )
 }
 
