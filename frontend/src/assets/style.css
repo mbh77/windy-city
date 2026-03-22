@@ -97,6 +97,17 @@ a { text-decoration: none; }
   pointer-events: none;
 }
 
+/* ── 내 위치 버튼 ── */
+.my-location-btn {
+  position: absolute; top: 12px; right: 12px; z-index: 5;
+  width: 36px; height: 36px; border-radius: 8px;
+  background: #fff; border: 1px solid #E0D5C8;
+  font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.my-location-btn:hover { background: #F8F4F0; }
+
 /* ── 카테고리 칩 ── */
 .category-bar {
   position: absolute; top: 12px; left: 12px; z-index: 5;
