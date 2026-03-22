@@ -17,7 +17,7 @@
           {{ DIFFICULTY_LABELS[event.difficulty] }}
         </span>
         <h2 style="margin-top:8px">{{ event.title }}</h2>
-        <p v-if="event.description" style="margin:8px 0;color:#bbb;font-size:0.85rem;white-space:pre-wrap">{{ event.description }}</p>
+        <div v-if="event.description" class="markdown-body" style="margin:8px 0;font-size:0.85rem;" v-html="renderMarkdown(event.description)"></div>
 
         <!-- 이미지 갤러리 -->
         <ImageGallery :images="event.media || []" />        
@@ -81,6 +81,35 @@ import { formatDate } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import ImageGallery from './ImageGallery.vue'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
+
+marked.setOptions({ breaks: true })
+
+function embedYouTube(html) {
+  const ytRegex = /<a[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^"]*"[^>]*>[^<]*<\/a>/g
+  html = html.replace(ytRegex, (m, id) => `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`)
+  const ytText = /(?:<p>)?(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^\s<]*)(?:<\/p>)?/g
+  html = html.replace(ytText, (m, u, id) => m.includes('<iframe') ? m : `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`)
+  return html
+}
+
+function embedInstagram(html) {
+  const igRegex = /(?:<a[^>]*href=")?https?:\/\/(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)\/?[^"<\s]*"?[^<]*(?:<\/a>)?/g
+  html = html.replace(igRegex, (m, type, code) => `<div class="embed-video"><iframe src="https://www.instagram.com/${type}/${code}/embed" frameborder="0" scrolling="no"></iframe></div>`)
+  return html
+}
+
+function renderMarkdown(content) {
+  if (!content) return ''
+  let html = marked(content)
+  html = embedYouTube(html)
+  html = embedInstagram(html)
+  return DOMPurify.sanitize(html, {
+    ADD_TAGS: ['iframe'],
+    ADD_ATTR: ['allowfullscreen', 'frameborder', 'src', 'scrolling'],
+  })
+}
 
 const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' }
 
