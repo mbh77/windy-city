@@ -1,5 +1,6 @@
 <template>
   <div id="map" :class="{ picking: isPicking }"></div>
+  <button class="my-location-btn" @click="goToMyLocation" title="내 위치">📍</button>
 </template>
 
 <script setup>
@@ -7,11 +8,12 @@ import { onMounted, watch } from 'vue'
 import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
 import { formatDate } from '../utils/api.js'
-import { VENUE_TYPE_LABELS } from '../utils/constants.js'
+import { VENUE_TYPE_LABELS, GENRE_LABELS } from '../utils/constants.js'
 import markerClubImg from '@/assets/maker_club.png'
 import markerSchoolImg from '@/assets/maker_shcool.png'
 import markerPracticeImg from '@/assets/maker_practice.png'
 import markerEventImg from '@/assets/maker_event.png'
+import defaultThumbImg from '@/assets/camera.png'
 
 const emit = defineEmits(['markerClick', 'venueMarkerClick', 'locationPicked', 'boundsChanged'])
 const props = defineProps({
@@ -31,8 +33,6 @@ let eventMarkers = []
 let venueMarkers = []
 let tempMarker = null
 let activeInfowindow = null
-let eventClusterer = null
-let venueClusterer = null
 
 // 카테고리별 마커 이미지 매핑
 const markerImageSrc = {
@@ -102,6 +102,23 @@ function getMarkerImage(colorOrType, size = 'small') {
   return markerImages[key] || null
 }
 
+// 말풍선 클릭 → 상세 보기 (글로벌 함수)
+const infoItemStore = {}
+function closeAllInfowindows() {
+  eventInfowindows.forEach(iw => iw.close())
+  venueInfowindows.forEach(iw => iw.close())
+  activeInfowindow = null
+}
+window.__windycity_closeInfowindows = closeAllInfowindows
+
+window.__windycity_infoClick = (key) => {
+  const item = infoItemStore[key]
+  if (!item) return
+  closeAllInfowindows()
+  if (item.type === 'event') emit('markerClick', item.data)
+  else emit('venueMarkerClick', item.data)
+}
+
 // 선택된 마커 추적
 let selectedMarker = null
 let selectedMarkerColor = null
@@ -151,31 +168,6 @@ onMounted(async () => {
     level: 7,
   })
 
-  // 클러스터러 생성
-  eventClusterer = new window.kakao.maps.MarkerClusterer({
-    map: map,
-    averageCenter: true,
-    minLevel: 4,
-    styles: [{
-      width: '36px', height: '36px',
-      background: '#e74c3c', color: '#fff',
-      borderRadius: '18px', textAlign: 'center', lineHeight: '36px',
-      fontSize: '13px', fontWeight: 'bold'
-    }]
-  })
-
-  venueClusterer = new window.kakao.maps.MarkerClusterer({
-    map: map,
-    averageCenter: true,
-    minLevel: 4,
-    styles: [{
-      width: '36px', height: '36px',
-      background: '#9b59b6', color: '#fff',
-      borderRadius: '18px', textAlign: 'center', lineHeight: '36px',
-      fontSize: '13px', fontWeight: 'bold'
-    }]
-  })
-
   // 지도 영역 변경 시 bounds 전달
   function emitBounds() {
     const bounds = map.getBounds()
@@ -203,7 +195,7 @@ onMounted(async () => {
   // 지도 클릭 → 위치 선택 모드
   window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
     document.activeElement.blur()
-    if (activeInfowindow) { activeInfowindow.close(); activeInfowindow = null }
+    closeAllInfowindows()
     deselectMarker()
     if (!props.isPicking) return
     const latlng = mouseEvent.latLng
@@ -238,21 +230,17 @@ watch(venues, (vns) => {
 
 // 카테고리 표시/숨김
 watch(() => props.visibleCategories, (cats) => {
-  if (eventClusterer) {
-    eventClusterer.clear()
-    if (cats.event) eventClusterer.addMarkers(eventMarkers)
-  }
-  if (venueClusterer) {
-    venueClusterer.clear()
-    const visibleMarkers = venueMarkers.filter(m => cats[m._venueType])
-    venueClusterer.addMarkers(visibleMarkers)
-  }
+  eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
+  venueMarkers.forEach(m => m.setMap(cats[m._venueType] ? map : null))
 }, { deep: true })
+
+let eventInfowindows = []
+let venueInfowindows = []
 
 function renderEventMarkers(evts) {
   eventMarkers.forEach(m => m.setMap(null))
-  if (eventClusterer) eventClusterer.clear()
   eventMarkers = []
+  eventInfowindows = []
 
   evts.forEach(ev => {
     const pos = new window.kakao.maps.LatLng(ev.latitude, ev.longitude)
@@ -261,12 +249,21 @@ function renderEventMarkers(evts) {
       image: getMarkerImage(eventColor),
     })
 
+    const thumb = ev.media?.[0]?.url
+    const genres = (ev.dance_genres || []).map(g => GENRE_LABELS[g] || g).join(' · ')
+    const infoKey = `event_${ev.id}`
+    infoItemStore[infoKey] = { type: 'event', data: ev }
     const infoContent = `
-      <div style="padding:6px 10px;font-size:13px;white-space:nowrap">
-        <strong>${ev.title}</strong><br/>
-        <span style="color:#888;font-size:11px">${formatDate(ev.start_date)}</span>
+      <div onclick="window.__windycity_infoClick('${infoKey}')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;white-space:nowrap;cursor:pointer">
+        <img src="${thumb || defaultThumbImg}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;background:#EDE5DB;" />
+        <div>
+          <strong>${ev.title}</strong><br/>
+          <span style="color:#888;font-size:11px">${formatDate(ev.start_date)}</span>
+          ${genres ? `<br/><span style="font-size:10px;color:#5BA89E">${genres}</span>` : ''}
+        </div>
       </div>`
     const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent })
+    eventInfowindows.push(infowindow)
 
     window.kakao.maps.event.addListener(marker, 'mouseover', () => {
       if (!('ontouchstart' in window)) {
@@ -284,15 +281,15 @@ function renderEventMarkers(evts) {
 
       if ('ontouchstart' in window) {
         if (activeInfowindow === infowindow) {
+          closeAllInfowindows()
           emit('markerClick', ev)
-          infowindow.close()
-          activeInfowindow = null
         } else {
-          if (activeInfowindow) activeInfowindow.close()
+          closeAllInfowindows()
           infowindow.open(map, marker)
           activeInfowindow = infowindow
         }
       } else {
+        closeAllInfowindows()
         emit('markerClick', ev)
       }
     })
@@ -304,18 +301,15 @@ function renderEventMarkers(evts) {
       selectedMarkerColor = eventColor
     }
 
+    if (props.visibleCategories.event) marker.setMap(map)
     eventMarkers.push(marker)
   })
-
-  if (eventClusterer && props.visibleCategories.event) {
-    eventClusterer.addMarkers(eventMarkers)
-  }
 }
 
 function renderVenueMarkers(vns) {
   venueMarkers.forEach(m => m.setMap(null))
-  if (venueClusterer) venueClusterer.clear()
   venueMarkers = []
+  venueInfowindows = []
 
   vns.forEach(v => {
     const pos = new window.kakao.maps.LatLng(v.latitude, v.longitude)
@@ -327,12 +321,21 @@ function renderVenueMarkers(vns) {
     marker._venueType = v.venue_type
 
     const typeLabel = VENUE_TYPE_LABELS[v.venue_type] || ''
+    const thumb = v.media?.[0]?.url
+    const vGenres = (v.dance_genres || []).map(g => GENRE_LABELS[g] || g).join(' · ')
+    const infoKey = `venue_${v.id}`
+    infoItemStore[infoKey] = { type: 'venue', data: v }
     const infoContent = `
-      <div style="padding:6px 10px;font-size:13px;white-space:nowrap">
-        <span style="color:${color};font-size:11px;font-weight:600">${typeLabel}</span><br/>
-        <strong>${v.name}</strong>
+      <div onclick="window.__windycity_infoClick('${infoKey}')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;white-space:nowrap;cursor:pointer">
+        <img src="${thumb || defaultThumbImg}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;background:#EDE5DB;" />
+        <div>
+          <span style="color:${color};font-size:11px;font-weight:600">${typeLabel}</span><br/>
+          <strong>${v.name}</strong>
+          ${vGenres ? `<br/><span style="font-size:10px;color:#5BA89E">${vGenres}</span>` : ''}
+        </div>
       </div>`
     const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent })
+    venueInfowindows.push(infowindow)
 
     window.kakao.maps.event.addListener(marker, 'mouseover', () => {
       if (!('ontouchstart' in window)) {
@@ -350,15 +353,15 @@ function renderVenueMarkers(vns) {
 
       if ('ontouchstart' in window) {
         if (activeInfowindow === infowindow) {
+          closeAllInfowindows()
           emit('venueMarkerClick', v)
-          infowindow.close()
-          activeInfowindow = null
         } else {
-          if (activeInfowindow) activeInfowindow.close()
+          closeAllInfowindows()
           infowindow.open(map, marker)
           activeInfowindow = infowindow
         }
       } else {
+        closeAllInfowindows()
         emit('venueMarkerClick', v)
       }
     })
@@ -370,28 +373,20 @@ function renderVenueMarkers(vns) {
       selectedMarkerColor = color
     }
 
+    if (props.visibleCategories[v.venue_type]) marker.setMap(map)
     venueMarkers.push(marker)
   })
-
-  if (venueClusterer) {
-    const visibleMarkers = venueMarkers.filter(m => props.visibleCategories[m._venueType])
-    venueClusterer.addMarkers(visibleMarkers)
-  }
 }
 
 // 위치 선택 모드 전환 시 마커 숨김/복원
 watch(() => props.isPicking, (picking) => {
   if (picking) {
-    if (eventClusterer) eventClusterer.clear()
-    if (venueClusterer) venueClusterer.clear()
+    eventMarkers.forEach(m => m.setMap(null))
+    venueMarkers.forEach(m => m.setMap(null))
   } else {
-    if (eventClusterer && props.visibleCategories.event) {
-      eventClusterer.addMarkers(eventMarkers)
-    }
-    if (venueClusterer) {
-      const visibleMarkers = venueMarkers.filter(m => props.visibleCategories[m._venueType])
-      venueClusterer.addMarkers(visibleMarkers)
-    }
+    const cats = props.visibleCategories
+    eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
+    venueMarkers.forEach(m => m.setMap(cats[m._venueType] ? map : null))
     if (tempMarker) { tempMarker.setMap(null); tempMarker = null }
   }
 })
@@ -414,6 +409,26 @@ function selectMarkerById(id, type) {
     const c = type === 'event' ? eventColor : (venueColors[items[idx].venue_type] || '#999')
     selectMarker(markers[idx], c, id, type)
   }
+}
+
+function goToMyLocation() {
+  if (!navigator.geolocation) {
+    alert('이 브라우저에서는 위치 서비스를 지원하지 않습니다')
+    return
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude
+      const lng = pos.coords.longitude
+      if (map) {
+        map.setLevel(4)
+        map.panTo(new window.kakao.maps.LatLng(lat, lng))
+      }
+    },
+    () => {
+      alert('위치 정보를 가져올 수 없습니다. 위치 권한을 확인해주세요.')
+    }
+  )
 }
 
 defineExpose({ panTo, clearTempMarker, renderEventMarkers, renderVenueMarkers, selectMarkerById })

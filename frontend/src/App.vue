@@ -3,6 +3,7 @@
     :showSearch="isMainPage"
     @authClick="handleAuthClick"
     @placeSelect="handlePlaceSelect"
+    @click="closeMapInfowindows"
   />
   <router-view v-slot="{ Component }">
     <component :is="Component" ref="routerViewRef" />
@@ -30,5 +31,9 @@ function handlePlaceSelect(place) {
   if (routerViewRef.value?.handlePlaceSelect) {
     routerViewRef.value.handlePlaceSelect(place)
   }
+}
+
+function closeMapInfowindows() {
+  window.__windycity_closeInfowindows?.()
 }
 </script>
