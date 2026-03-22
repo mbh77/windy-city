@@ -16,6 +16,9 @@ VERIFY_CODE_EXPIRE_MINUTES = 10
 # 금지 닉네임 목록
 RESERVED_NICKNAMES = ['admin', 'administrator', '관리자', '운영자', '바람난도시', 'windycity', '어드민']
 
+# 고스트 계정 이메일 (탈퇴 시 콘텐츠 이전용)
+GHOST_EMAIL = 'ghost@windycity.internal'
+
 
 @router.post("/register", status_code=201)
 def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -23,6 +26,9 @@ def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
     # 금지 닉네임 확인
     if user_data.nickname.lower().strip() in RESERVED_NICKNAMES:
         raise HTTPException(status_code=400, detail="사용할 수 없는 닉네임입니다")
+    # 고스트 계정 이메일 차단
+    if user_data.email == GHOST_EMAIL:
+        raise HTTPException(status_code=400, detail="사용할 수 없는 이메일입니다")
     # 이메일 중복 확인
     existing = db.query(models.User).filter(models.User.email == user_data.email).first()
     if existing:
@@ -138,21 +144,26 @@ def get_me(current_user: models.User = Depends(auth_utils.get_current_user)):
 
 @router.delete("/me", status_code=200)
 def delete_me(current_user: models.User = Depends(auth_utils.get_current_user), db: Session = Depends(get_db)):
-    """회원 탈퇴 — 계정 비활성화, 작성물은 유지"""
+    """회원 탈퇴 — 콘텐츠를 고스트 계정으로 이전 후 계정 삭제"""
     if current_user.is_admin:
         raise HTTPException(status_code=400, detail="관리자 계정은 탈퇴할 수 없습니다")
 
-    user = db.query(models.User).filter(models.User.id == current_user.id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다")
+    user_id = current_user.id
 
-    user.nickname = "탈퇴한 사용자"
-    user.email = f"deleted_{user.id}@deleted"
-    user.hashed_password = "WITHDRAWN"
-    user.is_verified = False
-    user.is_organizer = False
-    user.verify_code = None
-    user.verify_code_expires = None
+    # 고스트 계정 조회
+    ghost = db.query(models.User).filter(models.User.email == GHOST_EMAIL).first()
+    if not ghost:
+        raise HTTPException(status_code=500, detail="시스템 오류: 고스트 계정이 없습니다")
+
+    # 작성물을 고스트 계정으로 이전
+    db.query(models.Event).filter(models.Event.organizer_id == user_id).update({"organizer_id": ghost.id})
+    db.query(models.Venue).filter(models.Venue.owner_id == user_id).update({"owner_id": ghost.id})
+    db.query(models.Post).filter(models.Post.author_id == user_id).update({"author_id": ghost.id})
+    db.query(models.Comment).filter(models.Comment.author_id == user_id).update({"author_id": ghost.id})
+
+    # 회원 레코드 완전 삭제
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    db.delete(user)
     db.commit()
 
     return {"message": "회원 탈퇴가 완료되었습니다"}
