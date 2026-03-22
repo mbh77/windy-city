@@ -1,10 +1,10 @@
 <template>
   <div id="map" :class="{ picking: isPicking }"></div>
-  <button class="my-location-btn" @click="goToMyLocation" title="내 위치">📍</button>
+  <button class="my-location-btn" :class="{ locating: isLocating }" @click="goToMyLocation" title="내 위치" :disabled="isLocating">{{ isLocating ? '⏳' : '📍' }}</button>
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
 import { formatDate } from '../utils/api.js'
@@ -411,13 +411,17 @@ function selectMarkerById(id, type) {
   }
 }
 
+const isLocating = ref(false)
+
 function goToMyLocation() {
   if (!navigator.geolocation) {
     alert('이 브라우저에서는 위치 서비스를 지원하지 않습니다')
     return
   }
+  isLocating.value = true
   navigator.geolocation.getCurrentPosition(
     (pos) => {
+      isLocating.value = false
       const lat = pos.coords.latitude
       const lng = pos.coords.longitude
       if (map) {
@@ -426,6 +430,7 @@ function goToMyLocation() {
       }
     },
     () => {
+      isLocating.value = false
       alert('위치 정보를 가져올 수 없습니다. 위치 권한을 확인해주세요.')
     },
     { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
