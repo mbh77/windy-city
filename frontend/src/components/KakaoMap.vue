@@ -119,6 +119,34 @@ window.__windycity_infoClick = (key) => {
   else emit('venueMarkerClick', item.data)
 }
 
+window.__windycity_badgeClick = (key) => {
+  const item = infoItemStore[key]
+  if (!item || item.type !== 'badge') return
+  closeAllInfowindows()
+  const { group, lat, lng } = item
+  const listItems = group.map(e => {
+    const listKey = `event_${e.id}`
+    infoItemStore[listKey] = { type: 'event', data: e }
+    const listThumb = e.media?.[0]?.url
+    return `<div onclick="window.__windycity_infoClick('${listKey}')" style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;border-bottom:1px solid #EDE5DB;">
+      <img src="${listThumb || defaultThumbImg}" style="width:36px;height:36px;border-radius:4px;object-fit:cover;background:#EDE5DB;" />
+      <div>
+        <strong style="font-size:12px;">${e.title}</strong><br/>
+        <span style="color:#888;font-size:10px">${formatDate(e.start_date)}</span>
+      </div>
+    </div>`
+  }).join('')
+  const groupContent = `<div style="padding:8px 10px;font-size:13px;max-width:250px;max-height:200px;overflow-y:auto;">
+    <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 이벤트 ${group.length}건</div>
+    ${listItems}
+  </div>`
+  const pos = new window.kakao.maps.LatLng(lat, lng)
+  const groupInfowindow = new window.kakao.maps.InfoWindow({ content: groupContent, position: pos })
+  groupInfowindow.open(map)
+  activeInfowindow = groupInfowindow
+  eventInfowindows.push(groupInfowindow)
+}
+
 // 선택된 마커 추적
 let selectedMarker = null
 let selectedMarkerColor = null
@@ -354,9 +382,11 @@ function renderEventMarkers(evts) {
     if (group.length >= 2 && !shownBadgeKeys.has(key)) {
       shownBadgeKeys.add(key)
       const pos = new window.kakao.maps.LatLng(ev.latitude, ev.longitude)
+      const badgeKey = `badge_${key}`
+      infoItemStore[badgeKey] = { type: 'badge', group, lat: ev.latitude, lng: ev.longitude }
       const badge = new window.kakao.maps.CustomOverlay({
         position: pos,
-        content: `<div style="background:#E74C3C;color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;line-height:20px;font-size:11px;font-weight:700;border:2px solid #fff;transform:translate(12px,-12px);pointer-events:none;">${group.length}</div>`,
+        content: `<div onclick="window.__windycity_badgeClick('${badgeKey}')" style="background:#E74C3C;color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;line-height:20px;font-size:11px;font-weight:700;border:2px solid #fff;transform:translate(12px,-12px);cursor:pointer;">${group.length}</div>`,
         yAnchor: 1,
         xAnchor: 0,
         zIndex: 10,
