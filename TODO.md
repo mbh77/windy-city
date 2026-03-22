@@ -210,12 +210,13 @@
 ## P-ADS — 수익화 (Google AdSense)
 
 ### Phase 1: 가입 및 승인
-- ⬜ **ADS-001** AdSense 가입 신청
-  - Google AdSense 사이트에서 windycity.co.kr 등록
-  - 승인 심사 대기 (1~14일)
-- ⬜ **ADS-002** 승인 확인 코드 삽입
-  - Google이 제공하는 `<script>` 코드를 `frontend/index.html`의 `<head>`에 삽입
-  - prod 빌드 + 배포
+- ✅ **ADS-001** AdSense 가입 신청
+  - Google AdSense 사이트에서 windycity.co.kr 등록 (2026-03-22)
+  - 승인 심사 대기 중 (1~14일)
+- ✅ **ADS-002** 승인 확인 코드 + ads.txt 삽입
+  - `<script>` 코드를 `frontend/index.html`의 `<head>`에 삽입
+  - `static/ads.txt` 생성 (dev/prod)
+  - GDPR 동의 메시지 설정 완료
 
 ### Phase 2: 광고 배치
 - ⬜ **ADS-003** 사이드바 하단 광고
