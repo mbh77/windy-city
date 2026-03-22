@@ -43,6 +43,13 @@ def search(
 
     results = []
 
+    def get_media(entity_type, entity_id):
+        media = db.query(models.Media).filter(
+            models.Media.entity_type == entity_type,
+            models.Media.entity_id == entity_id,
+        ).order_by(models.Media.sort_order).all()
+        return [{"id": m.id, "url": m.url, "media_type": m.media_type} for m in media]
+
     for e in events:
         genres = [dg.dance_genre for dg in e.dance_genres]
         results.append({
@@ -60,6 +67,7 @@ def search(
             "dance_genres": genres,
             "difficulty": e.difficulty,
             "price": e.price,
+            "media": get_media("event", e.id),
         })
 
     for v in venues:
@@ -74,6 +82,7 @@ def search(
             "latitude": v.latitude,
             "longitude": v.longitude,
             "dance_genres": genres,
+            "media": get_media("venue", v.id),
         })
 
     return results    

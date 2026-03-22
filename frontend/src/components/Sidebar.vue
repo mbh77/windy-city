@@ -24,27 +24,38 @@
         <span>검색 결과 {{ filteredSearchResults.length }}건</span>
       </div>
       <ul class="sidebar-list">
-        <li 
+        <li
           v-for="item in filteredSearchResults"
           :key="item.item_type + '-' + item.id"
+          class="card-with-thumb"
           @click="handleSearchClick(item)"
         >
-          <span v-if="item.item_type === 'event'" :class="['event-type-badge', `type-${item.event_type}`]">
-            {{  TYPE_LABELS[item.event_type] }}
-          </span>
-          <span v-else :class="['venue-type-badge', `vtype-${item.venue_type}`]">
-            {{  VENUE_TYPE_LABELS[item.venue_type] }}
-          </span>
-          <span
-            v-for="g in item.dance_genres || []"
-            :key="g"
-            :class="['genre-badge', `genre-${g}`]"
-          >
-            {{ GENRE_LABELS[g] }}
-          </span>
-          <div class="item-title">{{ item.item_type === 'event' ? item.title : item.name }}</div>
-          <div class="item-meta">{{ item.item_type === 'event' ? item.location_name : item.address }}</div>
-          <div v-if="item.item_type === 'event'" class="item-meta">{{ formatDate(item.start_date) }}</div>
+          <img :src="item.media?.[0]?.url || (item.item_type === 'event' ? markerEventImg : (venueDefaultImg[item.venue_type] || markerClubImg))" class="card-thumb" />
+          <div class="card-info">
+            <div class="card-line1">
+              <span v-if="item.item_type === 'event'" :class="['event-type-badge', `type-${item.event_type}`]">
+                {{  TYPE_LABELS[item.event_type] }}
+              </span>
+              <span v-else :class="['venue-type-badge', `vtype-${item.venue_type}`]">
+                {{  VENUE_TYPE_LABELS[item.venue_type] }}
+              </span>
+              <span
+                v-for="g in item.dance_genres || []"
+                :key="g"
+                :class="['genre-badge', `genre-${g}`]"
+              >
+                {{ GENRE_LABELS[g] }}
+              </span>
+              <span class="item-title">{{ item.item_type === 'event' ? item.title : item.name }}</span>
+            </div>
+            <div class="card-line2">
+              <span class="item-meta">{{ item.item_type === 'event' ? item.location_name : item.address }}</span>
+              <template v-if="item.item_type === 'event'">
+                <span class="card-dot">·</span>
+                <span class="item-meta">{{ formatDate(item.start_date) }}</span>
+              </template>
+            </div>
+          </div>
         </li>
         <li v-if="filteredSearchResults.length === 0" class="empty-state">
           <div class="empty-icon">🔍</div>
@@ -104,21 +115,24 @@
           </div>
         </div>
         <ul class="sidebar-list">
-          <li v-for="ev in filteredEvents" :key="ev.id" class="card-item" @click="$emit('selectEvent', ev)">
-            <div class="card-line1">
-              <span :class="['event-type-badge', `type-${ev.event_type}`]">{{ TYPE_LABELS[ev.event_type] }}</span>
-              <span
-                v-for="g in ev.dance_genres || []"
-                :key="g"
-                :class="['genre-badge', `genre-${g}`]"
-              >{{ GENRE_LABELS[g] }}</span>
-              <span class="item-title">{{ ev.title }}</span>
-            </div>
-            <div class="card-line2">
-              <span class="item-meta">{{ ev.location_name }}</span>
-              <span class="card-dot">·</span>
-              <span class="item-meta">{{ ev.is_recurring ? formatRecurringSchedule(ev) : formatDate(ev.start_date) }}</span>
-              <span v-if="ev.is_recurring" class="recurring-badge">🔄 {{ formatRecurring(ev.recurrence_rule) }}</span>
+          <li v-for="ev in filteredEvents" :key="ev.id" class="card-item card-with-thumb" @click="$emit('selectEvent', ev)">
+            <img :src="ev.media?.[0]?.url || markerEventImg" class="card-thumb" />
+            <div class="card-info">
+              <div class="card-line1">
+                <span :class="['event-type-badge', `type-${ev.event_type}`]">{{ TYPE_LABELS[ev.event_type] }}</span>
+                <span
+                  v-for="g in ev.dance_genres || []"
+                  :key="g"
+                  :class="['genre-badge', `genre-${g}`]"
+                >{{ GENRE_LABELS[g] }}</span>
+                <span class="item-title">{{ ev.title }}</span>
+              </div>
+              <div class="card-line2">
+                <span class="item-meta">{{ ev.location_name }}</span>
+                <span class="card-dot">·</span>
+                <span class="item-meta">{{ ev.is_recurring ? formatRecurringSchedule(ev) : formatDate(ev.start_date) }}</span>
+                <span v-if="ev.is_recurring" class="recurring-badge">🔄 {{ formatRecurring(ev.recurrence_rule) }}</span>
+              </div>
             </div>
           </li>
           <li v-if="filteredEvents.length === 0" class="empty-state">
@@ -133,18 +147,21 @@
       <!-- 장소 탭 -->
       <template v-if="activeTab === 'venues'">
         <ul class="sidebar-list">
-          <li v-for="v in visibleVenues" :key="v.id" class="card-item" @click="$emit('selectVenue', v)">
-            <div class="card-line1">
-              <span :class="['venue-type-badge', `vtype-${v.venue_type}`]">{{ VENUE_TYPE_LABELS[v.venue_type] }}</span>
-              <span
-                v-for="g in v.dance_genres || []"
-                :key="g"
-                :class="['genre-badge', `genre-${g}`]"
-              >{{ GENRE_LABELS[g] }}</span>
-              <span class="item-title">{{ v.name }}</span>
-            </div>
-            <div class="card-line2">
-              <span v-if="v.address" class="item-meta">{{ v.address }}</span>
+          <li v-for="v in visibleVenues" :key="v.id" class="card-item card-with-thumb" @click="$emit('selectVenue', v)">
+            <img :src="v.media?.[0]?.url || venueDefaultImg[v.venue_type] || markerClubImg" class="card-thumb" />
+            <div class="card-info">
+              <div class="card-line1">
+                <span :class="['venue-type-badge', `vtype-${v.venue_type}`]">{{ VENUE_TYPE_LABELS[v.venue_type] }}</span>
+                <span
+                  v-for="g in v.dance_genres || []"
+                  :key="g"
+                  :class="['genre-badge', `genre-${g}`]"
+                >{{ GENRE_LABELS[g] }}</span>
+                <span class="item-title">{{ v.name }}</span>
+              </div>
+              <div class="card-line2">
+                <span v-if="v.address" class="item-meta">{{ v.address }}</span>
+              </div>
             </div>
           </li>
           <li v-if="visibleVenues.length === 0" class="empty-state">
@@ -167,6 +184,12 @@ import { apiFetch, formatDate } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
+import markerClubImg from '@/assets/maker_club.png'
+import markerSchoolImg from '@/assets/maker_shcool.png'
+import markerPracticeImg from '@/assets/maker_practice.png'
+import markerEventImg from '@/assets/maker_event.png'
+
+const venueDefaultImg = { club: markerClubImg, academy: markerSchoolImg, practice_room: markerPracticeImg }
 
 const emit = defineEmits(['addEvent', 'selectEvent', 'addVenue', 'selectVenue', 'dateFilterChange'])
 const props = defineProps({

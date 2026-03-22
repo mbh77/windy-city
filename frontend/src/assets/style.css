@@ -203,6 +203,9 @@ a { text-decoration: none; }
 .sidebar-list .empty-msg:hover { background: transparent; }
 
 /* ── 카드 2줄 구조 ── */
+.card-with-thumb { display: flex; align-items: center; gap: 10px; }
+.card-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #EDE5DB; }
+.card-info { flex: 1; min-width: 0; }
 .card-line1 { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .card-line1 .item-title { margin-bottom: 0; }
 .card-line2 { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
@@ -256,6 +259,7 @@ a { text-decoration: none; }
   .sidebar-list li { padding: 6px 10px; }
   .sidebar-list .item-title { font-size: 0.8rem; margin-bottom: 0; }
   .sidebar-list .item-meta { font-size: 0.65rem; }
+  .card-thumb { width: 36px; height: 36px; border-radius: 6px; }
   .card-line2 { margin-top: 2px; }
   .event-type-badge, .venue-type-badge { font-size: 0.6rem; padding: 1px 4px; }
   .genre-badge { font-size: 0.55rem; padding: 0px 4px; }
