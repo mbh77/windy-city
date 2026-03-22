@@ -31,8 +31,6 @@ let eventMarkers = []
 let venueMarkers = []
 let tempMarker = null
 let activeInfowindow = null
-let eventClusterer = null
-let venueClusterer = null
 
 // 카테고리별 마커 이미지 매핑
 const markerImageSrc = {
@@ -151,31 +149,6 @@ onMounted(async () => {
     level: 7,
   })
 
-  // 클러스터러 생성
-  eventClusterer = new window.kakao.maps.MarkerClusterer({
-    map: map,
-    averageCenter: true,
-    minLevel: 4,
-    styles: [{
-      width: '36px', height: '36px',
-      background: '#e74c3c', color: '#fff',
-      borderRadius: '18px', textAlign: 'center', lineHeight: '36px',
-      fontSize: '13px', fontWeight: 'bold'
-    }]
-  })
-
-  venueClusterer = new window.kakao.maps.MarkerClusterer({
-    map: map,
-    averageCenter: true,
-    minLevel: 4,
-    styles: [{
-      width: '36px', height: '36px',
-      background: '#9b59b6', color: '#fff',
-      borderRadius: '18px', textAlign: 'center', lineHeight: '36px',
-      fontSize: '13px', fontWeight: 'bold'
-    }]
-  })
-
   // 지도 영역 변경 시 bounds 전달
   function emitBounds() {
     const bounds = map.getBounds()
@@ -238,20 +211,12 @@ watch(venues, (vns) => {
 
 // 카테고리 표시/숨김
 watch(() => props.visibleCategories, (cats) => {
-  if (eventClusterer) {
-    eventClusterer.clear()
-    if (cats.event) eventClusterer.addMarkers(eventMarkers)
-  }
-  if (venueClusterer) {
-    venueClusterer.clear()
-    const visibleMarkers = venueMarkers.filter(m => cats[m._venueType])
-    venueClusterer.addMarkers(visibleMarkers)
-  }
+  eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
+  venueMarkers.forEach(m => m.setMap(cats[m._venueType] ? map : null))
 }, { deep: true })
 
 function renderEventMarkers(evts) {
   eventMarkers.forEach(m => m.setMap(null))
-  if (eventClusterer) eventClusterer.clear()
   eventMarkers = []
 
   evts.forEach(ev => {
@@ -304,17 +269,13 @@ function renderEventMarkers(evts) {
       selectedMarkerColor = eventColor
     }
 
+    if (props.visibleCategories.event) marker.setMap(map)
     eventMarkers.push(marker)
   })
-
-  if (eventClusterer && props.visibleCategories.event) {
-    eventClusterer.addMarkers(eventMarkers)
-  }
 }
 
 function renderVenueMarkers(vns) {
   venueMarkers.forEach(m => m.setMap(null))
-  if (venueClusterer) venueClusterer.clear()
   venueMarkers = []
 
   vns.forEach(v => {
@@ -370,28 +331,20 @@ function renderVenueMarkers(vns) {
       selectedMarkerColor = color
     }
 
+    if (props.visibleCategories[v.venue_type]) marker.setMap(map)
     venueMarkers.push(marker)
   })
-
-  if (venueClusterer) {
-    const visibleMarkers = venueMarkers.filter(m => props.visibleCategories[m._venueType])
-    venueClusterer.addMarkers(visibleMarkers)
-  }
 }
 
 // 위치 선택 모드 전환 시 마커 숨김/복원
 watch(() => props.isPicking, (picking) => {
   if (picking) {
-    if (eventClusterer) eventClusterer.clear()
-    if (venueClusterer) venueClusterer.clear()
+    eventMarkers.forEach(m => m.setMap(null))
+    venueMarkers.forEach(m => m.setMap(null))
   } else {
-    if (eventClusterer && props.visibleCategories.event) {
-      eventClusterer.addMarkers(eventMarkers)
-    }
-    if (venueClusterer) {
-      const visibleMarkers = venueMarkers.filter(m => props.visibleCategories[m._venueType])
-      venueClusterer.addMarkers(visibleMarkers)
-    }
+    const cats = props.visibleCategories
+    eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
+    venueMarkers.forEach(m => m.setMap(cats[m._venueType] ? map : null))
     if (tempMarker) { tempMarker.setMap(null); tempMarker = null }
   }
 })
