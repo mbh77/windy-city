@@ -136,13 +136,19 @@ window.__windycity_badgeClick = (key) => {
       </div>
     </div>`
   }).join('')
-  const groupContent = `<div style="padding:8px 10px;font-size:13px;max-width:250px;max-height:200px;overflow-y:auto;">
+  const groupContent = `<div style="padding:8px 10px;font-size:13px;max-width:250px;overflow:hidden;">
     <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 이벤트 ${group.length}건</div>
-    ${listItems}
+    <div style="max-height:160px;overflow-y:auto;">
+      ${listItems}
+    </div>
+    <div style="height:1px;"></div>
   </div>`
-  const pos = new window.kakao.maps.LatLng(lat, lng)
-  const groupInfowindow = new window.kakao.maps.InfoWindow({ content: groupContent, position: pos })
-  groupInfowindow.open(map)
+  const anchorMarker = eventMarkers.find(m => {
+    const mp = m.getPosition()
+    return mp.getLat().toFixed(6) === lat.toFixed(6) && mp.getLng().toFixed(6) === lng.toFixed(6)
+  })
+  const groupInfowindow = new window.kakao.maps.InfoWindow({ content: groupContent })
+  groupInfowindow.open(map, anchorMarker || map)
   activeInfowindow = groupInfowindow
   eventInfowindows.push(groupInfowindow)
 }
@@ -338,9 +344,12 @@ function renderEventMarkers(evts) {
             </div>
           </div>`
         }).join('')
-        const groupContent = `<div style="padding:8px 10px;font-size:13px;max-width:250px;max-height:200px;overflow-y:auto;">
+        const groupContent = `<div style="padding:8px 10px;font-size:13px;max-width:250px;overflow:hidden;">
           <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 이벤트 ${group.length}건</div>
-          ${listItems}
+          <div style="max-height:160px;overflow-y:auto;">
+            ${listItems}
+          </div>          
+          <div style="height: 1px;"></div>
         </div>`
         const groupInfowindow = new window.kakao.maps.InfoWindow({ content: groupContent })
         groupInfowindow.open(map, marker)
