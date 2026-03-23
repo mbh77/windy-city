@@ -23,7 +23,10 @@
       <form v-if="mode === 'register'" @submit.prevent="handleRegister">
         <input v-model="regEmail" type="email" placeholder="이메일" required />
         <input v-model="regPassword" type="password" placeholder="비밀번호" required />
-        <input v-model="regNickname" type="text" placeholder="닉네임" required />
+        <div style="position:relative;">
+          <input v-model="regNickname" type="text" placeholder="닉네임" required @blur="checkNickname" />
+          <p v-if="nicknameMsg" class="form-error" :style="{ color: nicknameAvailable ? '#5BA89E' : '' }">{{ nicknameMsg }}</p>
+        </div>
         <!-- 주최자 권한은 관리자가 부여 (회원가입 시 비활성) -->
         <!-- <label class="checkbox-label">
           <input v-model="regIsOrganizer" type="checkbox" />
@@ -55,6 +58,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useAuth } from '../composables/useAuth.js'
+import { apiFetch } from '../utils/api.js'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -78,6 +82,8 @@ const regNickname = ref('')
 const regIsOrganizer = ref(false)
 const regError = ref('')
 const regLoading = ref(false)
+const nicknameMsg = ref('')
+const nicknameAvailable = ref(false)
 
 // 이메일 인증
 const pendingEmail = ref('')
@@ -99,6 +105,21 @@ watch(() => props.visible, (v) => {
 
 function handleClose() {
   emit('close')
+}
+
+async function checkNickname() {
+  const nick = regNickname.value.trim()
+  nicknameMsg.value = ''
+  nicknameAvailable.value = false
+  if (!nick) return
+  try {
+    const res = await apiFetch(`/api/auth/check-nickname?nickname=${encodeURIComponent(nick)}`)
+    const data = await res.json()
+    nicknameMsg.value = data.message
+    nicknameAvailable.value = data.available
+  } catch {
+    nicknameMsg.value = ''
+  }
 }
 
 async function handleLogin() {
@@ -123,6 +144,11 @@ async function handleLogin() {
 
 async function handleRegister() {
   regError.value = ''
+  await checkNickname()
+  if (nicknameMsg.value && !nicknameAvailable.value) {
+    regError.value = nicknameMsg.value
+    return
+  }
   regLoading.value = true
   try {
     const result = await register(regEmail.value, regPassword.value, regNickname.value, regIsOrganizer.value)
