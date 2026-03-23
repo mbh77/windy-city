@@ -26,6 +26,10 @@ def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
     # 금지 닉네임 확인
     if user_data.nickname.lower().strip() in RESERVED_NICKNAMES:
         raise HTTPException(status_code=400, detail="사용할 수 없는 닉네임입니다")
+    # 닉네임 중복 확인
+    nickname_exists = db.query(models.User).filter(models.User.nickname == user_data.nickname.strip()).first()
+    if nickname_exists and nickname_exists.email != user_data.email:
+        raise HTTPException(status_code=400, detail="이미 사용 중인 닉네임입니다")
     # 고스트 계정 이메일 차단
     if user_data.email == GHOST_EMAIL:
         raise HTTPException(status_code=400, detail="사용할 수 없는 이메일입니다")
@@ -114,6 +118,20 @@ def resend_code(data: schemas.ResendCode, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="인증 메일 발송에 실패했습니다")
 
     return {"message": "인증 코드가 재발송되었습니다"}
+
+
+@router.get("/check-nickname")
+def check_nickname(nickname: str, db: Session = Depends(get_db)):
+    """닉네임 중복 확인"""
+    nickname = nickname.strip()
+    if not nickname:
+        raise HTTPException(status_code=400, detail="닉네임을 입력해 주세요")
+    if nickname.lower() in RESERVED_NICKNAMES:
+        return {"available": False, "message": "사용할 수 없는 닉네임입니다"}
+    exists = db.query(models.User).filter(models.User.nickname == nickname).first()
+    if exists:
+        return {"available": False, "message": "이미 사용 중인 닉네임입니다"}
+    return {"available": True, "message": "사용 가능한 닉네임입니다"}
 
 
 @router.post("/login", response_model=schemas.Token)
