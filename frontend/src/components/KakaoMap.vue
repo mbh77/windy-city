@@ -130,14 +130,14 @@ window.__windycity_badgeClick = (key) => {
     const listThumb = e.media?.[0]?.url
     return `<div onclick="window.__windycity_infoClick('${listKey}')" style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;border-bottom:1px solid #EDE5DB;">
       <img src="${listThumb || defaultThumbImg}" style="width:36px;height:36px;border-radius:4px;object-fit:cover;background:#EDE5DB;" />
-      <div>
-        <strong style="font-size:12px;">${e.title}</strong><br/>
+      <div style="min-width:0;flex:1;overflow:hidden;">
+        <strong style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.title}</strong>
         <span style="color:#888;font-size:10px">${formatDate(e.start_date)}</span>
       </div>
     </div>`
   }).join('')
   const groupContent = `
-  <div style="padding:8px 10px;font-size:13px;max-width:320px;overflow:hidden;">
+    <div style="padding:8px 10px;font-size:13px;width:180px;overflow:hidden;">
     <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 이벤트 ${group.length}건</div>
     <div style="max-height:160px;overflow-y:auto;">
       ${listItems}
@@ -339,14 +339,14 @@ function renderEventMarkers(evts) {
           const listThumb = e.media?.[0]?.url
           return `<div onclick="window.__windycity_infoClick('${listKey}')" style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;border-bottom:1px solid #EDE5DB;">
             <img src="${listThumb || defaultThumbImg}" style="width:36px;height:36px;border-radius:4px;object-fit:cover;background:#EDE5DB;" />
-            <div>
-              <strong style="font-size:12px;">${e.title}</strong><br/>
+            <div style="min-width:0;flex:1;overflow:hidden;">
+              <strong style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.title}</strong>
               <span style="color:#888;font-size:10px">${formatDate(e.start_date)}</span>
             </div>
           </div>`
         }).join('')
         const groupContent = `
-        <div style="padding:8px 10px;font-size:13px;max-width:320px;overflow:hidden;">
+        <div style="padding:8px 10px;font-size:13px;width:180px;overflow:hidden;">
           <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 이벤트 ${group.length}건</div>
           <div style="max-height:160px;overflow-y:auto;">
             ${listItems}
