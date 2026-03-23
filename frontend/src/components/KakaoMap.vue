@@ -136,7 +136,8 @@ window.__windycity_badgeClick = (key) => {
       </div>
     </div>`
   }).join('')
-  const groupContent = `<div style="padding:8px 10px;font-size:13px;max-width:250px;overflow:hidden;">
+  const groupContent = `
+  <div style="padding:8px 10px;font-size:13px;max-width:320px;overflow:hidden;">
     <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 이벤트 ${group.length}건</div>
     <div style="max-height:160px;overflow-y:auto;">
       ${listItems}
@@ -344,7 +345,8 @@ function renderEventMarkers(evts) {
             </div>
           </div>`
         }).join('')
-        const groupContent = `<div style="padding:8px 10px;font-size:13px;max-width:250px;overflow:hidden;">
+        const groupContent = `
+        <div style="padding:8px 10px;font-size:13px;max-width:320px;overflow:hidden;">
           <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 이벤트 ${group.length}건</div>
           <div style="max-height:160px;overflow-y:auto;">
             ${listItems}
