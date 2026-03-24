@@ -76,41 +76,38 @@
 
 > 기존 모달 → 전용 페이지로 전환. 지도 모달은 간략 보기로 유지, 깊이 있는 보기/편집은 별도 페이지.
 
+### 이벤트 날짜/시간 분리
+- ✅ **UX-012** DB 스키마 변경 — `start_date`/`end_date` → `event_date`/`event_end_date`/`start_time`/`end_time` (dev DB 완료)
+- ✅ **UX-013** 백엔드 API 수정 — models, schemas, routers/events.py, routers/search.py
+- ⬜ **UX-014** 프론트 기존 화면 날짜 대응 — 사이드바, 모달 등에서 새 날짜 구조 표시
+- ⬜ **UX-015** 프론트 상세/목록 표시 — 시간 없으면 날짜만, 있으면 날짜+시간 표시
+
 ### 상세 페이지
-- ⬜ **UX-001** 이벤트 상세 페이지 (`/events/:id`) — URL 공유, SEO, 수정/삭제 버튼
-- ⬜ **UX-002** 장소 상세 페이지 (`/venues/:id`) — URL 공유, SEO, 수정/삭제 버튼
+- ✅ **UX-001** 이벤트 상세 페이지 (`/events/:id`) — views/events/EventDetailView.vue
+- ✅ **UX-002** 장소 상세 페이지 (`/venues/:id`) — views/venues/VenueDetailView.vue
 - ⬜ **UX-003** 이벤트 목록 페이지 (`/events`) — 게시판형 목록, 필터/정렬
 - ⬜ **UX-004** 장소 목록 페이지 (`/venues`) — 게시판형 목록, 필터/정렬
-- ⬜ **UX-005** 지도 모달 → 상세 페이지 연결 — 모달 내 "상세 보기" 링크 클릭 시 `/events/:id`로 이동
+- ✅ **UX-005** 지도 모달 → 상세 페이지 연결 — EventDetailModal, VenueDetailModal에 "상세 보기" 링크
 
 ### 등록/수정 전용 페이지
-- ⬜ **UX-006** 이벤트 등록 페이지 (`/events/new`) — 2단계 폼 + 미니 카카오맵 (위치 선택)
-  - 1단계 (필수): 제목, 장소/위치(미니맵 클릭+검색), 날짜, 이벤트 유형
-  - 2단계 (상세): 설명(마크다운+툴바), 춤 종류, 가격, 유형별 추가 정보, 반복 설정, 이미지
-  - 2단계 건너뛰고 바로 등록 가능
-  - 지도에서 진입 시: `/events/new?lat=...&lng=...&address=...` → 미니맵에 위치 미리 표시
-- ⬜ **UX-007** 이벤트 수정 페이지 (`/events/:id/edit`) — 등록과 동일 폼, 기존 데이터 프리필
-- ⬜ **UX-008** 장소 등록 페이지 (`/venues/new`) — 2단계 폼 + 미니 카카오맵
-  - 1단계 (필수): 이름, 장소 유형, 주소/위치(미니맵)
-  - 2단계 (상세): 설명(마크다운+툴바), 춤 종류, 운영시간, 시설 정보, 이미지
-- ⬜ **UX-009** 장소 수정 페이지 (`/venues/:id/edit`) — 등록과 동일 폼, 기존 데이터 프리필
+- 🚧 **UX-006** 이벤트 등록 페이지 (`/events/new`) — 2단계 폼 + 미니맵 + 마크다운 툴바
+  - ✅ 기본 구조, 미니맵, 위치 검색, 마크다운 에디터, 이미지 첨부
+  - ⬜ 2단계 유형별 추가 필드 (소셜 파티/워크샵 정보) template 채우기
+  - ⬜ 2단계 반복 이벤트 설정 template 채우기
+- ⬜ **UX-007** 이벤트 수정 페이지 (`/events/:id/edit`) — 라우팅 완료, 동작 테스트 필요
+- ⬜ **UX-008** 장소 등록 페이지 (`/venues/new`) — 2단계 폼 + 미니맵
+- ⬜ **UX-009** 장소 수정 페이지 (`/venues/:id/edit`)
 
 ### 기존 모달 정리
 - ⬜ **UX-010** 지도 모달 간소화 — 등록/수정 기능 제거, 간략 정보 + "상세 보기" 링크만 유지
 - ⬜ **UX-011** 기존 CreateEventModal / CreateVenueModal 제거 (전용 페이지로 대체 후)
 
-### 이벤트 날짜/시간 분리
-- ⬜ **UX-012** DB 스키마 변경 — 기존 `start_date`/`end_date` (DATETIME) → 날짜/시간 분리
-  - `event_date` DATE NOT NULL — 이벤트 날짜 (필수)
-  - `event_end_date` DATE NULL — 종료 날짜 (페스티벌 등 다일 이벤트만)
-  - `start_time` TIME NULL — 시작 시간 (옵션)
-  - `end_time` TIME NULL — 종료 시간 (옵션)
-  - 기존 데이터 마이그레이션: `DATE(start_date)` → `event_date`, `TIME(start_date)` → `start_time` 등
-  - 마이그레이션 후 기존 `start_date`/`end_date` 컬럼 제거
-- ⬜ **UX-013** 백엔드 API 수정 — 검색은 DATE만 사용 (`date_from`/`date_to` → `event_date` 비교)
-  - TIME 검색은 이후 별도 옵션으로 고려
-- ⬜ **UX-014** 프론트 등록/수정 폼 — 날짜(필수) + 시간(옵션) 입력 분리
-- ⬜ **UX-015** 프론트 상세/목록 표시 — 시간 없으면 날짜만 표시, 있으면 날짜+시간 표시
+### 코드 정리 (완료)
+- ✅ views 폴더 구조 정리 — board/, events/, venues/ 하위 폴더 분리
+- ✅ `utils/markdown.js` — renderMarkdown 공통화 (9개 파일 중복 제거)
+- ✅ `composables/useImageUpload.js` — 이미지 업로드/삭제/저장 공통화
+- ✅ `composables/useLocationSearch.js` — 카카오 장소 검색 공통화
+- ✅ `composables/useMarkdownEditor.js` — 마크다운 툴바 (B/I/링크/이미지/영상) 공통화
 
 ---
 

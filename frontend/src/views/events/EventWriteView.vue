@@ -163,18 +163,32 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiFetch } from '@/utils/api.js'
 import { TYPE_OPTIONS, GENRE_OPTIONS, DIFFICULTY_OPTIONS } from '@/utils/constants.js'
 import { useAuth } from '@/composables/useAuth.js'
 import { useEvents } from '@/composables/useEvents.js'
+import { useImageUpload } from '@/composables/useImageUpload.js'
+import { useLocationSearch } from '@/composables/useLocationSearch.js'
+import { useMarkdownEditor } from '@/composables/useMarkdownEditor.js'
 import { renderMarkdown } from '@/utils/markdown.js'
 
 const route = useRoute()
 const router = useRouter()
 const { currentUser } = useAuth()
 const { createEvent, updateEvent } = useEvents()
+
+// ===== 공통 composables =====
+const { uploadedImages, uploadError, handleImageUpload, removeImage, setExistingMedia, saveMedia } = useImageUpload()
+const { searchQuery, searchResults, searchStatus, searchLocation, clearSearch } = useLocationSearch()
+const {
+  descPreview, descArea, descImageInput, showVideoDialog, videoUrl,
+  insertBold, insertItalic, insertLink, triggerDescImage, uploadDescImage, insertVideo,
+} = useMarkdownEditor(
+  () => form.description,
+  (v) => { form.description = v },
+)
 
 // ===== 수정 모드 판별 =====
 const editId = computed(() => route.params.id || null)
@@ -215,9 +229,6 @@ const form = reactive({
 })
 
 const error = ref('')
-const searchQuery = ref('')
-const searchResults = ref([])
-const searchStatus = ref('')
 
 const DAY_OPTIONS = [
   { value: 'mon', label: '월' },
@@ -245,88 +256,6 @@ function addExtraDate() {
     form.extra_dates.push(newExtraDate.value)
     form.extra_dates.sort()
     newExtraDate.value = ''
-  }
-}
-
-// ===== 이미지 첨부 =====
-const uploadedImages = ref([])
-const uploadError = ref('')
-let existingMedia = []
-
-async function handleImageUpload(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  uploadError.value = ''
-
-  const maxSize = file.type === 'image/png' ? 10 * 1024 * 1024 : 3 * 1024 * 1024
-  if (file.size > maxSize) {
-    uploadError.value = file.type === 'image/png'
-      ? 'PNG 파일은 10MB 이하만 가능합니다'
-      : 'JPG/WEBP 파일은 3MB 이하만 가능합니다'
-    e.target.value = ''
-    return
-  }
-
-  const fd = new FormData()
-  fd.append('file', file)
-  const res = await apiFetch('/api/upload/image', { method: 'POST', body: fd })
-  if (res.ok) {
-    const data = await res.json()
-    uploadedImages.value.push({ url: data.url })
-  } else {
-    const err = await res.json()
-    uploadError.value = err.detail || '업로드에 실패했습니다'
-  }
-  e.target.value = ''
-}
-
-function removeImage(idx) {
-  uploadedImages.value.splice(idx, 1)
-}
-
-// ===== 마크다운 =====
-const descPreview = ref(false)
-const descArea = ref(null)
-const descImageInput = ref(null)
-const showVideoDialog = ref(false)
-const videoUrl = ref('')
-
-function insertAtCursor(before, after = '') {
-  const ta = descArea.value
-  if (!ta) return
-  const start = ta.selectionStart
-  const end = ta.selectionEnd
-  const selected = form.description.substring(start, end)
-  form.description = form.description.substring(0, start) + before + (selected || '') + after + form.description.substring(end)
-  const cursorPos = start + before.length + (selected || '').length
-  nextTick(() => { ta.focus(); ta.setSelectionRange(cursorPos, cursorPos) })
-}
-
-function insertBold() { insertAtCursor('**', '**') }
-function insertItalic() { insertAtCursor('*', '*') }
-function insertLink() { insertAtCursor('[링크 텍스트](', ')') }
-function triggerDescImage() { descImageInput.value?.click() }
-
-async function uploadDescImage(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  const fd = new FormData()
-  fd.append('file', file)
-  const res = await apiFetch('/api/upload/image', { method: 'POST', body: fd })
-  if (res.ok) {
-    const data = await res.json()
-    insertAtCursor(`![이미지](${data.url})`)
-  } else {
-    alert('이미지 업로드에 실패했습니다')
-  }
-  e.target.value = ''
-}
-
-function insertVideo() {
-  if (videoUrl.value.trim()) {
-    insertAtCursor(videoUrl.value.trim() + '\n')
-    videoUrl.value = ''
-    showVideoDialog.value = false
   }
 }
 
@@ -365,43 +294,26 @@ function initMinimap() {
   })
 }
 
-// ===== 위치 검색 =====
-function searchLocation() {
-  const query = searchQuery.value.trim()
-  if (!query) return
-  searchResults.value = []
-  searchStatus.value = '검색 중...'
-  const places = new window.kakao.maps.services.Places()
-  places.keywordSearch(query, (data, status) => {
-    if (status === window.kakao.maps.services.Status.OK) {
-      searchResults.value = data.slice(0, 5)
-      searchStatus.value = ''
-    } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
-      searchStatus.value = '검색 결과가 없습니다'
-    } else {
-      searchStatus.value = '검색에 실패했습니다'
-    }
-  })
+function moveMinimap(lat, lng) {
+  if (!minimap) return
+  const pos = new window.kakao.maps.LatLng(lat, lng)
+  minimap.setCenter(pos)
+  minimap.setLevel(3)
+  if (minimapMarker) {
+    minimapMarker.setPosition(pos)
+  } else {
+    minimapMarker = new window.kakao.maps.Marker({ position: pos, map: minimap })
+  }
 }
 
+// ===== 장소 선택 (검색 결과 클릭) =====
 function selectPlace(place) {
   form.latitude = parseFloat(place.y).toFixed(6)
   form.longitude = parseFloat(place.x).toFixed(6)
   form.address = place.road_address_name || place.address_name
   if (!form.location_name) form.location_name = place.place_name
-  searchResults.value = []
-  searchQuery.value = ''
-  searchStatus.value = ''
-  if (minimap) {
-    const pos = new window.kakao.maps.LatLng(place.y, place.x)
-    minimap.setCenter(pos)
-    minimap.setLevel(3)
-    if (minimapMarker) {
-      minimapMarker.setPosition(pos)
-    } else {
-      minimapMarker = new window.kakao.maps.Marker({ position: pos, map: minimap })
-    }
-  }
+  clearSearch()
+  moveMinimap(place.y, place.x)
 }
 
 // ===== 스텝 이동 =====
@@ -457,29 +369,13 @@ async function handleSubmit() {
     const result = await updateEvent(editId.value, body)
     if (!result.ok) { error.value = result.error; return }
     savedId = editId.value
-    // 수정 모드: 삭제된 기존 이미지 제거
-    const currentIds = uploadedImages.value.filter(img => img.id).map(img => img.id)
-    for (const m of existingMedia) {
-      if (!currentIds.includes(m.id)) {
-        await apiFetch(`/api/events/${savedId}/media/${m.id}`, { method: 'DELETE' })
-      }
-    }
   } else {
     const result = await createEvent(body)
     if (!result.ok) { error.value = result.error; return }
     savedId = result.eventId
   }
 
-  // 새로 추가된 이미지 등록
-  const newImages = uploadedImages.value.filter(img => !img.id)
-  for (let i = 0; i < newImages.length; i++) {
-    await apiFetch(`/api/events/${savedId}/media`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ media_type: 'image', url: newImages[i].url, sort_order: i }),
-    })
-  }
-
+  await saveMedia('events', savedId)
   router.push(`/events/${savedId}`)
 }
 
@@ -517,10 +413,7 @@ async function loadEvent() {
     skip_dates: e.recurrence_rule?.skip_dates || [],
     extra_dates: e.recurrence_rule?.extra_dates || [],
   })
-  uploadedImages.value = (e.media || [])
-    .filter(m => m.media_type === 'image')
-    .map(m => ({ id: m.id, url: m.url }))
-  existingMedia = e.media || []
+  setExistingMedia(e.media)
 }
 
 // ===== URL 쿼리에서 위치 로드 =====
