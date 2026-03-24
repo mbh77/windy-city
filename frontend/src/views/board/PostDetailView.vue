@@ -69,8 +69,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { apiJson } from '../utils/api.js'
-import { useAuth } from '../composables/useAuth.js'
+import { apiJson } from '@/utils/api.js'
+import { useAuth } from '@/composables/useAuth.js'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 

@@ -1,27 +1,41 @@
 <template>
-  <div v-if="visible" class="modal modal-detail" @click.self="$emit('close')">
-    <div class="modal-content">
-      <button class="modal-close" @click="$emit('close')">✕</button>
-      <template v-if="venue">
+  <div class="page-container">
+    <header class="page-header">
+      <router-link to="/" class="page-nav-btn">지도</router-link>
+      <a class="page-nav-btn" @click="$router.back()">뒤로</a>
+      <h1 class="page-title">장소 상세</h1>
+    </header>
+
+    <main class="page-body" v-if="venue">
+      <!-- 뱃지들 -->
+      <div class="badge-row">
         <span :class="['venue-type-badge', `vtype-${venue.venue_type}`]">
           {{ VENUE_TYPE_LABELS[venue.venue_type] }}
         </span>
-        <span
-          v-for="g in venue.dance_genres || []"
-          :key="g"
-          :class="['genre-badge', `genre-${g}`]"
-        >
+        <span v-for="g in venue.dance_genres || []" :key="g"
+              :class="['genre-badge', `genre-${g}`]">
           {{ GENRE_LABELS[g] }}
         </span>
-        <h2 style="margin-top:8px">{{ venue.name }}</h2>
+      </div>
 
-        <div v-if="venue.description" class="venue-desc markdown-body" v-html="renderMarkdown(venue.description)"></div>
+      <!-- 이름 -->
+      <h2 class="post-title">{{ venue.name }}</h2>
+      <div class="post-meta">
+        <span>{{ venue.owner_nickname || '-' }}</span>
+      </div>
 
-        <!-- 이미지 갤러리 -->
-        <ImageGallery :images="venue.media || []" />
+      <!-- 이미지 갤러리 -->
+      <ImageGallery :images="venue.media || []" />
 
+      <!-- 설명 (마크다운) -->
+      <div v-if="venue.description" class="post-body markdown-body"
+           v-html="renderMarkdown(venue.description)"></div>
+
+      <!-- 상세 정보 -->
+      <div class="detail-section">
         <div v-if="venue.address" class="detail-row">
-          <span class="detail-label">주소</span>{{ venue.address }}<span v-if="venue.address_detail"> {{ venue.address_detail }}</span>
+          <span class="detail-label">주소</span>{{ venue.address }}
+          <span v-if="venue.address_detail"> {{ venue.address_detail }}</span>
         </div>
         <div v-if="venue.phone" class="detail-row">
           <span class="detail-label">전화</span>{{ venue.phone }}
@@ -74,29 +88,28 @@
         <div v-if="venue.has_parking" class="detail-row">
           <span class="detail-label">주차</span>{{ venue.parking_info || '가능' }}
         </div>
+      </div>
 
-        <div class="detail-row">
-          <span class="detail-label">등록자</span>{{ venue.owner_nickname || '-' }}
-        </div>
+      <!-- 수정/삭제 (본인 또는 관리자) -->
+      <div class="post-actions" v-if="isOwner">
+        <router-link :to="`/venues/${venue.id}/edit`" class="btn-ghost">수정</router-link>
+        <button class="btn-danger" @click="handleDelete">삭제</button>
+      </div>
+    </main>
 
-        <div class="action-row">
-          <router-link :to="`/venues/${venue.id}`" class="btn-ghost">상세 보기</router-link>
-          <template v-if="isOwner">
-            <button class="btn-primary" @click="$emit('edit', venue)">수정</button>
-            <button class="btn-danger" @click="handleDelete">삭제</button>
-          </template>
-        </div>
-      </template>
-    </div>
+    <!-- 로딩/에러 -->
+    <div v-else-if="loading" class="page-body">로딩 중...</div>
+    <div v-else class="page-body">장소를 찾을 수 없습니다.</div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { VENUE_TYPE_LABELS, GENRE_LABELS } from '../utils/constants.js'
-import { useAuth } from '../composables/useAuth.js'
-import { useVenues } from '../composables/useVenues.js'
-import ImageGallery from './ImageGallery.vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { apiFetch } from '@/utils/api.js'
+import { VENUE_TYPE_LABELS, GENRE_LABELS } from '@/utils/constants.js'
+import { useAuth } from '@/composables/useAuth.js'
+import ImageGallery from '@/components/ImageGallery.vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 
@@ -127,22 +140,34 @@ function renderMarkdown(content) {
   })
 }
 
-const props = defineProps({
-  visible: { type: Boolean, default: false },
-  venue: { type: Object, default: null },
-})
-const emit = defineEmits(['close','edit'])
-
+const route = useRoute()
+const router = useRouter()
 const { currentUser } = useAuth()
-const { deleteVenue } = useVenues()
+
+const venue = ref(null)
+const loading = ref(true)
 
 const isOwner = computed(() => {
-  return currentUser.value && props.venue && (currentUser.value.id === props.venue.owner_id || currentUser.value.is_admin)
+  return currentUser.value && venue.value &&
+    (currentUser.value.id === venue.value.owner_id || currentUser.value.is_admin)
 })
+
+async function fetchVenue() {
+  try {
+    const res = await apiFetch(`/api/venues/${route.params.id}`)
+    if (res.ok) {
+      venue.value = await res.json()
+    }
+  } finally {
+    loading.value = false
+  }
+}
 
 async function handleDelete() {
   if (!confirm('장소를 삭제할까요?')) return
-  const ok = await deleteVenue(props.venue.id)
-  if (ok) emit('close')
+  const res = await apiFetch(`/api/venues/${venue.value.id}`, { method: 'DELETE' })
+  if (res.ok) router.push('/')
 }
+
+onMounted(fetchVenue)
 </script>
