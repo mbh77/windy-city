@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from datetime import datetime
+from datetime import datetime, date, time
 from typing import Optional, List, Dict, Any
 from models import EventType, DanceGenre, VenueType, DifficultyLevel
 
@@ -192,8 +192,10 @@ class EventCreate(BaseModel):
     address_detail: Optional[str] = None
     latitude: float
     longitude: float
-    start_date: datetime
-    end_date: Optional[datetime] = None
+    event_date: date
+    event_end_date: Optional[date] = None
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
     event_type: EventType = EventType.social
     dance_genres: List[DanceGenre] = []
 
@@ -230,8 +232,10 @@ class EventUpdate(BaseModel):
     address_detail: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
+    event_date: Optional[date] = None
+    event_end_date: Optional[date] = None
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
     event_type: Optional[EventType] = None
     dance_genres: Optional[List[DanceGenre]] = None
 
@@ -259,8 +263,10 @@ class EventResponse(BaseModel):
     address_detail: Optional[str] = None
     latitude: float
     longitude: float
-    start_date: datetime
-    end_date: Optional[datetime]
+    event_date: date
+    event_end_date: Optional[date] = None
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
     event_type: EventType
     dance_genres: List[DanceGenre] = []
 

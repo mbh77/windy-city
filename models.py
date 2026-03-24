@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Enum, JSON
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Enum, JSON, Date, Time
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -156,8 +156,10 @@ class Event(Base):
     address_detail = Column(String(255))
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
-    start_date = Column(DateTime, nullable=False)
-    end_date = Column(DateTime)
+    event_date = Column(Date, nullable=False)
+    event_end_date = Column(Date, nullable=True)
+    start_time = Column(Time, nullable=True)
+    end_time = Column(Time, nullable=True)
     event_type = Column(Enum(EventType), default=EventType.social)
 
     # 장소 연결 (선택)

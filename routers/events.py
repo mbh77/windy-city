@@ -2,7 +2,7 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 
 from database import get_db
 import models
@@ -57,7 +57,7 @@ def _event_to_response(db: Session, event: models.Event) -> schemas.EventRespons
     )
 
 
-def _recurring_in_range(event, date_from: datetime, date_to: datetime) -> bool:
+def _recurring_in_range(event, date_from: date, date_to: date) -> bool:
     """반복 이벤트가 날짜 범위 내에 해당 요일이 있는지 확인"""
     rule = event.recurrence_rule
     if not rule or not rule.get('days'):
@@ -69,7 +69,7 @@ def _recurring_in_range(event, date_from: datetime, date_to: datetime) -> bool:
         return True
 
     # 범위 내 날짜를 순회하며 반복 요일이 있는지 확인
-    current = date_from.replace(hour=0, minute=0, second=0)
+    current = date_from
     while current <= date_to:
         if current.weekday() in target_weekdays:
             return True
@@ -79,8 +79,8 @@ def _recurring_in_range(event, date_from: datetime, date_to: datetime) -> bool:
 
 @router.get("/", response_model=List[schemas.EventResponse])
 def get_events(
-    date_from: Optional[datetime] = Query(None, description="시작일 필터"),
-    date_to: Optional[datetime] = Query(None, description="종료일 필터"),
+    date_from: Optional[date] = Query(None, description="시작일 필터"),
+    date_to: Optional[date] = Query(None, description="종료일 필터"),
     event_type: Optional[models.EventType] = Query(None, description="이벤트 유형 필터"),
     dance_genre: Optional[models.DanceGenre] = Query(None, description="춤 종류 필터"),
     venue_id: Optional[int] = Query(None, description="장소 필터"),
@@ -101,22 +101,22 @@ def get_events(
     if difficulty:
         query = query.filter(models.Event.difficulty == difficulty)
 
-    all_events = query.order_by(models.Event.start_date).all()
+    all_events = query.order_by(models.Event.event_date).all()
     results = []
 
     for e in all_events:
         if e.is_recurring:
             # 반복 이벤트: 시작일이 범위 끝 이전이고 범위 내 해당 요일이 있으면 포함
-            if date_to and e.start_date > date_to:
+            if date_to and e.event_date > date_to:
                 continue
             if date_from and date_to and not _recurring_in_range(e, date_from, date_to):
                 continue
             results.append(_event_to_response(db, e))
         else:
             # 비반복 이벤트: 기존 날짜 필터
-            if date_from and e.start_date < date_from:
+            if date_from and e.event_date < date_from:
                 continue
-            if date_to and e.start_date > date_to:
+            if date_to and e.event_date > date_to:
                 continue
             results.append(_event_to_response(db, e))
 

@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Query
 from sqlalchemy.orm import Session
 from fastapi import Depends
-
 from database import get_db
 
 import models
@@ -14,20 +13,21 @@ def search(
     limit: int = Query(20, ge=1, le=50),
     db: Session = Depends(get_db),
 ):
-    from datetime import datetime
+    from datetime import datetime, date
     from sqlalchemy import or_
 
     keyword = f"%{q}%"
 
     now = datetime.now()
+    today = date.today()
 
     # 이벤트 검색: title, description, instructor_name, location_name
     # 반복 이벤트는 항상 포함 (진행중인 정기 이벤트)
     events = db.query(models.Event).filter(
         or_(
             models.Event.is_recurring == True,
-            models.Event.end_date >= now,
-            (models.Event.end_date == None) & (models.Event.start_date >= now),
+            models.Event.event_end_date >= today,
+            (models.Event.event_end_date == None) & (models.Event.event_date >= today),
         ),
         (models.Event.title.like(keyword)) |
         (models.Event.description.like(keyword)) |
@@ -61,8 +61,10 @@ def search(
             "address": e.address,
             "latitude": e.latitude,
             "longitude": e.longitude,
-            "start_date": e.start_date.isoformat() if e.start_date else None,
-            "end_date": e.end_date.isoformat() if e.end_date else None,
+            "event_date": e.event_date.isoformat() if e.event_date else None,
+            "event_end_date": e.event_end_date.isoformat() if e.event_end_date else None,
+            "start_time": e.start_time.isoformat() if e.start_time else None,
+            "end_time": e.end_time.isoformat() if e.end_time else None,
             "event_type": e.event_type,
             "dance_genres": genres,
             "difficulty": e.difficulty,
