@@ -1,0 +1,62 @@
+/* ── 지역명 오버레이 ── */
+.region-overlay {
+  position: absolute; bottom: 12px; right: 12px; z-index: 5;
+  background: rgba(255,255,255,0.9); color: #3D3029;
+  padding: 4px 10px; border-radius: 16px;
+  font-size: 0.75rem; font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  pointer-events: none;
+}
+
+/* ── 내 위치 버튼 ── */
+.my-location-btn {
+  position: absolute; top: 12px; right: 12px; z-index: 5;
+  width: 36px; height: 36px; border-radius: 8px;
+  background: #fff; border: 1px solid #E0D5C8;
+  font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.my-location-btn:hover { background: #F8F4F0; }
+
+/* ── 카테고리 칩 ── */
+.category-bar {
+  position: absolute; top: 12px; left: 12px; z-index: 5;
+  display: flex; gap: 8px;
+}
+.cat-chip {
+  padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  background: rgba(255,255,255,0.9); color: #555;
+  border: 1.5px solid #ccc;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.cat-chip.active {
+  background: var(--chip-color); color: #fff;
+  border-color: var(--chip-color);
+}
+.cat-chip:hover { opacity: 0.85; }
+
+/* ── 위치 선택 모드 ── */
+.pick-bar {
+  position: fixed; top: 52px; left: 50%; transform: translateX(-50%);
+  z-index: 50; background: #FFFFFF; border: 1px solid #D4725C;
+  border-radius: 10px; padding: 10px 20px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 4px 20px rgba(212, 114, 92, 0.3);
+  font-size: 0.9rem; color: #3D3029;
+  animation: pickBarIn 0.25s ease-out;
+}
+@keyframes pickBarIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+.pick-bar .btn-primary { padding: 5px 12px; font-size: 0.8rem; }
+.pick-bar .btn-ghost { padding: 5px 12px; font-size: 0.8rem; }
+
+/* 지도 위치 선택 모드 시각 피드백 */
+#map.picking { cursor: crosshair !important; outline: 3px solid #D4725C; outline-offset: -3px; }
+
+/* ── 지도내 검색 ── */
+.search-bounds-btn { background: rgba(255,255,255,0.9); border: 1px solid #D0C4B8; color: #5A4A3A; border-radius: 16px; padding: 4px 10px; font-size: 0.75rem; white-space: nowrap; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.search-bounds-btn.active { background: #D4725C; border-color: #D4725C; color: #fff; }
+
+/* PC에서 바텀시트 핸들 숨김 */
+.sheet-handle { display: none; }

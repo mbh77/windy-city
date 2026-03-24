@@ -17,7 +17,7 @@
 
         <!-- ========== 1단계: 필수 정보 ========== -->
         <div v-show="step === 1">
-          <input v-model="form.title" type="text" placeholder="이벤트 제목 *" required />
+          <input v-model="form.title" placeholder="이벤트 제목 *" class="write-title" required />
 
           <input v-model="form.location_name" type="text" placeholder="장소명 *" required />
 
@@ -463,6 +463,8 @@ onMounted(() => {
 .step-actions {
   margin-top: 16px;
 }
+
+.write-title { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 10px; font-size: 1rem; margin-bottom: 8px; }
 
 /* 작성/미리보기 탭 */
 .write-tabs { display: flex; gap: 4px; margin-bottom: 8px; }

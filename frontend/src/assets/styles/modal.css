@@ -1,0 +1,69 @@
+/* ── 모달 ── */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal-content { background: #FFFFFF; border-radius: 12px; padding: 28px 32px; width: 800px; max-width: 95vw; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+.modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #8B7B6B; font-size: 1.1rem; cursor: pointer; z-index: 1; }
+.modal-close:hover { color: #3D3029; }
+/* 인증 모달은 좁게 유지 */
+.modal-sm .modal-content { width: 420px; }
+
+.modal-content h2 { margin-bottom: 16px; font-size: 1.1rem; }
+.modal-content input, .modal-content select, .modal-content textarea {
+  display: block; width: 100%; margin-bottom: 10px;
+  background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem;
+}
+.modal-content input[type="checkbox"] { display: inline; width: auto; margin-bottom: 0; }
+.modal-content textarea { resize: vertical; min-height: 70px; }
+
+/* ── 이벤트 상세 ── */
+.detail-row { display: flex; gap: 8px; margin-bottom: 6px; font-size: 0.85rem; color: #5A4A3A; }
+.detail-label { color: #8B7B6B; min-width: 60px; }
+.action-row { display: flex; gap: 8px; margin-top: 16px; }
+
+/* ── 이미지 슬라이더 ── */
+.gallery-slider { position: relative; overflow: hidden; border-radius: 10px; margin: 12px 0; }
+.gallery-track { display: flex; transition: transform 0.3s ease; }
+.gallery-slide { min-width: 100%; cursor: pointer; }
+.gallery-slide img { width: 100%; height: 240px; object-fit: contain; display: block; background: #FFFFFF; }
+.gallery-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,0.4); color: #fff; border: none;
+  width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  z-index: 2;
+}
+.gallery-prev { left: 8px; }
+.gallery-next { right: 8px; }
+.gallery-arrow:hover { background: rgba(0,0,0,0.6); }
+.gallery-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+.gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.3); cursor: pointer; }
+.gallery-dot.active { background: #D4725C; }
+
+/* ── 전체화면 이미지 뷰어 ── */
+.image-viewer {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+}
+.viewer-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; z-index: 3;
+}
+.viewer-image { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 8px; }
+.viewer-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,0.15); color: #fff; border: none;
+  width: 44px; height: 44px; border-radius: 50%; font-size: 1.5rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.viewer-prev { left: 16px; }
+.viewer-next { right: 16px; }
+.viewer-arrow:hover { background: rgba(255,255,255,0.3); }
+.viewer-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: #ccc; font-size: 0.85rem; }
+
+@media (max-width: 768px) {
+  .modal { align-items: stretch; }
+  .modal-content { width: 100%; max-width: 100%; max-height: 100%; border-radius: 0; padding: 20px 16px; }
+  /* 상세 모달: 하단 50% */
+  .modal-detail { align-items: flex-end; }
+  .modal-detail .modal-content { width: 100%; max-width: 100%; max-height: 50vh; max-height: 50dvh; border-radius: 16px 16px 0 0; padding: 16px; }
+}

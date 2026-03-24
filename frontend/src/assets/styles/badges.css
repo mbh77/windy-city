@@ -1,0 +1,48 @@
+/* ── 이벤트 유형 색상 ── */
+.type-social { background: #2ecc7122; color: #27ae60; }
+.type-workshop { background: #e67e2222; color: #d35400; }
+.type-festival { background: #e74c3c22; color: #c0392b; }
+.type-regular_class { background: #9b59b622; color: #8e44ad; }
+.type-practice { background: #3498db22; color: #2980b9; }
+.type-performance { background: #e91e6322; color: #c2185b; }
+.type-other { background: #95a5a622; color: #7f8c8d; }
+
+/* ── 춤 종류 배지 ── */
+.genre-badge { display: inline-block; font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; margin-right: 2px; margin-bottom: 4px; }
+.genre-salsa { background: #e74c3c22; color: #c0392b; }
+.genre-bachata { background: #2980b922; color: #2471a3; }
+.genre-kizomba { background: #8e44ad22; color: #7d3c98; }
+.genre-zouk { background: #1abc9c22; color: #16a085; }
+.genre-tango { background: #e91e6322; color: #c2185b; }
+.genre-merengue { background: #f39c1222; color: #e67e22; }
+.genre-lindy_hop { background: #f9a82622; color: #d4881e; }
+.genre-balboa { background: #00acc122; color: #00838f; }
+.genre-blues { background: #3f51b522; color: #303f9f; }
+.genre-west_coast_swing { background: #43a04722; color: #2e7d32; }
+.genre-other { background: #95a5a622; color: #7f8c8d; }
+
+/* ── 장소 유형 배지 ── */
+.venue-type-badge { display: inline-block; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px; }
+.vtype-club { background: #9b59b622; color: #8e44ad; }
+.vtype-academy { background: #3498db22; color: #2980b9; }
+.vtype-practice_room { background: #2ecc7122; color: #27ae60; }
+
+/* ── 난이도 배지 ── */
+.difficulty-badge { display: inline-block; font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; margin-bottom: 4px; background: #e67e2222; color: #d35400; }
+
+/* ── 시설 태그 ── */
+.facility-tag { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; background: #FFFFFF; color: #8B7B6B; margin-right: 4px; }
+
+/* ── 장소 상세 ── */
+.venue-desc { margin: 8px 0; color: #5A4A3A; font-size: 0.85rem; line-height: 1.5; white-space: pre-wrap; }
+.venue-link { color: #5BA89E; text-decoration: none; word-break: break-all; }
+.venue-link:hover { text-decoration: underline; }
+
+/* ── 반복 이벤트 ── */
+.recurring-badge { display: inline-block; font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; background: #D4725C22; color: #D4725C; margin-bottom: 4px; }
+
+@media (max-width: 768px) {
+  .event-type-badge, .venue-type-badge { font-size: 0.6rem; padding: 1px 4px; }
+  .genre-badge { font-size: 0.55rem; padding: 0px 4px; }
+  .recurring-badge { font-size: 0.55rem; padding: 0px 4px; }
+}

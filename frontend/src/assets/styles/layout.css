@@ -1,0 +1,22 @@
+/* ── 공통 페이지 컨테이너 ── */
+.page-container { height: 100vh; height: 100dvh; background: #F9F9F9; color: #3D3029; padding: 20px; width: 100%; overflow-y: auto; }
+.page-container > * { max-width: 1200px; margin-left: auto; margin-right: auto; }
+.page-container.wide > * { max-width: 1200px; }
+.page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.page-nav-btn { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 6px; color: #8B7B6B; font-size: 0.8rem; cursor: pointer; text-decoration: none; }
+.page-nav-btn:hover { background: #EDE5DB; color: #3D3029; }
+.page-title { font-size: 1.2rem; font-weight: 700; }
+.page-body { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 10px; padding: 20px; }
+
+/* ── 레이아웃 ── */
+.layout { display: flex; flex: 1; overflow: hidden; }
+.map-wrap { position: relative; flex: 1; overflow: hidden; }
+#map { width: 100%; height: 100%; }
+@keyframes markerPop { from { transform: scale(0.5); opacity: 0.5; } to { transform: scale(1); opacity: 1; } }
+
+@media (max-width: 768px) {
+  .page-container, .page-container.wide { padding: 12px; }
+  .page-container > * { max-width: 100%; }
+  .layout { flex-direction: column; }
+  .map-wrap { flex: 1; min-height: 0; }
+}
