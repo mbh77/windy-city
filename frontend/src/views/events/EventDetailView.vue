@@ -102,37 +102,9 @@ import { apiFetch } from '@/utils/api.js'
 import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '@/utils/constants.js'
 import { useAuth } from '@/composables/useAuth.js'
 import ImageGallery from '@/components/ImageGallery.vue'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
+import { renderMarkdown } from '@/utils/markdown.js'
 
 const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' }
-
-marked.setOptions({ breaks: true })
-
-function embedYouTube(html) {
-  const ytRegex = /<a[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^"]*"[^>]*>[^<]*<\/a>/g
-  html = html.replace(ytRegex, (m, id) => `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`)
-  const ytText = /(?:<p>)?(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^\s<]*)(?:<\/p>)?/g
-  html = html.replace(ytText, (m, u, id) => m.includes('<iframe') ? m : `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`)
-  return html
-}
-
-function embedInstagram(html) {
-  const igRegex = /(?:<a[^>]*href=")?https?:\/\/(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)\/?[^"<\s]*"?[^<]*(?:<\/a>)?/g
-  html = html.replace(igRegex, (m, type, code) => `<div class="embed-video"><iframe src="https://www.instagram.com/${type}/${code}/embed" frameborder="0" scrolling="no"></iframe></div>`)
-  return html
-}
-
-function renderMarkdown(content) {
-  if (!content) return ''
-  let html = marked(content)
-  html = embedYouTube(html)
-  html = embedInstagram(html)
-  return DOMPurify.sanitize(html, {
-    ADD_TAGS: ['iframe'],
-    ADD_ATTR: ['allowfullscreen', 'frameborder', 'src', 'scrolling'],
-  })
-}
 
 const route = useRoute()
 const router = useRouter()

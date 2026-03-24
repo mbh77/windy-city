@@ -75,11 +75,10 @@
         <button :class="['tab', { active: activeTab === 'venues' }]" @click="activeTab = 'venues'">
           장소 {{ visibleVenues.length }}
         </button>
-        <button
+        <router-link to="/events/new"
           v-if="currentUser?.is_organizer && activeTab === 'events'"
           class="btn-primary tab-action"
-          @click="$emit('addEvent')"
-        >등록 +</button>
+        >등록 +</router-link>
         <button
           v-if="currentUser?.is_organizer && activeTab === 'venues'"
           class="btn-primary tab-action"
