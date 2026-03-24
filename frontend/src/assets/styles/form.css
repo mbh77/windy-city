@@ -4,6 +4,7 @@
   background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem;
 }
 .page-body input[type="checkbox"] { display: inline; width: auto; margin-bottom: 0; }
+.page-body input[type="file"] { display: none; }
 .page-body textarea { resize: vertical; min-height: 70px; font-family: inherit; line-height: 1.6; }
 
 /* ── 폼 라벨/에러 ── */
@@ -29,8 +30,10 @@
 .picked-address.has-value { color: #3D3029; }
 
 /* ── 날짜/시간 ── */
+.page-body input[type="date"],
+.page-body input[type="time"] { width: auto; display: inline-block; }
 .date-row { display: flex; gap: 8px; }
-.date-row input { flex: 1; }
+.date-row input { flex: none; }
 
 /* ── 체크박스/장르 ── */
 .checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 0.85rem; color: #5A4A3A; cursor: pointer; }
@@ -72,5 +75,4 @@
 
 @media (max-width: 768px) {
   .genre-checkboxes { grid-template-columns: repeat(2, 1fr); }
-  .date-row { flex-direction: column; }
 }

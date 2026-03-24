@@ -8,7 +8,7 @@
       <input
         v-model="searchQuery"
         type="text"
-        placeholder="🔍 이벤트, 장소, 강사 이름으로 검색..."
+        placeholder="🔍 강습·행사, 장소, 강사 이름으로 검색..."
         @keydown.esc="searchQuery = ''"
         @focus="isExpanded = true"
       />
@@ -70,7 +70,7 @@
       <!-- 탭 + 등록 버튼 -->
       <div class="tab-group">
         <button :class="['tab', { active: activeTab === 'events' }]" @click="activeTab = 'events'">
-          이벤트 {{ filteredEvents.length }}
+          강습·행사 {{ filteredEvents.length }}
         </button>
         <button :class="['tab', { active: activeTab === 'venues' }]" @click="activeTab = 'venues'">
           장소 {{ visibleVenues.length }}
@@ -136,9 +136,9 @@
           </li>
           <li v-if="filteredEvents.length === 0" class="empty-state">
             <div class="empty-icon">📅</div>
-            <div class="empty-title">이 지역에 이벤트가 없어요</div>
+            <div class="empty-title">이 지역에 강습·행사가 없어요</div>
             <div class="empty-hint">날짜 범위를 넓히거나 지도를 이동해보세요</div>
-            <button v-if="currentUser?.is_organizer" class="btn-primary" @click="$emit('addEvent')">+ 이벤트 등록하기</button>
+            <button v-if="currentUser?.is_organizer" class="btn-primary" @click="$emit('addEvent')">+ 강습·행사 등록하기</button>
           </li>
         </ul>
       </template>    

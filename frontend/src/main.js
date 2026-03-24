@@ -9,5 +9,6 @@ import './assets/styles/map.css'
 import './assets/styles/modal.css'
 import './assets/styles/form.css'
 import './assets/styles/badges.css'
+import './assets/styles/markdown.css'
 
 createApp(App).use(router).mount('#app')

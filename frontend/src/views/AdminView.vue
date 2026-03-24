@@ -8,7 +8,7 @@
     <main class="page-body">
       <div class="admin-tabs">
         <button :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">회원</button>
-        <button :class="{ active: activeTab === 'events' }" @click="activeTab = 'events'">이벤트</button>
+        <button :class="{ active: activeTab === 'events' }" @click="activeTab = 'events'">강습·행사</button>
         <button :class="{ active: activeTab === 'venues' }" @click="activeTab = 'venues'">장소</button>
       </div>
 
@@ -65,7 +65,7 @@
 
       <!-- 이벤트 탭 -->
       <div v-if="activeTab === 'events'">
-        <h2>이벤트 관리</h2>
+        <h2>강습·행사 관리</h2>
         <div class="admin-search">
           <input v-model="eventSearch" placeholder="제목 또는 장소명 검색..." @input="debouncedEventSearch" />
         </div>
@@ -226,7 +226,7 @@ function debouncedEventSearch() {
 function changeEventPage(p) { eventPage.value = p; loadEvents() }
 
 async function deleteEvent(ev) {
-  if (!confirm(`"${ev.title}" 이벤트를 삭제하시겠습니까?`)) return
+  if (!confirm(`"${ev.title}" 강습·행사를 삭제하시겠습니까?`)) return
   try {
     const res = await apiJson(`/api/admin/events/${ev.id}`, { method: 'DELETE' })
     if (!res.ok) {

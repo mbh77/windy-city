@@ -3,7 +3,7 @@
     <header class="page-header">
       <router-link to="/" class="page-nav-btn">지도</router-link>
       <a class="page-nav-btn" @click="$router.back()">뒤로</a>
-      <h1 class="page-title">이벤트 상세</h1>
+      <h1 class="page-title">강습·행사 상세</h1>
     </header>
 
     <main class="page-body" v-if="event">
@@ -78,7 +78,7 @@
             </span>
           </div>
         </template>
-        <div v-else-if="event.is_recurring" class="detail-row"><span class="detail-label">반복</span>반복 이벤트</div>
+        <div v-else-if="event.is_recurring" class="detail-row"><span class="detail-label">반복</span>반복 강습·행사</div>
 
       </div>
 
@@ -91,7 +91,7 @@
 
     <!-- 로딩/에러 -->
     <div v-else-if="loading" class="page-body">로딩 중...</div>
-    <div v-else class="page-body">이벤트를 찾을 수 없습니다.</div>
+    <div v-else class="page-body">강습·행사를 찾을 수 없습니다.</div>
   </div>
 </template>
 
@@ -142,7 +142,7 @@ async function fetchEvent() {
 }
 
 async function handleDelete() {
-  if (!confirm('이벤트를 삭제할까요?')) return
+  if (!confirm('강습·행사를 삭제할까요?')) return
   const res = await apiFetch(`/api/events/${event.value.id}`, { method: 'DELETE' })
   if (res.ok) router.push('/')
 }

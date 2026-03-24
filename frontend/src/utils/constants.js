@@ -3,7 +3,7 @@ export const TYPE_LABELS = {
   social: '소셜',
   workshop: '워크샵',
   festival: '페스티벌',
-  regular_class: '정규수업',
+  regular_class: '강습',
   performance: '공연',
   practice: '프랙티스',
   other: '기타',
@@ -57,5 +57,5 @@ export const MAP_CATEGORIES = [
   { key: 'club', label: '클럽', color: '#2E6EB5' },         // 파랑
   { key: 'academy', label: '학원', color: '#D4A84C' },     // 노랑
   { key: 'practice_room', label: '연습실', color: '#4EA89E' }, // 틸
-  { key: 'event', label: '이벤트', color: '#7B2D8E' },     // 보라
+  { key: 'event', label: '강습/행사', color: '#7B2D8E' },     // 보라
 ]

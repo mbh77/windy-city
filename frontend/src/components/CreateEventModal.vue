@@ -2,9 +2,9 @@
   <div v-if="visible" class="modal" @click.self="$emit('close')">
     <div class="modal-content">
       <button class="modal-close" @click="$emit('close')">✕</button>
-      <h2>{{ editMode ? '이벤트 수정' : '이벤트 등록'}}</h2>
+      <h2>{{ editMode ? '강습·행사 수정' : '강습·행사 등록'}}</h2>
       <form @submit.prevent="handleSubmit">
-        <input v-model="form.title" type="text" placeholder="이벤트 제목" required />
+        <input v-model="form.title" type="text" placeholder="강습·행사 제목" required />
         <label class="form-label">설명 (마크다운 지원)</label>
         <div class="write-tabs">
           <button type="button" :class="{ active: !descPreview }" @click="descPreview = false">작성</button>
@@ -49,7 +49,7 @@
           <input v-model="form.end_date" type="datetime-local" />
         </div>
 
-        <label class="form-label">이벤트 유형</label>
+        <label class="form-label">강습·행사 유형</label>
         <select v-model="form.event_type">
           <option v-for="opt in TYPE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
@@ -113,12 +113,12 @@
 
         <!-- 반복 이벤트 (접이식) -->
         <button type="button" class="collapsible-toggle" @click="showRecurring = !showRecurring">
-          반복 이벤트 설정
+          반복 강습·행사 설정
           <span class="collapse-arrow" :class="{ open: showRecurring }">&#9662;</span>
         </button>
         <div v-show="showRecurring" class="collapsible-body">
           <div class="inline-checks">
-            <label class="checkbox-label"><input v-model="form.is_recurring" type="checkbox" /> 반복 이벤트</label>
+            <label class="checkbox-label"><input v-model="form.is_recurring" type="checkbox" /> 반복 강습·행사</label>
           </div>
           <template v-if="form.is_recurring">
             <!-- 주기 -->

@@ -61,7 +61,7 @@
             </span>
           </div>
         </template>
-        <div v-else-if="event.is_recurring" class="detail-row"><span class="detail-label">반복</span>반복 이벤트</div>
+        <div v-else-if="event.is_recurring" class="detail-row"><span class="detail-label">반복</span>반복 강습·행사</div>
 
         <div class="detail-row"><span class="detail-label">작성자</span>{{ event.organizer_nickname || '-' }}</div>
 
@@ -102,7 +102,7 @@ const isOwner = computed(() => {
 })
 
 async function handleDelete() {
-  if (!confirm('이벤트를 삭제할까요?')) return
+  if (!confirm('강습·행사를 삭제할까요?')) return
   const ok = await deleteEvent(props.event.id)
   if (ok) emit('close')
 }

@@ -3,7 +3,7 @@
     <header class="page-header">
       <router-link to="/" class="page-nav-btn">지도</router-link>
       <a class="page-nav-btn" @click="$router.back()">뒤로</a>
-      <h1 class="page-title">{{ editMode ? '이벤트 수정' : '이벤트 등록' }}</h1>
+      <h1 class="page-title">{{ editMode ? '강습·행사 수정' : '강습·행사 등록' }}</h1>
     </header>
 
     <main class="page-body">
@@ -17,12 +17,27 @@
 
         <!-- ========== 1단계: 필수 정보 ========== -->
         <div v-show="step === 1">
-          <input v-model="form.title" placeholder="이벤트 제목 *" class="write-title" required />
+          <input v-model="form.title" placeholder="강습·행사 제목 (필수)" class="write-title" required />
 
-          <input v-model="form.location_name" type="text" placeholder="장소명 *" required />
+          <!-- 이미지 첨부 -->
+          <label class="form-label">이미지 첨부 ({{ uploadedImages.length }}/5) (선택)</label>
+          <div class="image-upload-area">
+            <div v-for="(img, idx) in uploadedImages" :key="idx" class="image-thumb">
+              <img :src="img.url" />
+              <button type="button" class="image-remove" @click="removeImage(idx)">✕</button>
+            </div>
+            <label v-if="uploadedImages.length < 5" class="image-add">
+              <input type="file" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload" hidden />
+              <span>+</span>
+            </label>
+          </div>
+          <div v-if="uploadError" class="form-error">{{ uploadError }}</div>
+          <div class="upload-hint">JPG/WEBP 3MB 이하 · PNG는 자동 변환 (10MB 이하)</div>
+
+          <input v-model="form.location_name" type="text" placeholder="장소명 (선택)" required />
 
           <!-- 위치 검색 -->
-          <label class="form-label">위치 지정 *</label>
+          <label class="form-label">위치 지정 (필수) : 검색하거나 지도에서 선택</label>
           <div class="location-search-row">
             <input v-model="searchQuery" type="text" placeholder="주소 또는 장소명 검색"
                    autocomplete="off" @keydown.enter.prevent="searchLocation" />
@@ -48,21 +63,11 @@
           <input v-model="form.address_detail" type="text" placeholder="상세 주소 (층수, 호수 등)" />
 
           <!-- 날짜 (필수) -->
-          <label class="form-label">이벤트 날짜 *</label>
-          <div class="date-row">
-            <input v-model="form.event_date" type="date" required />
-            <input v-model="form.event_end_date" type="date" placeholder="종료일 (선택)" />
-          </div>
-
-          <!-- 시간 (옵션) -->
-          <label class="form-label">시간 (선택)</label>
-          <div class="date-row">
-            <input v-model="form.start_time" type="time" />
-            <input v-model="form.end_time" type="time" />
-          </div>
+          <label class="form-label">강습·행사 날짜 (필수)</label>
+          <input v-model="form.event_date" type="date" required />
 
           <!-- 이벤트 유형 -->
-          <label class="form-label">이벤트 유형 *</label>
+          <label class="form-label">강습·행사 유형 (필수)</label>
           <select v-model="form.event_type">
             <option v-for="opt in TYPE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
           </select>
@@ -80,6 +85,17 @@
         <!-- ========== 2단계: 상세 정보 ========== -->
         <div v-show="step === 2">
 
+          <!-- 종료일 (선택) -->
+          <label class="form-label">종료일 (선택)</label>
+          <input v-model="form.event_end_date" type="date" />
+
+          <!-- 시간 (선택) -->
+          <label class="form-label">시간 (선택)</label>
+          <div class="date-row">
+            <input v-model="form.start_time" type="time" />
+            <input v-model="form.end_time" type="time" />
+          </div>
+
           <!-- 설명 (마크다운 + 툴바) -->
           <label class="form-label">설명</label>
           <div class="write-tabs">
@@ -95,7 +111,7 @@
             <input type="file" ref="descImageInput" accept="image/*" style="display:none" @change="uploadDescImage" />
           </div>
           <textarea v-if="!descPreview" ref="descArea" v-model="form.description"
-                    placeholder="이벤트 설명 (마크다운 지원)" rows="8"></textarea>
+                    placeholder="강습·행사 설명 (마크다운 지원)" rows="8"></textarea>
           <div v-else class="write-preview markdown-body" v-html="renderMarkdown(form.description)"></div>
 
           <!-- 영상 URL 다이얼로그 (PostWriteView 참고) -->
@@ -132,21 +148,6 @@
           <!-- 반복 이벤트 -->
           <!-- 기존 CreateEventModal.vue 114~161행 그대로 가져오기 -->
           <!-- 단, collapsible-toggle 제거하고 바로 노출 -->
-
-          <!-- 이미지 첨부 -->
-          <label class="form-label">이미지 첨부 ({{ uploadedImages.length }}/5)</label>
-          <div class="image-upload-area">
-            <div v-for="(img, idx) in uploadedImages" :key="idx" class="image-thumb">
-              <img :src="img.url" />
-              <button type="button" class="image-remove" @click="removeImage(idx)">✕</button>
-            </div>
-            <label v-if="uploadedImages.length < 5" class="image-add">
-              <input type="file" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload" hidden />
-              <span>+</span>
-            </label>
-          </div>
-          <div v-if="uploadError" class="form-error">{{ uploadError }}</div>
-          <div class="upload-hint">JPG/WEBP 3MB 이하 · PNG는 자동 변환 (10MB 이하)</div>
 
           <div class="step-actions">
             <button type="button" class="btn-ghost" @click="step = 1">← 이전</button>
@@ -210,7 +211,7 @@ const form = reactive({
   event_end_date: '',
   start_time: '',
   end_time: '',
-  event_type: 'social',
+  event_type: 'regular_class',
   dance_genres: [],
   price: '',
   early_bird_price: '',
@@ -321,7 +322,7 @@ function goStep2() {
   if (!form.title.trim()) { error.value = '제목을 입력해 주세요'; return }
   if (!form.location_name.trim()) { error.value = '장소명을 입력해 주세요'; return }
   if (!form.latitude) { error.value = '위치를 선택해 주세요'; return }
-  if (!form.event_date) { error.value = '이벤트 날짜를 선택해 주세요'; return }
+  if (!form.event_date) { error.value = '강습·행사 날짜를 선택해 주세요'; return }
   error.value = ''
   step.value = 2
 }
@@ -330,7 +331,7 @@ function goStep2() {
 async function handleSubmit() {
   error.value = ''
   if (!form.latitude || !form.longitude) { error.value = '위치를 선택해 주세요'; return }
-  if (!form.event_date) { error.value = '이벤트 날짜를 선택해 주세요'; return }
+  if (!form.event_date) { error.value = '강습·행사 날짜를 선택해 주세요'; return }
 
   const body = {
     title: form.title,

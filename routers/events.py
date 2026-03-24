@@ -28,19 +28,19 @@ router = APIRouter(prefix="/api/events", tags=["events"])
 
 
 def _get_dance_genres(event: models.Event) -> list:
-    """이벤트의 춤 종류 목록 반환"""
+    """강습·행사의 춤 종류 목록 반환"""
     return [dg.dance_genre for dg in event.dance_genres]
 
 
 def _set_dance_genres(db: Session, event: models.Event, genres: list):
-    """이벤트의 춤 종류 설정 (기존 삭제 후 재생성)"""
+    """강습·행사의 춤 종류 설정 (기존 삭제 후 재생성)"""
     event.dance_genres.clear()
     for genre in genres:
         event.dance_genres.append(models.EventDanceGenre(dance_genre=genre))
 
 
 def _get_media(db: Session, entity_id: int) -> list:
-    """이벤트의 미디어 목록 반환"""
+    """강습·행사의 미디어 목록 반환"""
     return db.query(models.Media).filter(
         models.Media.entity_type == "event",
         models.Media.entity_id == entity_id
@@ -58,7 +58,7 @@ def _event_to_response(db: Session, event: models.Event) -> schemas.EventRespons
 
 
 def _recurring_in_range(event, date_from: date, date_to: date) -> bool:
-    """반복 이벤트가 날짜 범위 내에 해당 요일이 있는지 확인"""
+    """반복 강습·행사가 날짜 범위 내에 해당 요일이 있는지 확인"""
     rule = event.recurrence_rule
     if not rule or not rule.get('days'):
         return True  # 규칙 없으면 일단 포함
@@ -81,13 +81,13 @@ def _recurring_in_range(event, date_from: date, date_to: date) -> bool:
 def get_events(
     date_from: Optional[date] = Query(None, description="시작일 필터"),
     date_to: Optional[date] = Query(None, description="종료일 필터"),
-    event_type: Optional[models.EventType] = Query(None, description="이벤트 유형 필터"),
+    event_type: Optional[models.EventType] = Query(None, description="강습·행사 유형 필터"),
     dance_genre: Optional[models.DanceGenre] = Query(None, description="춤 종류 필터"),
     venue_id: Optional[int] = Query(None, description="장소 필터"),
     difficulty: Optional[models.DifficultyLevel] = Query(None, description="난이도 필터"),
     db: Session = Depends(get_db)
 ):
-    """이벤트 목록 조회 (로그인 불필요)"""
+    """강습·행사 목록 조회 (로그인 불필요)"""
     query = db.query(models.Event)
 
     if event_type:
@@ -129,7 +129,7 @@ def create_event(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user)
 ):
-    """이벤트 등록 (로그인 필요)"""
+    """강습·행사 등록 (로그인 필요)"""
     data = event_data.model_dump(exclude={"dance_genres"})
     event = models.Event(**data, organizer_id=current_user.id)
     db.add(event)
@@ -145,10 +145,10 @@ def create_event(
 
 @router.get("/{event_id}", response_model=schemas.EventResponse)
 def get_event(event_id: int, db: Session = Depends(get_db)):
-    """이벤트 상세 조회"""
+    """강습·행사 상세 조회"""
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
-        raise HTTPException(status_code=404, detail="이벤트를 찾을 수 없습니다")
+        raise HTTPException(status_code=404, detail="강습·행사를 찾을 수 없습니다")
     return _event_to_response(db, event)
 
 
@@ -159,10 +159,10 @@ def update_event(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user)
 ):
-    """이벤트 수정 (본인만 가능)"""
+    """강습·행사 수정 (본인만 가능)"""
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
-        raise HTTPException(status_code=404, detail="이벤트를 찾을 수 없습니다")
+        raise HTTPException(status_code=404, detail="강습·행사를 찾을 수 없습니다")
     if event.organizer_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=403, detail="수정 권한이 없습니다")
 
@@ -186,10 +186,10 @@ def delete_event(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user)
 ):
-    """이벤트 삭제 (본인만 가능)"""
+    """강습·행사 삭제 (본인만 가능)"""
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
-        raise HTTPException(status_code=404, detail="이벤트를 찾을 수 없습니다")
+        raise HTTPException(status_code=404, detail="강습·행사를 찾을 수 없습니다")
     if event.organizer_id != current_user.id:
         raise HTTPException(status_code=403, detail="삭제 권한이 없습니다")
 
@@ -215,10 +215,10 @@ def add_event_media(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user)
 ):
-    """이벤트에 미디어 추가 (본인만 가능)"""
+    """강습·행사에 미디어 추가 (본인만 가능)"""
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
-        raise HTTPException(status_code=404, detail="이벤트를 찾을 수 없습니다")
+        raise HTTPException(status_code=404, detail="강습·행사를 찾을 수 없습니다")
     if event.organizer_id != current_user.id:
         raise HTTPException(status_code=403, detail="미디어 추가 권한이 없습니다")
 
@@ -240,10 +240,10 @@ def delete_event_media(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user)
 ):
-    """이벤트 미디어 삭제 (본인만 가능)"""
+    """강습·행사 미디어 삭제 (본인만 가능)"""
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
-        raise HTTPException(status_code=404, detail="이벤트를 찾을 수 없습니다")
+        raise HTTPException(status_code=404, detail="강습·행사를 찾을 수 없습니다")
     if event.organizer_id != current_user.id:
         raise HTTPException(status_code=403, detail="미디어 삭제 권한이 없습니다")
 
