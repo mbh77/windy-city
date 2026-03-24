@@ -440,69 +440,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 미니맵 */
-.minimap {
-  width: 100%;
-  height: 250px;
-  border-radius: 8px;
-  border: 1px solid #E0D5C8;
-  margin: 8px 0;
-}
-
-/* 스텝 인디케이터 */
-.step-indicator {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-  font-size: 0.9rem;
-  color: #8B7B6B;
-}
-.step-indicator .active {
-  color: #5BA89E;
-  font-weight: 700;
-}
-.step-actions {
-  margin-top: 16px;
-}
-
-.write-title { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 10px; font-size: 1rem; margin-bottom: 8px; }
-
-/* 작성/미리보기 탭 */
-.write-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
-.write-tabs button { padding: 4px 12px; border: 1px solid #E0D5C8; background: transparent; color: #8B7B6B; border-radius: 6px 6px 0 0; font-size: 0.8rem; cursor: pointer; }
-.write-tabs button.active { background: #FFFFFF; color: #3D3029; border-bottom-color: #FFFFFF; }
-
-/* 마크다운 툴바 */
-.write-toolbar { display: flex; gap: 4px; margin-bottom: 4px; }
-.write-toolbar button { padding: 4px 10px; background: #FFFFFF; border: 1px solid #E0D5C8; color: #5A4A3A; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
-.write-toolbar button:hover { background: #EDE5DB; color: #3D3029; }
-
-/* 미리보기 */
-.write-preview { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 0 6px 6px 6px; padding: 10px; font-size: 0.9rem; min-height: 150px; line-height: 1.6; }
-
-/* 마크다운 렌더링 */
-.markdown-body :deep(h1) { font-size: 1.3rem; margin: 16px 0 8px; }
-.markdown-body :deep(h2) { font-size: 1.15rem; margin: 14px 0 6px; }
-.markdown-body :deep(h3) { font-size: 1.05rem; margin: 12px 0 4px; }
-.markdown-body :deep(p) { margin: 0 0 8px; }
-.markdown-body :deep(a) { color: #5BA89E; text-decoration: underline; }
-.markdown-body :deep(code) { background: #F0E8DE; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
-.markdown-body :deep(pre) { background: #F0E8DE; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
-.markdown-body :deep(pre code) { background: none; padding: 0; }
-.markdown-body :deep(blockquote) { border-left: 3px solid #E0D5C8; padding-left: 12px; color: #8B7B6B; margin: 8px 0; }
-.markdown-body :deep(ul), .markdown-body :deep(ol) { padding-left: 20px; margin: 8px 0; }
-.markdown-body :deep(img) { max-width: 100%; border-radius: 6px; }
-.markdown-body :deep(hr) { border: none; border-top: 1px solid #EDE5DB; margin: 16px 0; }
-
-/* 미디어 임베드 */
-.markdown-body :deep(.embed-video) { position: relative; width: 100%; padding-bottom: 56.25%; margin: 12px 0; }
-.markdown-body :deep(.embed-video iframe) { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; }
-
-/* 영상 URL 다이얼로그 */
-.dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.dialog-box { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 10px; padding: 20px; width: 90%; max-width: 400px; }
-.dialog-box h4 { margin: 0 0 8px; font-size: 1rem; }
-.dialog-hint { font-size: 0.75rem; color: #8B7B6B; margin-bottom: 12px; }
-.dialog-box input { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px; font-size: 0.85rem; margin-bottom: 12px; box-sizing: border-box; }
-.dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.minimap { width: 100%; height: 250px; border-radius: 8px; border: 1px solid #E0D5C8; margin: 8px 0; }
+.step-indicator { display: flex; gap: 16px; margin-bottom: 16px; font-size: 0.9rem; color: #8B7B6B; }
+.step-indicator .active { color: #5BA89E; font-weight: 700; }
+.step-actions { margin-top: 16px; }
 </style>

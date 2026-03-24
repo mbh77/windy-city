@@ -73,6 +73,27 @@
 .date-tag button:hover { color: #D4725C; }
 .date-tag-list-inline { display: inline-flex; flex-wrap: wrap; gap: 4px; }
 
+/* ── 글 작성 공통 (제목, 탭, 툴바, 미리보기) ── */
+.write-title { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 10px; font-size: 1rem; margin-bottom: 8px; }
+.write-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.write-tabs button { padding: 4px 12px; border: 1px solid #E0D5C8; background: transparent; color: #8B7B6B; border-radius: 6px 6px 0 0; font-size: 0.8rem; cursor: pointer; }
+.write-tabs button.active { background: #FFFFFF; color: #3D3029; border-bottom-color: #FFFFFF; }
+.write-toolbar { display: flex; gap: 4px; margin-bottom: 4px; }
+.write-toolbar button { padding: 4px 10px; background: #FFFFFF; border: 1px solid #E0D5C8; color: #5A4A3A; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+.write-toolbar button:hover { background: #EDE5DB; color: #3D3029; }
+.write-preview { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 0 6px 6px 6px; padding: 10px; font-size: 0.9rem; min-height: 150px; line-height: 1.6; }
+.write-content { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 0 6px 6px 6px; padding: 10px; font-size: 0.9rem; resize: vertical; font-family: inherit; line-height: 1.6; }
+.write-error { color: #D4725C; font-size: 0.8rem; margin-top: 8px; }
+.write-submit { width: 100%; margin-top: 12px; padding: 10px; font-size: 0.9rem; }
+
+/* ── 다이얼로그 (영상 URL 등) ── */
+.dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.dialog-box { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 10px; padding: 20px; width: 90%; max-width: 400px; }
+.dialog-box h4 { margin: 0 0 8px; font-size: 1rem; }
+.dialog-hint { font-size: 0.75rem; color: #8B7B6B; margin-bottom: 12px; }
+.dialog-box input { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px; font-size: 0.85rem; margin-bottom: 12px; box-sizing: border-box; }
+.dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
 @media (max-width: 768px) {
   .genre-checkboxes { grid-template-columns: repeat(2, 1fr); }
 }
