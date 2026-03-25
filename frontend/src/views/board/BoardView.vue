@@ -130,9 +130,9 @@ function formatDate(dateStr) {
 </script>
 
 <style scoped>
-.board-toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
-.board-toolbar input { flex: 1; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; }
-.board-toolbar .btn-primary { padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; }
+.board-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.board-toolbar input { flex: 1; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; margin-bottom: 0 !important; }
+.board-toolbar .btn-primary { padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
 .board-list { list-style: none; padding: 0; margin: 0; }
 .board-item { padding: 12px 0; border-bottom: 1px solid #EDE5DB; cursor: pointer; }
 .board-item:hover { background: #FFFFFF; }

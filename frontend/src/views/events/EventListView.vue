@@ -13,19 +13,25 @@
       </div>
 
       <!-- 목록 -->
-      <ul class="board-list">
-        <li v-for="event in events" :key="event.id" class="board-item" @click="goDetail(event.id)">
-          <div class="board-item-title">
-            <span :class="['event-type-badge', `type-${event.event_type}`]" style="font-size:0.7rem; margin-right:6px;">
-              {{ TYPE_LABELS[event.event_type] }}
-            </span>
-            {{ event.title }}
-          </div>
-          <div class="board-item-meta">
-            <span>{{ event.organizer_nickname }}</span>
-            <span>{{ formatCreatedAt(event.created_at) }}</span>
-            <span>👁 {{ event.view_count || 0 }}</span>
-            <span v-if="event.comment_count > 0">💬 {{ event.comment_count }}</span>
+      <ul class="event-list">
+        <li v-for="event in events" :key="event.id" class="event-card" @click="goDetail(event.id)">
+          <div class="event-info">
+            <div class="event-badges">
+              <span :class="['event-type-badge', `type-${event.event_type}`]">{{ TYPE_LABELS[event.event_type] }}</span>
+              <span v-for="g in event.dance_genres || []" :key="g" :class="['genre-badge', `genre-${g}`]">{{ GENRE_LABELS[g] }}</span>
+            </div>
+            <div class="event-title">{{ event.title }}</div>
+            <div class="event-detail">
+              <span v-if="event.location_name">{{ event.location_name }}</span>
+              <span v-if="event.event_date" class="event-date">{{ formatDate(event.event_date) }}</span>
+              <span v-if="event.event_end_date" class="event-date"> ~ {{ formatDate(event.event_end_date) }}</span>
+            </div>
+            <div class="event-meta">
+              <span>{{ event.organizer_nickname }}</span>
+              <span>{{ formatCreatedAt(event.created_at) }}</span>
+              <span>👁 {{ event.view_count || 0 }}</span>
+              <span v-if="event.comment_count > 0">💬 {{ event.comment_count }}</span>
+            </div>
           </div>
         </li>
         <li v-if="events.length === 0" class="board-empty">등록된 강습·행사가 없습니다</li>
@@ -44,9 +50,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { apiFetch, formatCreatedAt } from '@/utils/api.js'
+import { apiFetch, formatDate, formatTime, formatCreatedAt } from '@/utils/api.js'
 import { useAuth } from '@/composables/useAuth.js'
-import { TYPE_LABELS } from '@/utils/constants.js'
+import { TYPE_LABELS, GENRE_LABELS } from '@/utils/constants.js'
 
 const router = useRouter()
 const { currentUser } = useAuth()
@@ -96,15 +102,21 @@ function goDetail(id) {
 </script>
 
 <style scoped>
-.board-toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
-.board-toolbar input { flex: 1; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; }
-.board-toolbar .btn-primary { padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; }
-.board-list { list-style: none; padding: 0; margin: 0; }
-.board-item { padding: 12px 0; border-bottom: 1px solid #EDE5DB; cursor: pointer; }
-.board-item:hover { background: #FFFFFF; }
-.board-item-title { font-size: 0.9rem; margin-bottom: 4px; }
-.board-item-meta { font-size: 0.75rem; color: #8B7B6B; display: flex; gap: 12px; }
-.board-empty { padding: 40px 0; text-align: center; color: #8B7B6B; font-size: 0.85rem; }
+.board-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.board-toolbar input { flex: 1; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; margin-bottom: 0 !important; }
+.board-toolbar .btn-primary { padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; box-sizing: border-box; }
+.event-list { list-style: none; padding: 0; margin: 0; }
+.event-card { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #EDE5DB; cursor: pointer; }
+.event-card:hover { background: #FAFAFA; }
+.event-info { flex: 1; min-width: 0; }
+.event-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+.event-badges .event-type-badge,
+.event-badges .genre-badge { font-size: 0.65rem; }
+.event-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-detail { font-size: 0.78rem; color: #5A4A3A; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.event-date { color: #5BA89E; }
+.event-meta { font-size: 0.7rem; color: #8B7B6B; display: flex; gap: 10px; }
+.board-empty { padding: 40px 0; text-align: center; color: #8B7B6B; font-size: 0.85rem; list-style: none; }
 .board-paging { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 16px; }
 .board-paging button { background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 4px 12px; font-size: 0.8rem; cursor: pointer; }
 .board-paging button:disabled { opacity: 0.4; cursor: not-allowed; }

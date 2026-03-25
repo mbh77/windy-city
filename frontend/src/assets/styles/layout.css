@@ -2,13 +2,15 @@
 .page-container { height: 100vh; height: 100dvh; background: #F9F9F9; color: #3D3029; padding: 20px; width: 100%; overflow-y: auto; }
 .page-container > * { max-width: 1200px; margin-left: auto; margin-right: auto; }
 .page-container.wide > * { max-width: 1200px; }
-.page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.page-header { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
+.page-title { margin-left: 10px; }
 .page-nav-btn { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 6px; color: #8B7B6B; font-size: 0.8rem; cursor: pointer; text-decoration: none; }
 .page-nav-btn:hover { background: #EDE5DB; color: #3D3029; }
 .page-title { font-size: 1.2rem; font-weight: 700; }
 .page-body { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 10px; padding: 20px; }
 
 /* ── 상세 페이지 공통 ── */
+.badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .post-title { font-size: 1.2rem; margin-bottom: 8px; }
 .post-meta { font-size: 0.8rem; color: #8B7B6B; display: flex; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #EDE5DB; }
 .post-body { font-size: 0.9rem; line-height: 1.6; min-height: 100px; margin-bottom: 16px; }

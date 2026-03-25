@@ -38,12 +38,11 @@ export async function apiJson(url, options = {}) {
 // ── 날짜 포맷 ──
 export function formatDate(iso) {
   if (!iso) return '-'
-  const d = new Date(iso)
+  const d = new Date(iso.includes('T') ? iso : iso + 'T00:00:00')
   return d.toLocaleDateString('ko-KR', {
+    year: 'numeric',
     month: 'short',
     day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
   })
 }
 
