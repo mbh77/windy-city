@@ -55,7 +55,6 @@
     :visible="showVenueDetail"
     :venue="selectedVenue"
     @close="closeVenueDetail"
-    @edit="handleEditVenue"
   />
 
   <!-- 로그인/회원가입 모달 -->
@@ -216,12 +215,19 @@ onMounted(async () => {
     loadEvents(currentFilters.value),
     loadVenues()
   ])
-  // 쿼리 파라미터로 이벤트 선택
+  // 쿼리 파라미터로 이벤트/장소 선택
   if (route.query.eventId) {
     const res = await apiFetch(`/api/events/${route.query.eventId}`)
     if (res.ok) {
       const ev = await res.json()
       openEventDetail(ev)
+    }
+    router.replace({ path: '/', query: {} })
+  } else if (route.query.venueId) {
+    const res = await apiFetch(`/api/venues/${route.query.venueId}`)
+    if (res.ok) {
+      const v = await res.json()
+      openVenueDetail(v)
     }
     router.replace({ path: '/', query: {} })
   }
@@ -292,11 +298,7 @@ function openCreateVenueModal() {
   showCreateVenue.value = true
 }
 
-function handleEditVenue(venue) {
-  venueToEdit.value = venue
-  showVenueDetail.value = false
-  showCreateVenue.value = true
-}
+
 
 async function handleVenueCreated(data) {
   if (data?.panTo) {
