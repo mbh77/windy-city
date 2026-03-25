@@ -85,17 +85,17 @@
 ### 상세 페이지
 - ✅ **UX-001** 이벤트 상세 페이지 (`/events/:id`) — views/events/EventDetailView.vue
 - ✅ **UX-002** 장소 상세 페이지 (`/venues/:id`) — views/venues/VenueDetailView.vue
-- 🚧 **UX-003** 이벤트 목록 페이지 (`/events`) — 게시판형 목록, 필터/정렬, 조회수, 댓글
+- ✅ **UX-003** 이벤트 목록 페이지 (`/events`) — 게시판형 목록, 검색, 페이징, 조회수, 댓글
   - ✅ DB: events 테이블에 `view_count` 컬럼 추가
   - ✅ DB: event_comments 테이블 신규 (id, event_id, user_id, content, created_at, updated_at)
-  - ✅ 백엔드: 이벤트 상세 조회 시 view_count +1, 댓글 CRUD API
-  - ⬜ 프론트: 목록 UI (검색, 페이징, 조회수 표시)
+  - ✅ 백엔드: 이벤트 상세 조회 시 view_count +1, 댓글 CRUD API, GET /api/events/list 페이징
+  - ✅ 프론트: EventListView (카드형 목록, 유형/장르뱃지, 장소, 일정, 조회수, 댓글수)
   - ✅ 프론트: 상세 페이지에 댓글 UI (CommentSection 공통 컴포넌트)
-- 🚧 **UX-004** 장소 목록 페이지 (`/venues`) — 게시판형 목록, 필터/정렬, 조회수, 댓글
+- ✅ **UX-004** 장소 목록 페이지 (`/venues`) — 게시판형 목록, 검색, 페이징, 조회수, 댓글
   - ✅ DB: venues 테이블에 `view_count` 컬럼 추가
   - ✅ DB: venue_comments 테이블 신규 (id, venue_id, user_id, content, created_at, updated_at)
-  - ✅ 백엔드: 장소 상세 조회 시 view_count +1, 댓글 CRUD API
-  - ⬜ 프론트: 목록 UI (검색, 페이징, 조회수 표시)
+  - ✅ 백엔드: 장소 상세 조회 시 view_count +1, 댓글 CRUD API, GET /api/venues/list 페이징
+  - ✅ 프론트: VenueListView (카드형 목록, 썸네일, 유형/장르뱃지, 주소, 조회수, 댓글수)
   - ✅ 프론트: 상세 페이지에 댓글 UI (CommentSection 공통 컴포넌트)
 - ✅ **UX-005** 지도 모달 → 상세 페이지 연결 — EventDetailModal, VenueDetailModal에 "상세 보기" 링크
 - ✅ **UX-016** 상세 페이지 → 지도 연결 — "지도에서 보기" 버튼, 클릭 시 지도에서 해당 이벤트 선택
@@ -129,6 +129,13 @@
 - ✅ `formatTime()` 유틸 추가 — 시간 HH:MM 포맷 (api.js)
 - ✅ 마크다운 연속 빈 줄 보존 — `\n{3,}` → `<br>` 변환 (markdown.js)
 - ✅ 용어 통일 — "이벤트" → "강습·행사", "정규수업" → "강습", 기본 유형 regular_class
+- ✅ `start_date` → `event_date` 프론트 전면 대응 (Sidebar, KakaoMap, AdminView)
+- ✅ `formatDate()` 수정 — 날짜만 표시 (시간 제거), timezone 보정
+- ✅ `formatCreatedAt()` 추가 — 작성 시간 전용 (YYYY-MM-DD HH:MM:SS)
+- ✅ AuthModal App.vue로 이동 — 전 페이지에서 로그인 모달 동작
+- ✅ CommentSection.vue 공통 컴포넌트 — 게시판/이벤트/장소 댓글 통합
+- ✅ `badge-row` 전역 스타일 추가 (layout.css)
+- ✅ 메뉴 이름 — 열린 플로어 / 클래스·이벤트 / 댄스바·연습실
 
 ---
 
