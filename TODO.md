@@ -96,14 +96,16 @@
   - ✅ 2단계 유형별 추가 필드 (소셜 파티/워크샵 정보)
   - ✅ 2단계 반복 이벤트 설정 (주기/요일/휴강일/보강일)
 - ✅ **UX-007** 이벤트 수정 페이지 (`/events/:id/edit`) — 라우팅 + 동작 테스트 완료
-- ⬜ **UX-008** 장소 등록 페이지 (`/venues/new`) — 2단계 폼 + 미니맵
-- ⬜ **UX-009** 장소 수정 페이지 (`/venues/:id/edit`)
+- ✅ **UX-008** 장소 등록 페이지 (`/venues/new`) — 2단계 폼 + 미니맵 + 마크다운 + 유형별 필드
+- ✅ **UX-009** 장소 수정 페이지 (`/venues/:id/edit`) — VenueWriteView 공용, 라우팅 완료
 
 ### 기존 모달 정리
-- ✅ **UX-010** EventDetailModal 간소화 — 수정 버튼을 router-link로 변경, 불필요 정보(휴강일/보강일/작성자/정원) 제거
-- 🚧 **UX-011** 기존 등록 모달 제거
-  - ✅ CreateEventModal 제거 완료 (MainView에서 관련 코드 전부 정리)
-  - ⬜ CreateVenueModal 제거 (장소 등록 페이지 완성 후)
+- ✅ **UX-010** EventDetailModal 간소화 — 수정 → router-link, 불필요 정보 제거
+- ✅ **UX-010-2** VenueDetailModal 간소화 — 수정 → router-link, 표시 순서 상세 페이지와 통일
+- ✅ **UX-011** 기존 등록 모달 전부 제거
+  - ✅ CreateEventModal 제거 (MainView 관련 코드 정리)
+  - ✅ CreateVenueModal 제거 (MainView 관련 코드 정리)
+  - ✅ PickLocationBar 제거 (위치 선택 모드 불필요)
 
 ### 코드 정리
 - ✅ views 폴더 구조 정리 — board/, events/, venues/ 하위 폴더 분리
