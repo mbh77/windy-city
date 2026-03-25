@@ -2,7 +2,7 @@
   <div class="page-container">
     <header class="page-header">
       <router-link to="/" class="page-nav-btn">지도</router-link>
-      <a class="page-nav-btn" @click="$router.back()">뒤로</a>
+      <router-link to="/venues" class="page-nav-btn">목록</router-link>
       <h1 class="page-title">🎭 댄스바·연습실</h1>
     </header>
 

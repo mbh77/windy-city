@@ -74,6 +74,40 @@ def get_venues(
     return [_venue_to_response(db, v) for v in venues]
 
 
+@router.get("/list")
+def get_venues_list(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    q: str = Query("", description="검색어"),
+    venue_type: Optional[models.VenueType] = Query(None),
+    db: Session = Depends(get_db)
+):
+    """장소 게시판형 목록 (페이징, 검색, 댓글수 포함)"""
+    query = db.query(models.Venue)
+
+    if venue_type:
+        query = query.filter(models.Venue.venue_type == venue_type)
+
+    if q:
+        like = f"%{q}%"
+        query = query.filter(
+            (models.Venue.name.like(like)) |
+            (models.Venue.address.like(like)) |
+            (models.Venue.description.like(like))
+        )
+
+    total = query.count()
+    venues = query.order_by(models.Venue.created_at.desc()).offset((page - 1) * limit).limit(limit).all()
+    return {
+        "total": total,
+        "page": page,
+        "venues": [
+            {**_venue_to_response(db, v).model_dump(), "comment_count": len(v.comments)}
+            for v in venues
+        ],
+    }
+
+
 @router.post("/", response_model=schemas.VenueResponse, status_code=201)
 def create_venue(
     venue_data: schemas.VenueCreate,
