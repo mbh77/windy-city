@@ -13,7 +13,9 @@
           </button>
           <div v-if="showNavMenu" class="nav-dropdown">
             <router-link to="/board?category=notice" class="nav-dropdown-item" @click="showNavMenu = false">📢 공지사항</router-link>
-            <router-link to="/board?category=free" class="nav-dropdown-item" @click="showNavMenu = false">💬 열린 플로어 - 자유게시판</router-link>
+            <router-link to="/board?category=free" class="nav-dropdown-item" @click="showNavMenu = false">💬 열린 플로어 (자유게시판)</router-link>
+            <router-link to="/events" class="nav-dropdown-item" @click="showNavMenu = false">💃 댄스 클래스 (강습·행사)</router-link>
+            <router-link to="/venues" class="nav-dropdown-item" @click="showNavMenu = false">🎭 댄스 스테이지 (댄스바·연습실)</router-link>
             <router-link to="/about" class="nav-dropdown-item" @click="showNavMenu = false">ℹ️ About</router-link>
             <router-link to="/feedback" class="nav-dropdown-item" @click="showNavMenu = false">💡 제보/제안</router-link>
             <router-link v-if="currentUser?.is_admin" to="/admin" class="nav-dropdown-item" @click="showNavMenu = false">⚙️ 관리자</router-link>

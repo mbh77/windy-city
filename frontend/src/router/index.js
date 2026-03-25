@@ -10,6 +10,8 @@ import EventDetailView from '../views/events/EventDetailView.vue'
 import VenueDetailView from '../views/venues/VenueDetailView.vue'
 import VenueWriteView from '../views/venues/VenueWriteView.vue'
 import EventWriteView from '../views/events/EventWriteView.vue'
+import EventListView from '../views/events/EventListView.vue'
+import VenueListView from '../views/venues/VenueListView.vue'
 
 const routes = [
   { path: '/', name: 'main', component: MainView },
@@ -19,6 +21,8 @@ const routes = [
   { path: '/board', name: 'board', component: BoardView },
   { path: '/board/write', name: 'postWrite', component: PostWriteView },
   { path: '/board/:id', name: 'postDetail', component: PostDetailView },
+  { path: '/events', name: 'eventList', component: EventListView },
+  { path: '/venues', name: 'venueList', component: VenueListView },
   { path: '/events/new', name: 'eventNew', component: EventWriteView },
   { path: '/events/:id/edit', name: 'eventEdit', component: EventWriteView },  
   { path: '/events/:id', name: 'eventDetail', component: EventDetailView },
