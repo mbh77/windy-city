@@ -79,8 +79,8 @@
 ### 이벤트 날짜/시간 분리
 - ✅ **UX-012** DB 스키마 변경 — `start_date`/`end_date` → `event_date`/`event_end_date`/`start_time`/`end_time` (dev DB 완료)
 - ✅ **UX-013** 백엔드 API 수정 — models, schemas, routers/events.py, routers/search.py
-- ⬜ **UX-014** 프론트 기존 화면 날짜 대응 — 사이드바, 모달 등에서 새 날짜 구조 표시
-- ⬜ **UX-015** 프론트 상세/목록 표시 — 시간 없으면 날짜만, 있으면 날짜+시간 표시
+- ✅ **UX-014** 프론트 기존 화면 날짜 대응 — EventDetailModal에서 새 날짜 구조(event_date + start_time/end_time) 표시
+- ✅ **UX-015** 프론트 상세/목록 표시 — formatTime() 유틸 추가, 시:분까지만 표시
 
 ### 상세 페이지
 - ✅ **UX-001** 이벤트 상세 페이지 (`/events/:id`) — views/events/EventDetailView.vue
@@ -88,26 +88,35 @@
 - ⬜ **UX-003** 이벤트 목록 페이지 (`/events`) — 게시판형 목록, 필터/정렬
 - ⬜ **UX-004** 장소 목록 페이지 (`/venues`) — 게시판형 목록, 필터/정렬
 - ✅ **UX-005** 지도 모달 → 상세 페이지 연결 — EventDetailModal, VenueDetailModal에 "상세 보기" 링크
+- ✅ **UX-016** 상세 페이지 → 지도 연결 — "지도에서 보기" 버튼, 클릭 시 지도에서 해당 이벤트 선택
 
 ### 등록/수정 전용 페이지
-- 🚧 **UX-006** 이벤트 등록 페이지 (`/events/new`) — 2단계 폼 + 미니맵 + 마크다운 툴바
+- ✅ **UX-006** 이벤트 등록 페이지 (`/events/new`) — 2단계 폼 + 미니맵 + 마크다운 툴바
   - ✅ 기본 구조, 미니맵, 위치 검색, 마크다운 에디터, 이미지 첨부
-  - ⬜ 2단계 유형별 추가 필드 (소셜 파티/워크샵 정보) template 채우기
-  - ⬜ 2단계 반복 이벤트 설정 template 채우기
-- ⬜ **UX-007** 이벤트 수정 페이지 (`/events/:id/edit`) — 라우팅 완료, 동작 테스트 필요
+  - ✅ 2단계 유형별 추가 필드 (소셜 파티/워크샵 정보)
+  - ✅ 2단계 반복 이벤트 설정 (주기/요일/휴강일/보강일)
+- ✅ **UX-007** 이벤트 수정 페이지 (`/events/:id/edit`) — 라우팅 + 동작 테스트 완료
 - ⬜ **UX-008** 장소 등록 페이지 (`/venues/new`) — 2단계 폼 + 미니맵
 - ⬜ **UX-009** 장소 수정 페이지 (`/venues/:id/edit`)
 
 ### 기존 모달 정리
-- ⬜ **UX-010** 지도 모달 간소화 — 등록/수정 기능 제거, 간략 정보 + "상세 보기" 링크만 유지
-- ⬜ **UX-011** 기존 CreateEventModal / CreateVenueModal 제거 (전용 페이지로 대체 후)
+- ✅ **UX-010** EventDetailModal 간소화 — 수정 버튼을 router-link로 변경, 불필요 정보(휴강일/보강일/작성자/정원) 제거
+- 🚧 **UX-011** 기존 등록 모달 제거
+  - ✅ CreateEventModal 제거 완료 (MainView에서 관련 코드 전부 정리)
+  - ⬜ CreateVenueModal 제거 (장소 등록 페이지 완성 후)
 
-### 코드 정리 (완료)
+### 코드 정리
 - ✅ views 폴더 구조 정리 — board/, events/, venues/ 하위 폴더 분리
 - ✅ `utils/markdown.js` — renderMarkdown 공통화 (9개 파일 중복 제거)
 - ✅ `composables/useImageUpload.js` — 이미지 업로드/삭제/저장 공통화
 - ✅ `composables/useLocationSearch.js` — 카카오 장소 검색 공통화
 - ✅ `composables/useMarkdownEditor.js` — 마크다운 툴바 (B/I/링크/이미지/영상) 공통화
+- ✅ 전역 CSS 분리 — style.css → base/layout/topbar/sidebar/map/modal/form/badges/markdown.css
+- ✅ scoped CSS 중복 제거 — write/dialog/markdown 스타일을 전역으로 통합 (EventWriteView, PostWriteView, PostDetailView)
+- ✅ `post-title`/`post-meta`/`post-body`/`post-actions` 스타일 전역화 (layout.css)
+- ✅ `formatTime()` 유틸 추가 — 시간 HH:MM 포맷 (api.js)
+- ✅ 마크다운 연속 빈 줄 보존 — `\n{3,}` → `<br>` 변환 (markdown.js)
+- ✅ 용어 통일 — "이벤트" → "강습·행사", "정규수업" → "강습", 기본 유형 regular_class
 
 ---
 

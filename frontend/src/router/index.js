@@ -8,6 +8,7 @@ import PostDetailView from '../views/board/PostDetailView.vue'
 import PostWriteView from '../views/board/PostWriteView.vue'
 import EventDetailView from '../views/events/EventDetailView.vue'
 import VenueDetailView from '../views/venues/VenueDetailView.vue'
+import VenueWriteView from '../views/venues/VenueWriteView.vue'
 import EventWriteView from '../views/events/EventWriteView.vue'
 
 const routes = [
@@ -21,6 +22,8 @@ const routes = [
   { path: '/events/new', name: 'eventNew', component: EventWriteView },
   { path: '/events/:id/edit', name: 'eventEdit', component: EventWriteView },  
   { path: '/events/:id', name: 'eventDetail', component: EventDetailView },
+  { path: '/venues/new', name: 'venueNew', component: VenueWriteView },
+  { path: '/venues/:id/edit', name: 'venueEdit', component: VenueWriteView },
   { path: '/venues/:id', name: 'venueDetail', component: VenueDetailView },
 ]
 

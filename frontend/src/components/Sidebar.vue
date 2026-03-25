@@ -79,11 +79,10 @@
           v-if="currentUser?.is_organizer && activeTab === 'events'"
           class="btn-primary tab-action"
         >등록 +</router-link>
-        <button
+        <router-link to="/venues/new"
           v-if="currentUser?.is_organizer && activeTab === 'venues'"
           class="btn-primary tab-action"
-          @click="$emit('addVenue')"
-        >등록 +</button>
+        >등록 +</router-link>
       </div>
 
       <!-- 이벤트 탭 -->
