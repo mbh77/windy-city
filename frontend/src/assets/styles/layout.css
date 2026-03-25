@@ -8,6 +8,9 @@
 .page-title { font-size: 1.2rem; font-weight: 700; }
 .page-body { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 10px; padding: 20px; }
 
+/* ── 상세 페이지 수정/삭제 버튼 ── */
+.post-actions { display: flex; gap: 8px; margin-top: 20px; }
+
 /* ── 레이아웃 ── */
 .layout { display: flex; flex: 1; overflow: hidden; }
 .map-wrap { position: relative; flex: 1; overflow: hidden; }

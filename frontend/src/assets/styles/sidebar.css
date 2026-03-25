@@ -58,10 +58,10 @@
 }
 
 /* ── 탭 ── */
-.tab-group { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 1px solid #E0D5C8; }
+.tab-group { display: flex; align-items: center; gap: 0; margin-bottom: 16px; border-bottom: 1px solid #E0D5C8; }
 .tab { background: none; border: none; color: #8B7B6B; padding: 8px 16px; cursor: pointer; font-size: 0.9rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
 .tab.active { color: #D4725C; border-bottom-color: #D4725C; }
-.tab-action { padding: 4px 10px; font-size: 0.8rem; margin-left: auto; margin-right: 8px; }
+.tab-action { display: inline-block; text-align: center; text-decoration: none; padding: 4px 10px; font-size: 0.8rem; margin-left: auto; margin-right: 8px; }
 
 /* ── 접이식 필터 (날짜+요일 통합) ── */
 .compact-filter { padding: 6px 16px; border-bottom: 1px solid #EDE5DB; }
