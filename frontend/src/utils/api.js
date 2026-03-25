@@ -47,6 +47,14 @@ export function formatDate(iso) {
   })
 }
 
+// ── 작성일 포맷 (YYYY-MM-DD HH:MM:SS) ──
+export function formatCreatedAt(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
 // ── 시간 포맷 (HH:MM만 표시) ──
 export function formatTime(time) {
   if (!time) return ''

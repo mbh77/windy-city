@@ -88,7 +88,7 @@
               <td>{{ ev.title }}</td>
               <td>{{ ev.location_name }}</td>
               <td>{{ ev.event_type }}</td>
-              <td>{{ formatDate(ev.start_date) }}</td>
+              <td>{{ formatDate(ev.event_date) }}</td>
               <td>{{ ev.organizer_nickname }}</td>
               <td>
                 <button class="delete-btn" @click="deleteEvent(ev)">삭제</button>

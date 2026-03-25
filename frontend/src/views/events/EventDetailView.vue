@@ -2,8 +2,8 @@
   <div class="page-container">
     <header class="page-header">
       <router-link to="/" class="page-nav-btn">지도</router-link>
-      <a class="page-nav-btn" @click="$router.back()">뒤로</a>
-      <h1 class="page-title">강습·행사 상세</h1>
+      <router-link to="/events" class="page-nav-btn">목록</router-link>
+      <h1 class="page-title">댄스 클래스</h1>
     </header>
 
     <main class="page-body" v-if="event">
@@ -25,7 +25,7 @@
       <h2 class="post-title">{{ event.title }}</h2>
       <div class="post-meta">
         <span>{{ event.organizer_nickname || '-' }}</span>
-        <span>{{ formatEventDate(event) }}</span>
+        <span>{{ formatCreatedAt(event.created_at) }}</span>
         <span>조회 {{ event.view_count || 0 }}</span>
       </div>
 
@@ -42,6 +42,10 @@
         <div v-if="event.address" class="detail-row">
           <span class="detail-label">주소</span>{{ event.address }}
           <span v-if="event.address_detail"> {{ event.address_detail }}</span>
+        </div>
+        <!-- 이벤트 날짜 -->
+        <div class="detail-row">
+          <span class="detail-label">날짜</span>{{ formatEventDate(event) }}
         </div>
         <!-- 시간 (있을 때만) -->
         <div v-if="event.start_time" class="detail-row">
@@ -105,7 +109,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { apiFetch, formatTime } from '@/utils/api.js'
+import { apiFetch, formatTime, formatCreatedAt } from '@/utils/api.js'
 import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '@/utils/constants.js'
 import { useAuth } from '@/composables/useAuth.js'
 import ImageGallery from '@/components/ImageGallery.vue'

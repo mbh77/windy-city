@@ -28,6 +28,7 @@
         <!-- 상세 정보 -->
         <div class="detail-row"><span class="detail-label">장소</span>{{ event.location_name }}</div>
         <div v-if="event.address" class="detail-row"><span class="detail-label">주소</span>{{ event.address }}<span v-if="event.address_detail"> {{ event.address_detail }}</span></div>
+        <div class="detail-row"><span class="detail-label">날짜</span>{{ formatEventDate(event) }}</div>
         <div v-if="event.start_time" class="detail-row">
           <span class="detail-label">시간</span>
           {{ formatTime(event.start_time) }}{{ event.end_time ? ' ~ ' + formatTime(event.end_time) : '' }}
@@ -72,6 +73,17 @@ import ImageGallery from './ImageGallery.vue'
 import { renderMarkdown } from '@/utils/markdown.js'
 
 const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' }
+
+function formatEventDate(e) {
+  if (!e.event_date) return '-'
+  const d = new Date(e.event_date + 'T00:00:00')
+  let str = d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' })
+  if (e.event_end_date && e.event_end_date !== e.event_date) {
+    const d2 = new Date(e.event_end_date + 'T00:00:00')
+    str += ' ~ ' + d2.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
+  }
+  return str
+}
 
 const props = defineProps({
   visible: { type: Boolean, default: false },

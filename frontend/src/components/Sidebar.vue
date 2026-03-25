@@ -52,7 +52,7 @@
               <span class="item-meta">{{ item.item_type === 'event' ? item.location_name : item.address }}</span>
               <template v-if="item.item_type === 'event'">
                 <span class="card-dot">·</span>
-                <span class="item-meta">{{ formatDate(item.start_date) }}</span>
+                <span class="item-meta">{{ formatDate(item.event_date) }}</span>
               </template>
             </div>
           </div>
@@ -128,7 +128,7 @@
               <div class="card-line2">
                 <span class="item-meta">{{ ev.location_name }}</span>
                 <span class="card-dot">·</span>
-                <span class="item-meta">{{ ev.is_recurring ? formatRecurringSchedule(ev) : formatDate(ev.start_date) }}</span>
+                <span class="item-meta">{{ ev.is_recurring ? formatRecurringSchedule(ev) : formatDate(ev.event_date) }}</span>
                 <span v-if="ev.is_recurring" class="recurring-badge">🔄 {{ formatRecurring(ev.recurrence_rule) }}</span>
               </div>
             </div>
@@ -309,8 +309,8 @@ function matchesDay(ev) {
   if (ev.is_recurring && ev.recurrence_rule?.days) {
     return ev.recurrence_rule.days.some(d => selectedDays.value.includes(d))
   }
-  // 비반복: start_date 요일 확인
-  const weekday = new Date(ev.start_date).getDay()
+  // 비반복: event_date 요일 확인
+  const weekday = new Date(ev.event_date).getDay()
   const dayKey = WEEKDAY_TO_DAY[weekday === 0 ? 6 : weekday - 1]
   return selectedDays.value.includes(dayKey)
 }
@@ -323,7 +323,7 @@ function formatRecurring(rule) {
 }
 
 function formatRecurringSchedule(ev) {
-  const time = ev.start_date ? new Date(ev.start_date).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : ''
+  const time = ev.start_time ? ev.start_time.slice(0, 5) : ''
   return `${formatRecurring(ev.recurrence_rule)} ${time}`
 }
 

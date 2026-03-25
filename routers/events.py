@@ -126,6 +126,44 @@ def get_events(
     return results
 
 
+@router.get("/list")
+def list_events(
+    q: str = Query("", description="검색어"),
+    event_type: Optional[models.EventType] = Query(None),
+    dance_genre: Optional[models.DanceGenre] = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """강습·행사 목록 (페이징, 검색)"""
+    query = db.query(models.Event)
+
+    if event_type:
+        query = query.filter(models.Event.event_type == event_type)
+    if dance_genre:
+        query = query.join(models.EventDanceGenre).filter(
+            models.EventDanceGenre.dance_genre == dance_genre
+        )
+    if q:
+        keyword = f"%{q}%"
+        query = query.filter(
+            (models.Event.title.like(keyword)) |
+            (models.Event.location_name.like(keyword)) |
+            (models.Event.instructor_name.like(keyword))
+        )
+
+    total = query.count()
+    events = query.order_by(models.Event.created_at.desc()).offset((page - 1) * limit).limit(limit).all()
+    return {
+        "total": total,
+        "page": page,
+        "events": [
+            {**_event_to_response(db, e).model_dump(), "comment_count": len(e.comments)}
+            for e in events
+        ],
+    }
+
+
 @router.post("/", response_model=schemas.EventResponse, status_code=201)
 def create_event(
     event_data: schemas.EventCreate,
