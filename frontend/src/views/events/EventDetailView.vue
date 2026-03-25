@@ -82,10 +82,13 @@
 
       </div>
 
-      <!-- 수정/삭제 (본인 또는 관리자) -->
-      <div class="post-actions" v-if="isOwner">
-        <router-link :to="`/events/${event.id}/edit`" class="btn-ghost">수정</router-link>
-        <button class="btn-danger" @click="handleDelete">삭제</button>
+      <!-- 액션 버튼 -->
+      <div class="post-actions">
+        <router-link :to="{ path: '/', query: { eventId: event.id } }" class="btn-ghost">지도에서 보기</router-link>
+        <template v-if="isOwner">
+          <router-link :to="`/events/${event.id}/edit`" class="btn-ghost">수정</router-link>
+          <button class="btn-danger" @click="handleDelete">삭제</button>
+        </template>
       </div>
     </main>
 

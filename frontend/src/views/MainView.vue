@@ -85,6 +85,8 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { apiFetch } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
@@ -99,6 +101,8 @@ import CreateVenueModal from '../components/CreateVenueModal.vue'
 import CategoryBar from '../components/CategoryBar.vue'
 import OnboardingOverlay from '../components/OnboardingOverlay.vue'
 
+const route = useRoute()
+const router = useRouter()
 const { currentUser, restoreSession, logout } = useAuth()
 const { events, loadEvents } = useEvents()
 const { venues, loadVenues } = useVenues()
@@ -212,6 +216,16 @@ onMounted(async () => {
     loadEvents(currentFilters.value),
     loadVenues()
   ])
+  // 쿼리 파라미터로 이벤트 선택
+  if (route.query.eventId) {
+    const res = await apiFetch(`/api/events/${route.query.eventId}`)
+    if (res.ok) {
+      const ev = await res.json()
+      openEventDetail(ev)
+    }
+    router.replace({ path: '/', query: {} })
+  }
+
   // 가상 키보드 감지
   const initialHeight = window.innerHeight
   window.visualViewport?.addEventListener('resize', () => {
