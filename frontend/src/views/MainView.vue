@@ -1,24 +1,12 @@
 <template>
-  <!-- 위치 선택 모드 오버레이 -->
-  <PickLocationBar
-    :visible="isPicking"
-    :message="pickMessage"
-    :hasLocation="!!pickedLocation"
-    @confirm="confirmPick"
-    @retry="retryPick"
-    @cancel="cancelPick"
-  />
-
   <main class="layout">
     <!-- 지도 -->
     <div class="map-wrap">
       <KakaoMap
         ref="mapRef"
-        :isPicking="isPicking"
         :visibleCategories="visibleCategories"
         @markerClick="openEventDetail"
         @venueMarkerClick="openVenueDetail"
-        @locationPicked="handleLocationPicked"
         @boundsChanged="mapBounds = $event"
       />
 
@@ -36,7 +24,6 @@
       :mapBounds="mapBounds"
       :visibleCategories="visibleCategories"
       @selectEvent="openEventDetail"
-      @addVenue="openCreateVenueModal"
       @selectVenue="openVenueDetail"
       @dateFilterChange="handleDateFilter"
       @click="closeMapInfowindows"
@@ -63,17 +50,6 @@
     @close="showAuth = false"
   />
 
-  <!-- 장소 등록 모달 -->
-  <CreateVenueModal
-    ref="createVenueRef"
-    :visible="showCreateVenue"
-    :restoredForm="restoredVenueForm"
-    :venueToEdit="venueToEdit"
-    @close="showCreateVenue = false"
-    @pickLocation="startPickLocation($event)"
-    @created="handleVenueCreated"
-  />
-
   <!-- 온보딩 (첫 방문 시) -->
   <OnboardingOverlay
     @goEvents="handleOnboardingEvents"
@@ -92,11 +68,9 @@ import { useVenues } from '../composables/useVenues.js'
 
 import Sidebar from '../components/Sidebar.vue'
 import KakaoMap from '../components/KakaoMap.vue'
-import PickLocationBar from '../components/PickLocationBar.vue'
 import EventDetailModal from '../components/EventDetailModal.vue'
 import VenueDetailModal from '../components/VenueDetailModal.vue'
 import AuthModal from '../components/AuthModal.vue'
-import CreateVenueModal from '../components/CreateVenueModal.vue'
 import CategoryBar from '../components/CategoryBar.vue'
 import OnboardingOverlay from '../components/OnboardingOverlay.vue'
 
@@ -108,8 +82,6 @@ const { venues, loadVenues } = useVenues()
 
 // refs
 const mapRef = ref(null)
-const createVenueRef = ref(null)
-
 // 지도 영역
 const mapBounds = ref(null)
 const mapCenter = computed(() => {
@@ -145,14 +117,12 @@ watch(mapCenter, (center) => {
 const showEventDetail = ref(false)
 const showVenueDetail = ref(false)
 const showAuth = ref(false)
-const showCreateVenue = ref(false)
 const selectedEvent = ref(null)
 const selectedVenue = ref(null)
-const venueToEdit = ref(null)
 
 // 모달 뒤로가기 처리
 const anyModalOpen = computed(() =>
-  showEventDetail.value || showVenueDetail.value || showAuth.value || showCreateVenue.value
+  showEventDetail.value || showVenueDetail.value || showAuth.value
 )
 
 watch(anyModalOpen, (open) => {
@@ -166,7 +136,6 @@ function handlePopState() {
     showEventDetail.value = false
     showVenueDetail.value = false
     showAuth.value = false
-    showCreateVenue.value = false
   }
 }
 
@@ -177,12 +146,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('popstate', handlePopState)
 })
-
-// 위치 선택 상태
-const isPicking = ref(false)
-const pickMessage = ref('지도에서 위치를 클릭하세요')
-const pickedLocation = ref(null)
-const restoredVenueForm = ref(null)
 
 // 카테고리 체크박스 상태
 const visibleCategories = reactive({
@@ -250,11 +213,6 @@ function handlePlaceSelect({ lat, lng }) {
   mapRef.value?.panTo(lat, lng)
 }
 
-// ── 검색 ──
-function handleSearch(filters) {
-  loadEvents(filters)
-}
-
 // ── 인증 ──
 function handleAuthClick() {
   if (currentUser.value) {
@@ -288,64 +246,6 @@ function openVenueDetail(v) {
 async function closeVenueDetail() {
   showVenueDetail.value = false
   await loadVenues()
-}
-
-// ── 장소 등록 ──
-function openCreateVenueModal() {
-  restoredVenueForm.value = null
-  venueToEdit.value = null
-  createVenueRef.value?.resetForm()
-  showCreateVenue.value = true
-}
-
-
-
-async function handleVenueCreated(data) {
-  if (data?.panTo) {
-    mapRef.value?.panTo(data.panTo.lat, data.panTo.lng)
-    return
-  }
-  await loadVenues()
-}
-
-// ── 위치 선택 모드 (장소 전용) ──
-function startPickLocation(formData) {
-  restoredVenueForm.value = formData ? { ...formData } : null
-  showCreateVenue.value = false
-  isPicking.value = true
-  pickMessage.value = '지도에서 위치를 클릭하세요'
-  pickedLocation.value = null
-}
-
-function handleLocationPicked(loc) {
-  pickedLocation.value = loc
-  pickMessage.value = loc.address || '주소를 찾을 수 없습니다'
-}
-
-function confirmPick() {
-  if (!pickedLocation.value) return
-  isPicking.value = false
-
-  const loc = pickedLocation.value
-  if (restoredVenueForm.value) {
-    restoredVenueForm.value.latitude = loc.lat.toFixed(6)
-    restoredVenueForm.value.longitude = loc.lng.toFixed(6)
-    if (loc.address) restoredVenueForm.value.address = loc.address
-  }
-  showCreateVenue.value = true
-  pickedLocation.value = null
-}
-
-function retryPick() {
-  mapRef.value?.clearTempMarker()
-  pickedLocation.value = null
-  pickMessage.value = '지도에서 위치를 클릭하세요'
-}
-
-function cancelPick() {
-  isPicking.value = false
-  pickedLocation.value = null
-  showCreateVenue.value = true
 }
 
 function handleDateFilter({ date_from, date_to }) {
