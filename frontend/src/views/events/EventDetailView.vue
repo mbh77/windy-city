@@ -45,7 +45,7 @@
         <!-- 시간 (있을 때만) -->
         <div v-if="event.start_time" class="detail-row">
           <span class="detail-label">시간</span>
-          {{ event.start_time }}{{ event.end_time ? ' ~ ' + event.end_time : '' }}
+          {{ formatTime(event.start_time) }}{{ event.end_time ? ' ~ ' + formatTime(event.end_time) : '' }}
         </div>
         <!-- 가격 -->
         <div v-if="event.price" class="detail-row"><span class="detail-label">가격</span>{{ event.price }}</div>
@@ -98,7 +98,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { apiFetch } from '@/utils/api.js'
+import { apiFetch, formatTime } from '@/utils/api.js'
 import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '@/utils/constants.js'
 import { useAuth } from '@/composables/useAuth.js'
 import ImageGallery from '@/components/ImageGallery.vue'

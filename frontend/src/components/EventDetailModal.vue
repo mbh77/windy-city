@@ -3,67 +3,52 @@
     <div class="modal-content">
       <button class="modal-close" @click="$emit('close')">✕</button>
       <template v-if="event">
-        <span :class="['event-type-badge', `type-${event.event_type}`]">
-          {{ TYPE_LABELS[event.event_type] }}
-        </span>
-        <span
-          v-for="g in event.dance_genres || []"
-          :key="g"
-          :class="['genre-badge', `genre-${g}`]"
-        >
-          {{ GENRE_LABELS[g] }}
-        </span>
-        <span v-if="event.difficulty" class="difficulty-badge">
-          {{ DIFFICULTY_LABELS[event.difficulty] }}
-        </span>
+        <!-- 뱃지 -->
+        <div class="badge-row">
+          <span :class="['event-type-badge', `type-${event.event_type}`]">
+            {{ TYPE_LABELS[event.event_type] }}
+          </span>
+          <span v-for="g in event.dance_genres || []" :key="g"
+                :class="['genre-badge', `genre-${g}`]">
+            {{ GENRE_LABELS[g] }}
+          </span>
+          <span v-if="event.difficulty" class="difficulty-badge">
+            {{ DIFFICULTY_LABELS[event.difficulty] }}
+          </span>
+        </div>
+
         <h2 style="margin-top:8px">{{ event.title }}</h2>
-        <div v-if="event.description" class="markdown-body" style="margin:8px 0;font-size:0.85rem;" v-html="renderMarkdown(event.description)"></div>
 
         <!-- 이미지 갤러리 -->
-        <ImageGallery :images="event.media || []" />        
+        <ImageGallery :images="event.media || []" />
 
+        <!-- 설명 -->
+        <div v-if="event.description" class="markdown-body" style="margin:8px 0;font-size:0.85rem;" v-html="renderMarkdown(event.description)"></div>
+
+        <!-- 상세 정보 -->
         <div class="detail-row"><span class="detail-label">장소</span>{{ event.location_name }}</div>
         <div v-if="event.address" class="detail-row"><span class="detail-label">주소</span>{{ event.address }}<span v-if="event.address_detail"> {{ event.address_detail }}</span></div>
-        <div class="detail-row"><span class="detail-label">시작</span>{{ formatDate(event.start_date) }}</div>
-        <div v-if="event.end_date" class="detail-row"><span class="detail-label">종료</span>{{ formatDate(event.end_date) }}</div>
-
-        <!-- 가격 정보 -->
+        <div v-if="event.start_time" class="detail-row">
+          <span class="detail-label">시간</span>
+          {{ formatTime(event.start_time) }}{{ event.end_time ? ' ~ ' + formatTime(event.end_time) : '' }}
+        </div>
         <div v-if="event.price" class="detail-row"><span class="detail-label">가격</span>{{ event.price }}</div>
         <div v-if="event.early_bird_price" class="detail-row"><span class="detail-label">얼리버드</span>{{ event.early_bird_price }}</div>
-
         <!-- 소셜 파티 -->
         <div v-if="event.dj_name" class="detail-row"><span class="detail-label">DJ</span>{{ event.dj_name }}</div>
         <div v-if="event.dress_code" class="detail-row"><span class="detail-label">드레스코드</span>{{ event.dress_code }}</div>
         <div v-if="event.has_pre_lesson" class="detail-row"><span class="detail-label">프리레슨</span>포함</div>
-
         <!-- 워크샵/수업 -->
         <div v-if="event.instructor_name" class="detail-row"><span class="detail-label">강사</span>{{ event.instructor_name }}</div>
-        <div v-if="event.max_participants" class="detail-row"><span class="detail-label">정원</span>{{ event.max_participants }}명</div>
-        <div v-if="event.requires_partner" class="detail-row"><span class="detail-label">파트너</span>필요</div>
-
-        <!-- 반복 -->
+        <!-- 반복 (주기·요일만 표시) -->
         <template v-if="event.is_recurring && event.recurrence_rule">
           <div class="detail-row">
             <span class="detail-label">반복</span>
             {{ event.recurrence_rule.frequency === 'weekly' ? '매주' : '격주' }}
             {{ (event.recurrence_rule.days || []).map(d => DAY_LABELS[d]).join(' · ') }}
           </div>
-          <div v-if="event.recurrence_rule.skip_dates?.length" class="detail-row">
-            <span class="detail-label">휴강일</span>
-            <span class="date-tag-list-inline">
-              <span v-for="d in event.recurrence_rule.skip_dates" :key="d" class="date-tag">{{ d }}</span>
-            </span>
-          </div>
-          <div v-if="event.recurrence_rule.extra_dates?.length" class="detail-row">
-            <span class="detail-label">보강일</span>
-            <span class="date-tag-list-inline">
-              <span v-for="d in event.recurrence_rule.extra_dates" :key="d" class="date-tag">{{ d }}</span>
-            </span>
-          </div>
         </template>
         <div v-else-if="event.is_recurring" class="detail-row"><span class="detail-label">반복</span>반복 강습·행사</div>
-
-        <div class="detail-row"><span class="detail-label">작성자</span>{{ event.organizer_nickname || '-' }}</div>
 
         <div class="action-row">
           <router-link :to="`/events/${event.id}`" class="btn-ghost">상세 보기</router-link>
@@ -80,7 +65,7 @@
 <script setup>
 import { computed } from 'vue'
 import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '../utils/constants.js'
-import { formatDate } from '../utils/api.js'
+import { formatTime } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import ImageGallery from './ImageGallery.vue'

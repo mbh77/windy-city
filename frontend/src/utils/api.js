@@ -46,3 +46,9 @@ export function formatDate(iso) {
     minute: '2-digit',
   })
 }
+
+// ── 시간 포맷 (HH:MM만 표시) ──
+export function formatTime(time) {
+  if (!time) return ''
+  return time.slice(0, 5)
+}
