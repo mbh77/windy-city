@@ -85,8 +85,18 @@
 ### 상세 페이지
 - ✅ **UX-001** 이벤트 상세 페이지 (`/events/:id`) — views/events/EventDetailView.vue
 - ✅ **UX-002** 장소 상세 페이지 (`/venues/:id`) — views/venues/VenueDetailView.vue
-- ⬜ **UX-003** 이벤트 목록 페이지 (`/events`) — 게시판형 목록, 필터/정렬
-- ⬜ **UX-004** 장소 목록 페이지 (`/venues`) — 게시판형 목록, 필터/정렬
+- ⬜ **UX-003** 이벤트 목록 페이지 (`/events`) — 게시판형 목록, 필터/정렬, 조회수, 댓글
+  - ⬜ DB: events 테이블에 `view_count` 컬럼 추가
+  - ⬜ DB: event_comments 테이블 신규 (id, event_id, user_id, content, created_at, updated_at)
+  - ⬜ 백엔드: 이벤트 상세 조회 시 view_count +1, 댓글 CRUD API
+  - ⬜ 프론트: 목록 UI (검색, 페이징, 조회수 표시)
+  - ⬜ 프론트: 상세 페이지에 댓글 UI (목록, 작성, 수정, 삭제)
+- ⬜ **UX-004** 장소 목록 페이지 (`/venues`) — 게시판형 목록, 필터/정렬, 조회수, 댓글
+  - ⬜ DB: venues 테이블에 `view_count` 컬럼 추가
+  - ⬜ DB: venue_comments 테이블 신규 (id, venue_id, user_id, content, created_at, updated_at)
+  - ⬜ 백엔드: 장소 상세 조회 시 view_count +1, 댓글 CRUD API
+  - ⬜ 프론트: 목록 UI (검색, 페이징, 조회수 표시)
+  - ⬜ 프론트: 상세 페이지에 댓글 UI (목록, 작성, 수정, 삭제)
 - ✅ **UX-005** 지도 모달 → 상세 페이지 연결 — EventDetailModal, VenueDetailModal에 "상세 보기" 링크
 - ✅ **UX-016** 상세 페이지 → 지도 연결 — "지도에서 보기" 버튼, 클릭 시 지도에서 해당 이벤트 선택
 
