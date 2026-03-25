@@ -3,7 +3,7 @@
     <header class="page-header">
       <router-link to="/" class="page-nav-btn">지도</router-link>
       <a class="page-nav-btn" @click="$router.back()">뒤로</a>
-      <h1 class="page-title">장소 상세</h1>
+      <h1 class="page-title">🎭 댄스바·연습실</h1>
     </header>
 
     <main class="page-body" v-if="venue">
