@@ -22,6 +22,7 @@
       <h2 class="post-title">{{ venue.name }}</h2>
       <div class="post-meta">
         <span>{{ venue.owner_nickname || '-' }}</span>
+        <span>조회 {{ venue.view_count || 0 }}</span>
       </div>
 
       <!-- 이미지 갤러리 -->
@@ -98,6 +99,9 @@
           <button class="btn-danger" @click="handleDelete">삭제</button>
         </template>
       </div>
+
+      <!-- 댓글 -->
+      <CommentSection :apiBase="`/api/venues/${venue.id}`" />
     </main>
 
     <!-- 로딩/에러 -->
@@ -113,6 +117,7 @@ import { apiFetch } from '@/utils/api.js'
 import { VENUE_TYPE_LABELS, GENRE_LABELS } from '@/utils/constants.js'
 import { useAuth } from '@/composables/useAuth.js'
 import ImageGallery from '@/components/ImageGallery.vue'
+import CommentSection from '@/components/CommentSection.vue'
 import { renderMarkdown } from '@/utils/markdown.js'
 
 const route = useRoute()

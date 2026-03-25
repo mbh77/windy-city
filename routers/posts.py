@@ -202,6 +202,23 @@ def delete_post(
 
 # ── 댓글 ──────────────────────────────────────────────
 
+@router.get("/{post_id}/comments")
+def get_comments(post_id: int, db: Session = Depends(get_db)):
+    comments = db.query(models.Comment).filter(models.Comment.post_id == post_id)\
+        .order_by(models.Comment.created_at.asc()).all()
+    return [
+        {
+            "id": c.id,
+            "post_id": c.post_id,
+            "author_id": c.author_id,
+            "author_nickname": c.author.nickname if c.author else "",
+            "content": c.content,
+            "created_at": c.created_at,
+            "updated_at": getattr(c, 'updated_at', None),
+        } for c in comments
+    ]
+
+
 @router.post("/{post_id}/comments", status_code=201)
 def create_comment(
     post_id: int,

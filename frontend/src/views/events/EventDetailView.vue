@@ -26,6 +26,7 @@
       <div class="post-meta">
         <span>{{ event.organizer_nickname || '-' }}</span>
         <span>{{ formatEventDate(event) }}</span>
+        <span>조회 {{ event.view_count || 0 }}</span>
       </div>
 
       <!-- 이미지 갤러리 -->
@@ -90,6 +91,9 @@
           <button class="btn-danger" @click="handleDelete">삭제</button>
         </template>
       </div>
+
+      <!-- 댓글 -->
+      <CommentSection :apiBase="`/api/events/${event.id}`" />
     </main>
 
     <!-- 로딩/에러 -->
@@ -105,6 +109,7 @@ import { apiFetch, formatTime } from '@/utils/api.js'
 import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '@/utils/constants.js'
 import { useAuth } from '@/composables/useAuth.js'
 import ImageGallery from '@/components/ImageGallery.vue'
+import CommentSection from '@/components/CommentSection.vue'
 import { renderMarkdown } from '@/utils/markdown.js'
 
 const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' }
