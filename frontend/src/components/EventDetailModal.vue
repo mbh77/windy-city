@@ -68,7 +68,7 @@
         <div class="action-row">
           <router-link :to="`/events/${event.id}`" class="btn-ghost">상세 보기</router-link>
           <template v-if="isOwner">
-            <button class="btn-ghost" @click="$emit('edit', event)">수정</button>
+            <router-link :to="`/events/${event.id}/edit`" class="btn-ghost">수정</router-link>
             <button class="btn-danger" @click="handleDelete">삭제</button>
           </template>
         </div>
@@ -92,7 +92,7 @@ const props = defineProps({
   visible: { type: Boolean, default: false },
   event: { type: Object, default: null },
 })
-const emit = defineEmits(['close', 'edit'])
+const emit = defineEmits(['close'])
 
 const { currentUser } = useAuth()
 const { deleteEvent } = useEvents()

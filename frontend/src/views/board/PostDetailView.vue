@@ -164,12 +164,6 @@ function formatDate(dateStr) {
 </script>
 
 <style scoped>
-.post-title { font-size: 1.2rem; margin-bottom: 8px; }
-.post-meta { font-size: 0.8rem; color: #8B7B6B; display: flex; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #EDE5DB; }
-.post-body { font-size: 0.9rem; line-height: 1.6; min-height: 100px; margin-bottom: 16px; }
-.post-actions { display: flex; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #EDE5DB; }
-.btn-ghost { padding: 6px 14px; background: transparent; border: 1px solid #E0D5C8; color: #5A4A3A; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
-.btn-danger { padding: 6px 14px; background: #c0392b; border: none; color: #fff; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
 .comment-section { margin-top: 16px; }
 .comment-section h3 { font-size: 0.9rem; margin-bottom: 12px; }
 .comment-list { list-style: none; padding: 0; margin: 0 0 12px 0; }
@@ -189,22 +183,4 @@ function formatDate(dateStr) {
 .comment-edit-form textarea { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; margin-top: 4px; }
 .comment-edit-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px; }
 .comment-edit-actions button { padding: 4px 12px; font-size: 0.75rem; }
-
-/* 마크다운 렌더링 스타일 */
-.markdown-body :deep(h1) { font-size: 1.3rem; margin: 16px 0 8px; }
-.markdown-body :deep(h2) { font-size: 1.15rem; margin: 14px 0 6px; }
-.markdown-body :deep(h3) { font-size: 1.05rem; margin: 12px 0 4px; }
-.markdown-body :deep(p) { margin: 0 0 8px; }
-.markdown-body :deep(a) { color: #5BA89E; text-decoration: underline; }
-.markdown-body :deep(code) { background: #F0E8DE; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
-.markdown-body :deep(pre) { background: #F0E8DE; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
-.markdown-body :deep(pre code) { background: none; padding: 0; }
-.markdown-body :deep(blockquote) { border-left: 3px solid #E0D5C8; padding-left: 12px; color: #8B7B6B; margin: 8px 0; }
-.markdown-body :deep(ul), .markdown-body :deep(ol) { padding-left: 20px; margin: 8px 0; }
-.markdown-body :deep(img) { max-width: 100%; border-radius: 6px; }
-.markdown-body :deep(hr) { border: none; border-top: 1px solid #EDE5DB; margin: 16px 0; }
-
-/* 미디어 임베드 */
-.markdown-body :deep(.embed-video) { position: relative; width: 100%; padding-bottom: 56.25%; margin: 12px 0; }
-.markdown-body :deep(.embed-video iframe) { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; }
 </style>

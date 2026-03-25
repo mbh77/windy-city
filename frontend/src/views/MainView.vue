@@ -35,7 +35,6 @@
     <Sidebar
       :mapBounds="mapBounds"
       :visibleCategories="visibleCategories"
-      @addEvent="openCreateEventModal"
       @selectEvent="openEventDetail"
       @addVenue="openCreateVenueModal"
       @selectVenue="openVenueDetail"
@@ -49,7 +48,6 @@
     :visible="showEventDetail"
     :event="selectedEvent"
     @close="closeEventDetail"
-    @edit="handleEditEvent"
   />
 
   <!-- 장소 상세 모달 -->
@@ -66,17 +64,6 @@
     @close="showAuth = false"
   />
 
-  <!-- 이벤트 등록 모달 -->
-  <CreateEventModal
-    ref="createEventRef"
-    :visible="showCreateEvent"
-    :restoredForm="restoredEventForm"
-    :eventToEdit="eventToEdit"
-    @close="showCreateEvent = false"
-    @pickLocation="startPickLocation('event', $event)"
-    @created="handleEventCreated"
-  />
-
   <!-- 장소 등록 모달 -->
   <CreateVenueModal
     ref="createVenueRef"
@@ -84,7 +71,7 @@
     :restoredForm="restoredVenueForm"
     :venueToEdit="venueToEdit"
     @close="showCreateVenue = false"
-    @pickLocation="startPickLocation('venue', $event)"
+    @pickLocation="startPickLocation($event)"
     @created="handleVenueCreated"
   />
 
@@ -108,7 +95,6 @@ import PickLocationBar from '../components/PickLocationBar.vue'
 import EventDetailModal from '../components/EventDetailModal.vue'
 import VenueDetailModal from '../components/VenueDetailModal.vue'
 import AuthModal from '../components/AuthModal.vue'
-import CreateEventModal from '../components/CreateEventModal.vue'
 import CreateVenueModal from '../components/CreateVenueModal.vue'
 import CategoryBar from '../components/CategoryBar.vue'
 import OnboardingOverlay from '../components/OnboardingOverlay.vue'
@@ -119,7 +105,6 @@ const { venues, loadVenues } = useVenues()
 
 // refs
 const mapRef = ref(null)
-const createEventRef = ref(null)
 const createVenueRef = ref(null)
 
 // 지도 영역
@@ -157,16 +142,14 @@ watch(mapCenter, (center) => {
 const showEventDetail = ref(false)
 const showVenueDetail = ref(false)
 const showAuth = ref(false)
-const showCreateEvent = ref(false)
 const showCreateVenue = ref(false)
 const selectedEvent = ref(null)
 const selectedVenue = ref(null)
-const eventToEdit = ref(null)
 const venueToEdit = ref(null)
 
 // 모달 뒤로가기 처리
 const anyModalOpen = computed(() =>
-  showEventDetail.value || showVenueDetail.value || showAuth.value || showCreateEvent.value || showCreateVenue.value
+  showEventDetail.value || showVenueDetail.value || showAuth.value || showCreateVenue.value
 )
 
 watch(anyModalOpen, (open) => {
@@ -180,7 +163,6 @@ function handlePopState() {
     showEventDetail.value = false
     showVenueDetail.value = false
     showAuth.value = false
-    showCreateEvent.value = false
     showCreateVenue.value = false
   }
 }
@@ -197,8 +179,6 @@ onUnmounted(() => {
 const isPicking = ref(false)
 const pickMessage = ref('지도에서 위치를 클릭하세요')
 const pickedLocation = ref(null)
-const pickTarget = ref('event')
-const restoredEventForm = ref(null)
 const restoredVenueForm = ref(null)
 
 // 카테고리 체크박스 상태
@@ -290,38 +270,6 @@ async function closeVenueDetail() {
   await loadVenues()
 }
 
-// ── 이벤트 등록 ──
-function openCreateEventModal() {
-  restoredEventForm.value = null
-  eventToEdit.value = null
-  createEventRef.value?.resetForm()
-  showCreateEvent.value = true
-}
-
-function handleEditEvent(event) {
-  eventToEdit.value = event
-  showEventDetail.value = false
-  showCreateEvent.value = true
-}
-
-async function handleEventCreated(data) {
-  if (data?.panTo) {
-    mapRef.value?.panTo(data.panTo.lat, data.panTo.lng)
-    return
-  }
-  // 생성/수정된 이벤트의 날짜 기준으로 필터 조정
-  if (data?.startDate) {
-    const eventDate = new Date(data.startDate)
-    const weekAfter = new Date(eventDate)
-    weekAfter.setDate(eventDate.getDate() + 7)
-    currentFilters.value = {
-      date_from: toLocalDate(eventDate),
-      date_to: toLocalDate(weekAfter),
-    }
-  }
-  await loadEvents(currentFilters.value)
-}
-
 // ── 장소 등록 ──
 function openCreateVenueModal() {
   restoredVenueForm.value = null
@@ -344,16 +292,10 @@ async function handleVenueCreated(data) {
   await loadVenues()
 }
 
-// ── 위치 선택 모드 (이벤트/장소 공용) ──
-function startPickLocation(target, formData) {
-  pickTarget.value = target
-  if (target === 'event') {
-    restoredEventForm.value = formData ? { ...formData } : null
-    showCreateEvent.value = false
-  } else {
-    restoredVenueForm.value = formData ? { ...formData } : null
-    showCreateVenue.value = false
-  }
+// ── 위치 선택 모드 (장소 전용) ──
+function startPickLocation(formData) {
+  restoredVenueForm.value = formData ? { ...formData } : null
+  showCreateVenue.value = false
   isPicking.value = true
   pickMessage.value = '지도에서 위치를 클릭하세요'
   pickedLocation.value = null
@@ -369,21 +311,12 @@ function confirmPick() {
   isPicking.value = false
 
   const loc = pickedLocation.value
-  if (pickTarget.value === 'event') {
-    if (restoredEventForm.value) {
-      restoredEventForm.value.latitude = loc.lat.toFixed(6)
-      restoredEventForm.value.longitude = loc.lng.toFixed(6)
-      if (loc.address) restoredEventForm.value.address = loc.address
-    }
-    showCreateEvent.value = true
-  } else {
-    if (restoredVenueForm.value) {
-      restoredVenueForm.value.latitude = loc.lat.toFixed(6)
-      restoredVenueForm.value.longitude = loc.lng.toFixed(6)
-      if (loc.address) restoredVenueForm.value.address = loc.address
-    }
-    showCreateVenue.value = true
+  if (restoredVenueForm.value) {
+    restoredVenueForm.value.latitude = loc.lat.toFixed(6)
+    restoredVenueForm.value.longitude = loc.lng.toFixed(6)
+    if (loc.address) restoredVenueForm.value.address = loc.address
   }
+  showCreateVenue.value = true
   pickedLocation.value = null
 }
 
@@ -396,11 +329,7 @@ function retryPick() {
 function cancelPick() {
   isPicking.value = false
   pickedLocation.value = null
-  if (pickTarget.value === 'event') {
-    showCreateEvent.value = true
-  } else {
-    showCreateVenue.value = true
-  }
+  showCreateVenue.value = true
 }
 
 function handleDateFilter({ date_from, date_to }) {

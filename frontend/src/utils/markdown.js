@@ -26,7 +26,7 @@ function embedInstagram(html) {
 
 export function renderMarkdown(content) {
   if (!content) return ''
-  // 연속 빈 줄을 보존: 2개 이상 줄바꿈 → 빈 줄마다 <br> 삽입
+  // 연속 빈 줄을 보존: 3개 이상 줄바꿈 → 빈 줄마다 <br> 삽입
   content = content.replace(/\n{3,}/g, (match) => '\n\n' + '<br>\n'.repeat(match.length - 1))
   let html = marked(content)
   html = embedYouTube(html)

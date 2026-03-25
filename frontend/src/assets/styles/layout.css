@@ -8,7 +8,10 @@
 .page-title { font-size: 1.2rem; font-weight: 700; }
 .page-body { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 10px; padding: 20px; }
 
-/* ── 상세 페이지 수정/삭제 버튼 ── */
+/* ── 상세 페이지 공통 ── */
+.post-title { font-size: 1.2rem; margin-bottom: 8px; }
+.post-meta { font-size: 0.8rem; color: #8B7B6B; display: flex; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #EDE5DB; }
+.post-body { font-size: 0.9rem; line-height: 1.6; min-height: 100px; margin-bottom: 16px; }
 .post-actions { display: flex; gap: 8px; margin-top: 20px; }
 
 /* ── 레이아웃 ── */
