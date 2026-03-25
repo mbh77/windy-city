@@ -55,12 +55,14 @@
 
           <!-- 미니맵 -->
           <div ref="minimapContainer" class="minimap"></div>
-          <div class="location-pick-row">
-            <span class="picked-address" :class="{ 'has-value': form.latitude }">
-              {{ form.latitude ? (form.address || '위치 선택됨') : '지도를 클릭하거나 검색으로 위치를 선택하세요' }}
-            </span>
+          <div class="address-row">
+            <div class="location-pick-row">
+              <span class="picked-address" :class="{ 'has-value': form.latitude }">
+                {{ form.latitude ? (form.address || '위치 선택됨') : '지도를 클릭하거나 검색으로 위치를 선택하세요' }}
+              </span>
+            </div>
+            <input v-model="form.address_detail" type="text" placeholder="상세 주소 (층수, 호수 등)" />
           </div>
-          <input v-model="form.address_detail" type="text" placeholder="상세 주소 (층수, 호수 등)" />
 
           <!-- 날짜 (필수) -->
           <label class="form-label">강습·행사 날짜 (필수)</label>
@@ -76,7 +78,7 @@
             <button type="button" class="btn-primary w100" @click="goStep2">
               다음: 상세 정보 →
             </button>
-            <button type="submit" class="btn-ghost w100" style="margin-top:8px;">
+            <button type="submit" class="btn-ghost w100">
               상세 정보 건너뛰고 바로 {{ editMode ? '수정' : '등록' }}
             </button>
           </div>
@@ -141,16 +143,69 @@
           <input v-model="form.price" type="text" placeholder="가격 (예: 20,000원)" />
           <input v-model="form.early_bird_price" type="text" placeholder="얼리버드 가격 (선택)" />
 
-          <!-- 유형별 추가 필드 -->
-          <!-- 기존 CreateEventModal.vue 82~112행의 소셜/워크샵 블록 그대로 가져오기 -->
-          <!-- 단, collapsible-toggle 제거하고 바로 노출 -->
+          <!-- 유형별 추가 필드: 소셜 파티 -->
+          <template v-if="form.event_type === 'social'">
+            <label class="form-label">소셜 파티 정보</label>
+            <input v-model="form.dj_name" type="text" placeholder="DJ 이름 (선택)" />
+            <input v-model="form.dress_code" type="text" placeholder="드레스코드 (선택)" />
+            <div class="inline-checks">
+              <label class="checkbox-label"><input v-model="form.has_pre_lesson" type="checkbox" /> 프리레슨 포함</label>
+            </div>
+          </template>
 
-          <!-- 반복 이벤트 -->
-          <!-- 기존 CreateEventModal.vue 114~161행 그대로 가져오기 -->
-          <!-- 단, collapsible-toggle 제거하고 바로 노출 -->
+          <!-- 유형별 추가 필드: 워크샵/강습 -->
+          <template v-if="form.event_type === 'workshop' || form.event_type === 'regular_class'">
+            <label class="form-label">수업 정보</label>
+            <input v-model="form.instructor_name" type="text" placeholder="강사명 (선택)" />
+            <select v-model="form.difficulty">
+              <option value="">난이도 선택</option>
+              <option v-for="opt in DIFFICULTY_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+            <input v-model.number="form.max_participants" type="number" placeholder="최대 정원 (선택)" />
+          </template>
+
+          <!-- 반복 설정 -->
+          <label class="form-label">반복 설정</label>
+          <div class="inline-checks">
+            <label class="checkbox-label"><input v-model="form.is_recurring" type="checkbox" /> 반복 강습·행사</label>
+          </div>
+          <template v-if="form.is_recurring">
+            <label class="form-label">주기</label>
+            <select v-model="form.recurrence_frequency">
+              <option value="weekly">매주</option>
+              <option value="biweekly">격주</option>
+            </select>
+            <label class="form-label">반복 요일</label>
+            <div class="genre-checkboxes">
+              <label v-for="day in DAY_OPTIONS" :key="day.value" class="checkbox-label">
+                <input v-model="form.recurrence_days" type="checkbox" :value="day.value" />
+                {{ day.label }}
+              </label>
+            </div>
+            <label class="form-label">휴강일</label>
+            <div class="skip-date-row">
+              <input v-model="newSkipDate" type="date" />
+              <button type="button" class="btn-ghost" @click="addSkipDate">추가</button>
+            </div>
+            <div v-if="form.skip_dates.length > 0" class="date-tag-list">
+              <span v-for="(d, idx) in form.skip_dates" :key="idx" class="date-tag">
+                {{ d }} <button type="button" @click="form.skip_dates.splice(idx, 1)">✕</button>
+              </span>
+            </div>
+            <label class="form-label">보강일</label>
+            <div class="skip-date-row">
+              <input v-model="newExtraDate" type="date" />
+              <button type="button" class="btn-ghost" @click="addExtraDate">추가</button>
+            </div>
+            <div v-if="form.extra_dates.length > 0" class="date-tag-list">
+              <span v-for="(d, idx) in form.extra_dates" :key="idx" class="date-tag">
+                {{ d }} <button type="button" @click="form.extra_dates.splice(idx, 1)">✕</button>
+              </span>
+            </div>
+          </template>
 
           <div class="step-actions">
-            <button type="button" class="btn-ghost" @click="step = 1">← 이전</button>
+            <button type="button" class="btn-ghost w100" @click="step = 1">← 이전</button>
             <button type="submit" class="btn-primary w100">
               {{ editMode ? '수정하기' : '등록하기' }}
             </button>
@@ -443,5 +498,9 @@ onMounted(() => {
 .minimap { width: 100%; height: 250px; border-radius: 8px; border: 1px solid #E0D5C8; margin: 8px 0; }
 .step-indicator { display: flex; gap: 16px; margin-bottom: 16px; font-size: 0.9rem; color: #8B7B6B; }
 .step-indicator .active { color: #5BA89E; font-weight: 700; }
-.step-actions { margin-top: 16px; }
+.step-actions { display: flex; gap: 8px; margin-top: 16px; }
+.step-actions button { flex: 1; }
+@media (max-width: 768px) {
+  .step-actions { flex-direction: column; }
+}
 </style>

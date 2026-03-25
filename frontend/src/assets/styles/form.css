@@ -24,6 +24,11 @@
 .search-loading, .search-empty { color: #8B7B6B; font-size: 0.8rem; cursor: default !important; text-align: center; }
 .search-loading:hover, .search-empty:hover { background: transparent !important; }
 
+/* ── 주소 + 상세주소 가로 배치 ── */
+.address-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.address-row .location-pick-row { flex: 1; margin-bottom: 0; }
+.address-row input { flex: 1; margin-bottom: 0 !important; }
+
 /* ── 위치 선택 표시 ── */
 .location-pick-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .picked-address { flex: 1; font-size: 0.85rem; color: #8B7B6B; padding: 8px 10px; background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -65,7 +70,7 @@
 
 /* ── 반복 이벤트 휴강/보강일 ── */
 .skip-date-row { display: flex; gap: 6px; margin-bottom: 8px; }
-.skip-date-row input { flex: 1; margin-bottom: 0 !important; }
+.skip-date-row input { flex: none; margin-bottom: 0 !important; }
 .skip-date-row .btn-ghost { white-space: nowrap; flex-shrink: 0; }
 .date-tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .date-tag { display: inline-flex; align-items: center; gap: 4px; background: #FFFFFF; color: #5A4A3A; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
@@ -96,4 +101,5 @@
 
 @media (max-width: 768px) {
   .genre-checkboxes { grid-template-columns: repeat(2, 1fr); }
+  .address-row { flex-direction: column; }
 }
