@@ -175,12 +175,24 @@ class VenueResponse(BaseModel):
     owner_id: int
     owner_nickname: Optional[str] = None
     media: List[MediaResponse] = []
+    view_count: int = 0
     created_at: datetime
     updated_at: Optional[datetime]
 
     class Config:
         from_attributes = True
 
+class VenueCommentCreate(BaseModel):
+    content: str
+
+class VenueCommentOut(BaseModel):
+    id: int
+    venue_id: int
+    author_id: int
+    author_nickname: str = ""
+    content: str
+    created_at: datetime
+    updated_at: datetime | None = None
 
 # ── 이벤트 스키마 ──────────────────────────────────────────────
 
@@ -287,11 +299,24 @@ class EventResponse(BaseModel):
     organizer_id: int
     organizer_nickname: Optional[str] = None
     media: List[MediaResponse] = []
+    view_count: int = 0
     created_at: datetime
     updated_at: Optional[datetime]
 
     class Config:
         from_attributes = True
+
+class EventCommentCreate(BaseModel):
+    content: str
+
+class EventCommentOut(BaseModel):
+    id: int
+    event_id: int
+    author_id: int
+    author_nickname: str = ""
+    content: str
+    created_at: datetime
+    updated_at: datetime | None = None
 
 
 # ── 게시판 스키마 ──────────────────────────────────────────────

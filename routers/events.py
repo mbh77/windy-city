@@ -9,6 +9,9 @@ import models
 import schemas
 import auth as auth_utils
 
+from models import EventComment
+from schemas import EventCommentCreate, EventCommentOut
+
 # 요일 매핑 (Python weekday: 0=월 ~ 6=일)
 DAY_TO_WEEKDAY = {
     'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3,
@@ -149,8 +152,12 @@ def get_event(event_id: int, db: Session = Depends(get_db)):
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=404, detail="강습·행사를 찾을 수 없습니다")
-    return _event_to_response(db, event)
+    
+    # GET /{id} 엔드포인트에서 이벤트 조회 후
+    event.view_count += 1
+    db.commit()
 
+    return _event_to_response(db, event)
 
 @router.put("/{event_id}", response_model=schemas.EventResponse)
 def update_event(
@@ -258,3 +265,74 @@ def delete_event_media(
     _delete_media_file(media.url)
     db.delete(media)
     db.commit()
+
+# ── 댓글 ──────────────────────────────────────────────
+
+# 댓글 목록
+@router.get("/{event_id}/comments", response_model=list[EventCommentOut])
+def get_event_comments(event_id: int, db: Session = Depends(get_db)):
+    comments = db.query(EventComment).filter(EventComment.event_id == event_id)\
+        .order_by(EventComment.created_at.asc()).all()
+    return [
+        EventCommentOut(
+            id=c.id, event_id=c.event_id, author_id=c.author_id,
+            author_nickname=c.author.nickname if c.author else "",
+            content=c.content, created_at=c.created_at, updated_at=c.updated_at,
+        ) for c in comments
+    ]
+
+# 댓글 작성
+@router.post("/{event_id}/comments", response_model=EventCommentOut)
+def create_event_comment(event_id: int, body: EventCommentCreate,
+                         db: Session = Depends(get_db),
+                         user: models.User = Depends(auth_utils.get_current_user)):
+    event = db.query(models.Event).filter(models.Event.id == event_id).first()
+    if not event:
+        raise HTTPException(404, "이벤트를 찾을 수 없습니다")
+    comment = EventComment(event_id=event_id, author_id=user.id, content=body.content)
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+    return EventCommentOut(
+        id=comment.id, event_id=comment.event_id, author_id=comment.author_id,
+        author_nickname=user.nickname, content=comment.content,
+        created_at=comment.created_at, updated_at=comment.updated_at,
+    )
+
+# 댓글 수정
+@router.put("/{event_id}/comments/{comment_id}", response_model=EventCommentOut)
+def update_event_comment(event_id: int, comment_id: int, body: EventCommentCreate,
+                         db: Session = Depends(get_db),
+                         user: models.User = Depends(auth_utils.get_current_user)):
+    comment = db.query(EventComment).filter(
+        EventComment.id == comment_id, EventComment.event_id == event_id
+    ).first()
+    if not comment:
+        raise HTTPException(404)
+    if comment.author_id != user.id and not user.is_admin:
+        raise HTTPException(403)
+    comment.content = body.content
+    comment.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(comment)
+    return EventCommentOut(
+        id=comment.id, event_id=comment.event_id, author_id=comment.author_id,
+        author_nickname=comment.author.nickname, content=comment.content,
+        created_at=comment.created_at, updated_at=comment.updated_at,
+    )
+
+# 댓글 삭제
+@router.delete("/{event_id}/comments/{comment_id}")
+def delete_event_comment(event_id: int, comment_id: int,
+                         db: Session = Depends(get_db),
+                         user: models.User = Depends(auth_utils.get_current_user)):
+    comment = db.query(EventComment).filter(
+        EventComment.id == comment_id, EventComment.event_id == event_id
+    ).first()
+    if not comment:
+        raise HTTPException(404)
+    if comment.author_id != user.id and not user.is_admin:
+        raise HTTPException(403)
+    db.delete(comment)
+    db.commit()
+    return {"ok": True}

@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -7,6 +8,9 @@ from database import get_db
 import models
 import schemas
 import auth as auth_utils
+
+from models import VenueComment
+from schemas import VenueCommentCreate, VenueCommentOut
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -96,6 +100,9 @@ def get_venue(venue_id: int, db: Session = Depends(get_db)):
     venue = db.query(models.Venue).filter(models.Venue.id == venue_id).first()
     if not venue:
         raise HTTPException(status_code=404, detail="장소를 찾을 수 없습니다")
+    
+    venue.view_count += 1
+    db.commit()    
     return _venue_to_response(db, venue)
 
 
@@ -205,3 +212,74 @@ def delete_venue_media(
     _delete_media_file(media.url)
     db.delete(media)
     db.commit()
+
+# ── 댓글 ──────────────────────────────────────────────
+
+# 댓글 목록
+@router.get("/{venue_id}/comments", response_model=list[VenueCommentOut])
+def get_venue_comments(venue_id: int, db: Session = Depends(get_db)):
+    comments = db.query(VenueComment).filter(VenueComment.venue_id == venue_id)\
+        .order_by(VenueComment.created_at.asc()).all()
+    return [
+        VenueCommentOut(
+            id=c.id, venue_id=c.venue_id, author_id=c.author_id,
+            author_nickname=c.author.nickname if c.author else "",
+            content=c.content, created_at=c.created_at, updated_at=c.updated_at,
+        ) for c in comments
+    ]
+
+# 댓글 작성
+@router.post("/{venue_id}/comments", response_model=VenueCommentOut)
+def create_venue_comment(venue_id: int, body: VenueCommentCreate,
+                         db: Session = Depends(get_db),
+                         user: models.User = Depends(auth_utils.get_current_user)):
+    venue = db.query(models.Venue).filter(models.Venue.id == venue_id).first()
+    if not venue:
+        raise HTTPException(404, "장소를 찾을 수 없습니다")
+    comment = VenueComment(venue_id=venue_id, author_id=user.id, content=body.content)
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+    return VenueCommentOut(
+        id=comment.id, venue_id=comment.venue_id, author_id=comment.author_id,
+        author_nickname=user.nickname, content=comment.content,
+        created_at=comment.created_at, updated_at=comment.updated_at,
+    )
+
+# 댓글 수정
+@router.put("/{venue_id}/comments/{comment_id}", response_model=VenueCommentOut)
+def update_venue_comment(venue_id: int, comment_id: int, body: VenueCommentCreate,
+                         db: Session = Depends(get_db),
+                         user: models.User = Depends(auth_utils.get_current_user)):
+    comment = db.query(VenueComment).filter(
+        VenueComment.id == comment_id, VenueComment.venue_id == venue_id
+    ).first()
+    if not comment:
+        raise HTTPException(404)
+    if comment.author_id != user.id and not user.is_admin:
+        raise HTTPException(403)
+    comment.content = body.content
+    comment.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(comment)
+    return VenueCommentOut(
+        id=comment.id, venue_id=comment.venue_id, author_id=comment.author_id,
+        author_nickname=comment.author.nickname, content=comment.content,
+        created_at=comment.created_at, updated_at=comment.updated_at,
+    )
+
+# 댓글 삭제
+@router.delete("/{venue_id}/comments/{comment_id}")
+def delete_venue_comment(venue_id: int, comment_id: int,
+                         db: Session = Depends(get_db),
+                         user: models.User = Depends(auth_utils.get_current_user)):
+    comment = db.query(VenueComment).filter(
+        VenueComment.id == comment_id, VenueComment.venue_id == venue_id
+    ).first()
+    if not comment:
+        raise HTTPException(404)
+    if comment.author_id != user.id and not user.is_admin:
+        raise HTTPException(403)
+    db.delete(comment)
+    db.commit()
+    return {"ok": True}
