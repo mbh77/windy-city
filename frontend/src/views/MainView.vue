@@ -44,12 +44,6 @@
     @close="closeVenueDetail"
   />
 
-  <!-- 로그인/회원가입 모달 -->
-  <AuthModal
-    :visible="showAuth"
-    @close="showAuth = false"
-  />
-
   <!-- 온보딩 (첫 방문 시) -->
   <OnboardingOverlay
     @goEvents="handleOnboardingEvents"
@@ -70,13 +64,12 @@ import Sidebar from '../components/Sidebar.vue'
 import KakaoMap from '../components/KakaoMap.vue'
 import EventDetailModal from '../components/EventDetailModal.vue'
 import VenueDetailModal from '../components/VenueDetailModal.vue'
-import AuthModal from '../components/AuthModal.vue'
 import CategoryBar from '../components/CategoryBar.vue'
 import OnboardingOverlay from '../components/OnboardingOverlay.vue'
 
 const route = useRoute()
 const router = useRouter()
-const { currentUser, restoreSession, logout } = useAuth()
+const { restoreSession } = useAuth()
 const { events, loadEvents } = useEvents()
 const { venues, loadVenues } = useVenues()
 
@@ -116,13 +109,12 @@ watch(mapCenter, (center) => {
 // 모달 상태
 const showEventDetail = ref(false)
 const showVenueDetail = ref(false)
-const showAuth = ref(false)
 const selectedEvent = ref(null)
 const selectedVenue = ref(null)
 
 // 모달 뒤로가기 처리
 const anyModalOpen = computed(() =>
-  showEventDetail.value || showVenueDetail.value || showAuth.value
+  showEventDetail.value || showVenueDetail.value
 )
 
 watch(anyModalOpen, (open) => {
@@ -135,7 +127,6 @@ function handlePopState() {
   if (anyModalOpen.value) {
     showEventDetail.value = false
     showVenueDetail.value = false
-    showAuth.value = false
   }
 }
 
@@ -213,14 +204,6 @@ function handlePlaceSelect({ lat, lng }) {
   mapRef.value?.panTo(lat, lng)
 }
 
-// ── 인증 ──
-function handleAuthClick() {
-  if (currentUser.value) {
-    logout()
-  } else {
-    showAuth.value = true
-  }
-}
 
 // ── 이벤트 상세 ──
 function openEventDetail(ev) {
@@ -266,5 +249,5 @@ function handleOnboardingVenues() {
   localStorage.setItem('onboarding_done', '1')
 }
 
-defineExpose({ handleAuthClick, handlePlaceSelect })
+defineExpose({ handlePlaceSelect })
 </script>
