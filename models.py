@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Enum, JSON
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Enum, JSON, Date, Time
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -122,6 +122,9 @@ class Venue(Base):
     dance_genres = relationship("VenueDanceGenre", back_populates="venue", cascade="all, delete-orphan")
     events = relationship("Event", back_populates="venue")
 
+    view_count = Column(Integer, default=0)
+    comments = relationship("VenueComment", back_populates="venue", cascade="all, delete-orphan")
+
 
 # 장소-춤종류 연결 테이블
 class VenueDanceGenre(Base):
@@ -156,8 +159,10 @@ class Event(Base):
     address_detail = Column(String(255))
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
-    start_date = Column(DateTime, nullable=False)
-    end_date = Column(DateTime)
+    event_date = Column(Date, nullable=False)
+    event_end_date = Column(Date, nullable=True)
+    start_time = Column(Time, nullable=True)
+    end_time = Column(Time, nullable=True)
     event_type = Column(Enum(EventType), default=EventType.social)
 
     # 장소 연결 (선택)
@@ -193,6 +198,9 @@ class Event(Base):
     organizer = relationship("User", back_populates="events")
     venue = relationship("Venue", back_populates="events")
     dance_genres = relationship("EventDanceGenre", back_populates="event", cascade="all, delete-orphan")
+
+    view_count = Column(Integer, default=0)    
+    comments = relationship("EventComment", back_populates="event", cascade="all, delete-orphan")
 
 
 # ── 미디어 (이미지/영상 공용) ─────────────────────────────────
@@ -239,3 +247,29 @@ class Comment(Base):
 
     post = relationship("Post", back_populates="comments")
     author = relationship("User", back_populates="comments")
+
+class EventComment(Base):
+    __tablename__ = "event_comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    event_id = Column(Integer, ForeignKey("events.id", ondelete="CASCADE"), nullable=False)
+    author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=True)
+
+    event = relationship("Event", back_populates="comments")
+    author = relationship("User")
+
+class VenueComment(Base):
+    __tablename__ = "venue_comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    venue_id = Column(Integer, ForeignKey("venues.id", ondelete="CASCADE"), nullable=False)
+    author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=True)
+
+    venue = relationship("Venue", back_populates="comments")
+    author = relationship("User")

@@ -8,7 +8,7 @@
       <input
         v-model="searchQuery"
         type="text"
-        placeholder="🔍 이벤트, 장소, 강사 이름으로 검색..."
+        placeholder="🔍 강습·행사, 장소, 강사 이름으로 검색..."
         @keydown.esc="searchQuery = ''"
         @focus="isExpanded = true"
       />
@@ -52,7 +52,7 @@
               <span class="item-meta">{{ item.item_type === 'event' ? item.location_name : item.address }}</span>
               <template v-if="item.item_type === 'event'">
                 <span class="card-dot">·</span>
-                <span class="item-meta">{{ formatDate(item.start_date) }}</span>
+                <span class="item-meta">{{ formatDate(item.event_date) }}</span>
               </template>
             </div>
           </div>
@@ -70,21 +70,19 @@
       <!-- 탭 + 등록 버튼 -->
       <div class="tab-group">
         <button :class="['tab', { active: activeTab === 'events' }]" @click="activeTab = 'events'">
-          이벤트 {{ filteredEvents.length }}
+          강습·행사 {{ filteredEvents.length }}
         </button>
         <button :class="['tab', { active: activeTab === 'venues' }]" @click="activeTab = 'venues'">
           장소 {{ visibleVenues.length }}
         </button>
-        <button
+        <router-link to="/events/new"
           v-if="currentUser?.is_organizer && activeTab === 'events'"
           class="btn-primary tab-action"
-          @click="$emit('addEvent')"
-        >등록 +</button>
-        <button
+        >등록 +</router-link>
+        <router-link to="/venues/new"
           v-if="currentUser?.is_organizer && activeTab === 'venues'"
           class="btn-primary tab-action"
-          @click="$emit('addVenue')"
-        >등록 +</button>
+        >등록 +</router-link>
       </div>
 
       <!-- 이벤트 탭 -->
@@ -130,16 +128,16 @@
               <div class="card-line2">
                 <span class="item-meta">{{ ev.location_name }}</span>
                 <span class="card-dot">·</span>
-                <span class="item-meta">{{ ev.is_recurring ? formatRecurringSchedule(ev) : formatDate(ev.start_date) }}</span>
+                <span class="item-meta">{{ ev.is_recurring ? formatRecurringSchedule(ev) : formatDate(ev.event_date) }}</span>
                 <span v-if="ev.is_recurring" class="recurring-badge">🔄 {{ formatRecurring(ev.recurrence_rule) }}</span>
               </div>
             </div>
           </li>
           <li v-if="filteredEvents.length === 0" class="empty-state">
             <div class="empty-icon">📅</div>
-            <div class="empty-title">이 지역에 이벤트가 없어요</div>
+            <div class="empty-title">이 지역에 강습·행사가 없어요</div>
             <div class="empty-hint">날짜 범위를 넓히거나 지도를 이동해보세요</div>
-            <button v-if="currentUser?.is_organizer" class="btn-primary" @click="$emit('addEvent')">+ 이벤트 등록하기</button>
+            <button v-if="currentUser?.is_organizer" class="btn-primary" @click="$emit('addEvent')">+ 강습·행사 등록하기</button>
           </li>
         </ul>
       </template>    
@@ -311,8 +309,8 @@ function matchesDay(ev) {
   if (ev.is_recurring && ev.recurrence_rule?.days) {
     return ev.recurrence_rule.days.some(d => selectedDays.value.includes(d))
   }
-  // 비반복: start_date 요일 확인
-  const weekday = new Date(ev.start_date).getDay()
+  // 비반복: event_date 요일 확인
+  const weekday = new Date(ev.event_date).getDay()
   const dayKey = WEEKDAY_TO_DAY[weekday === 0 ? 6 : weekday - 1]
   return selectedDays.value.includes(dayKey)
 }
@@ -325,7 +323,7 @@ function formatRecurring(rule) {
 }
 
 function formatRecurringSchedule(ev) {
-  const time = ev.start_date ? new Date(ev.start_date).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : ''
+  const time = ev.start_time ? ev.start_time.slice(0, 5) : ''
   return `${formatRecurring(ev.recurrence_rule)} ${time}`
 }
 

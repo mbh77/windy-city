@@ -74,7 +74,7 @@ def delete_user(
     event_count = db.query(models.Event).filter(models.Event.organizer_id == user_id).count()
     venue_count = db.query(models.Venue).filter(models.Venue.owner_id == user_id).count()
     if event_count > 0 or venue_count > 0:
-        raise HTTPException(400, f"등록한 이벤트({event_count}건) 또는 장소({venue_count}건)가 있어 삭제할 수 없습니다")
+        raise HTTPException(400, f"등록한 강습·행사({event_count}건) 또는 장소({venue_count}건)가 있어 삭제할 수 없습니다")
 
     db.delete(user)
     db.commit()
@@ -123,7 +123,7 @@ def admin_delete_event(
 ):
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
-        raise HTTPException(404, "이벤트를 찾을 수 없습니다")
+        raise HTTPException(404, "강습·행사를 찾을 수 없습니다")
     # 미디어 삭제
     media_list = db.query(models.Media).filter(
         models.Media.entity_type == "event", models.Media.entity_id == event_id
@@ -139,7 +139,7 @@ def admin_delete_event(
     db.query(models.EventDanceGenre).filter(models.EventDanceGenre.event_id == event_id).delete()
     db.delete(event)
     db.commit()
-    return {"message": "이벤트가 삭제되었습니다"}
+    return {"message": "강습·행사가 삭제되었습니다"}
 
 
 @router.get("/venues")

@@ -30,7 +30,7 @@
         <!-- 주최자 권한은 관리자가 부여 (회원가입 시 비활성) -->
         <!-- <label class="checkbox-label">
           <input v-model="regIsOrganizer" type="checkbox" />
-          이벤트 주최자로 가입
+          강습·행사 주최자로 가입
         </label> -->
         <button type="submit" class="btn-primary w100" :class="{ 'btn-loading': regLoading }" :disabled="regLoading">
           <span class="btn-text">가입하기</span>

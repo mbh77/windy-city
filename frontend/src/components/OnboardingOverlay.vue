@@ -6,7 +6,7 @@
           <img src="@/assets/windycity_logo.png" alt="바람난 도시" class="onboarding-logo" />
         </div>
         <p class="onboarding-subtitle">살사 · 바차타 · 스윙 · 탱고</p>
-        <p class="onboarding-desc">커플댄스 이벤트와 장소를<br/>지도에서 한눈에 찾아보세요</p>
+        <p class="onboarding-desc">커플댄스 강습·행사와 장소를<br/>지도에서 한눈에 찾아보세요</p>
       </div>
 
       <div class="onboarding-guide">
@@ -16,7 +16,7 @@
         </div>
         <div class="guide-item">
           <span class="guide-num">②</span>
-          <span><b>카테고리 버튼</b>으로 클럽·학원·연습실·이벤트를 필터링</span>
+          <span><b>카테고리 버튼</b>으로 클럽·학원·연습실·강습·행사를 필터링</span>
         </div>
         <div class="guide-item">
           <span class="guide-num">③</span>
@@ -24,7 +24,7 @@
         </div>
         <div class="guide-item">
           <span class="guide-num">④</span>
-          <span>사이드바에서 <b>날짜·요일별</b>로 이벤트 탐색</span>
+          <span>사이드바에서 <b>날짜·요일별</b>로 강습·행사 탐색</span>
         </div>
       </div>
 

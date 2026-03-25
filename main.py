@@ -11,7 +11,7 @@ from routers import auth, events, venues, search, upload, feedback, admin, posts
 # DB 테이블 생성
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Windy City", description="살사 댄스 이벤트 지도 서비스")
+app = FastAPI(title="Windy City", description="살사 댄스 강습·행사 지도 서비스")
 
 # CORS 설정 (개발 중 모든 origin 허용)
 app.add_middleware(

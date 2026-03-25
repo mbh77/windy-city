@@ -132,13 +132,13 @@ window.__windycity_badgeClick = (key) => {
       <img src="${listThumb || defaultThumbImg}" style="width:36px;height:36px;border-radius:4px;object-fit:cover;background:#EDE5DB;" />
       <div style="min-width:0;flex:1;overflow:hidden;">
         <strong style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.title}</strong>
-        <span style="color:#888;font-size:10px">${formatDate(e.start_date)}</span>
+        <span style="color:#888;font-size:10px">${formatDate(e.event_date)}</span>
       </div>
     </div>`
   }).join('')
   const groupContent = `
     <div style="padding:8px 10px;font-size:13px;width:180px;overflow:hidden;">
-    <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 이벤트 ${group.length}건</div>
+    <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 강습·행사 ${group.length}건</div>
     <div style="max-height:160px;overflow-y:auto;">
       ${listItems}
     </div>
@@ -305,7 +305,7 @@ function renderEventMarkers(evts) {
         <img src="${thumb || defaultThumbImg}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;background:#EDE5DB;" />
         <div>
           <strong>${ev.title}</strong><br/>
-          <span style="color:#888;font-size:11px">${formatDate(ev.start_date)}</span>
+          <span style="color:#888;font-size:11px">${formatDate(ev.event_date)}</span>
           ${genres ? `<br/><span style="font-size:10px;color:#5BA89E">${genres}</span>` : ''}
         </div>
       </div>`
@@ -341,13 +341,13 @@ function renderEventMarkers(evts) {
             <img src="${listThumb || defaultThumbImg}" style="width:36px;height:36px;border-radius:4px;object-fit:cover;background:#EDE5DB;" />
             <div style="min-width:0;flex:1;overflow:hidden;">
               <strong style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.title}</strong>
-              <span style="color:#888;font-size:10px">${formatDate(e.start_date)}</span>
+              <span style="color:#888;font-size:10px">${formatDate(e.event_date)}</span>
             </div>
           </div>`
         }).join('')
         const groupContent = `
         <div style="padding:8px 10px;font-size:13px;width:180px;overflow:hidden;">
-          <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 이벤트 ${group.length}건</div>
+          <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#7B2D8E;">📍 이 위치 강습·행사 ${group.length}건</div>
           <div style="max-height:160px;overflow-y:auto;">
             ${listItems}
           </div>          

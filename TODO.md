@@ -72,6 +72,73 @@
 
 ---
 
+## P-UX — UX 개선 (이벤트/장소 등록·상세 페이지 전환)
+
+> 기존 모달 → 전용 페이지로 전환. 지도 모달은 간략 보기로 유지, 깊이 있는 보기/편집은 별도 페이지.
+
+### 이벤트 날짜/시간 분리
+- ✅ **UX-012** DB 스키마 변경 — `start_date`/`end_date` → `event_date`/`event_end_date`/`start_time`/`end_time` (dev DB 완료)
+- ✅ **UX-013** 백엔드 API 수정 — models, schemas, routers/events.py, routers/search.py
+- ✅ **UX-014** 프론트 기존 화면 날짜 대응 — EventDetailModal에서 새 날짜 구조(event_date + start_time/end_time) 표시
+- ✅ **UX-015** 프론트 상세/목록 표시 — formatTime() 유틸 추가, 시:분까지만 표시
+
+### 상세 페이지
+- ✅ **UX-001** 이벤트 상세 페이지 (`/events/:id`) — views/events/EventDetailView.vue
+- ✅ **UX-002** 장소 상세 페이지 (`/venues/:id`) — views/venues/VenueDetailView.vue
+- ✅ **UX-003** 이벤트 목록 페이지 (`/events`) — 게시판형 목록, 검색, 페이징, 조회수, 댓글
+  - ✅ DB: events 테이블에 `view_count` 컬럼 추가
+  - ✅ DB: event_comments 테이블 신규 (id, event_id, user_id, content, created_at, updated_at)
+  - ✅ 백엔드: 이벤트 상세 조회 시 view_count +1, 댓글 CRUD API, GET /api/events/list 페이징
+  - ✅ 프론트: EventListView (카드형 목록, 유형/장르뱃지, 장소, 일정, 조회수, 댓글수)
+  - ✅ 프론트: 상세 페이지에 댓글 UI (CommentSection 공통 컴포넌트)
+- ✅ **UX-004** 장소 목록 페이지 (`/venues`) — 게시판형 목록, 검색, 페이징, 조회수, 댓글
+  - ✅ DB: venues 테이블에 `view_count` 컬럼 추가
+  - ✅ DB: venue_comments 테이블 신규 (id, venue_id, user_id, content, created_at, updated_at)
+  - ✅ 백엔드: 장소 상세 조회 시 view_count +1, 댓글 CRUD API, GET /api/venues/list 페이징
+  - ✅ 프론트: VenueListView (카드형 목록, 썸네일, 유형/장르뱃지, 주소, 조회수, 댓글수)
+  - ✅ 프론트: 상세 페이지에 댓글 UI (CommentSection 공통 컴포넌트)
+- ✅ **UX-005** 지도 모달 → 상세 페이지 연결 — EventDetailModal, VenueDetailModal에 "상세 보기" 링크
+- ✅ **UX-016** 상세 페이지 → 지도 연결 — "지도에서 보기" 버튼, 클릭 시 지도에서 해당 이벤트 선택
+
+### 등록/수정 전용 페이지
+- ✅ **UX-006** 이벤트 등록 페이지 (`/events/new`) — 2단계 폼 + 미니맵 + 마크다운 툴바
+  - ✅ 기본 구조, 미니맵, 위치 검색, 마크다운 에디터, 이미지 첨부
+  - ✅ 2단계 유형별 추가 필드 (소셜 파티/워크샵 정보)
+  - ✅ 2단계 반복 이벤트 설정 (주기/요일/휴강일/보강일)
+- ✅ **UX-007** 이벤트 수정 페이지 (`/events/:id/edit`) — 라우팅 + 동작 테스트 완료
+- ✅ **UX-008** 장소 등록 페이지 (`/venues/new`) — 2단계 폼 + 미니맵 + 마크다운 + 유형별 필드
+- ✅ **UX-009** 장소 수정 페이지 (`/venues/:id/edit`) — VenueWriteView 공용, 라우팅 완료
+
+### 기존 모달 정리
+- ✅ **UX-010** EventDetailModal 간소화 — 수정 → router-link, 불필요 정보 제거
+- ✅ **UX-010-2** VenueDetailModal 간소화 — 수정 → router-link, 표시 순서 상세 페이지와 통일
+- ✅ **UX-011** 기존 등록 모달 전부 제거
+  - ✅ CreateEventModal 제거 (MainView 관련 코드 정리)
+  - ✅ CreateVenueModal 제거 (MainView 관련 코드 정리)
+  - ✅ PickLocationBar 제거 (위치 선택 모드 불필요)
+
+### 코드 정리
+- ✅ views 폴더 구조 정리 — board/, events/, venues/ 하위 폴더 분리
+- ✅ `utils/markdown.js` — renderMarkdown 공통화 (9개 파일 중복 제거)
+- ✅ `composables/useImageUpload.js` — 이미지 업로드/삭제/저장 공통화
+- ✅ `composables/useLocationSearch.js` — 카카오 장소 검색 공통화
+- ✅ `composables/useMarkdownEditor.js` — 마크다운 툴바 (B/I/링크/이미지/영상) 공통화
+- ✅ 전역 CSS 분리 — style.css → base/layout/topbar/sidebar/map/modal/form/badges/markdown.css
+- ✅ scoped CSS 중복 제거 — write/dialog/markdown 스타일을 전역으로 통합 (EventWriteView, PostWriteView, PostDetailView)
+- ✅ `post-title`/`post-meta`/`post-body`/`post-actions` 스타일 전역화 (layout.css)
+- ✅ `formatTime()` 유틸 추가 — 시간 HH:MM 포맷 (api.js)
+- ✅ 마크다운 연속 빈 줄 보존 — `\n{3,}` → `<br>` 변환 (markdown.js)
+- ✅ 용어 통일 — "이벤트" → "강습·행사", "정규수업" → "강습", 기본 유형 regular_class
+- ✅ `start_date` → `event_date` 프론트 전면 대응 (Sidebar, KakaoMap, AdminView)
+- ✅ `formatDate()` 수정 — 날짜만 표시 (시간 제거), timezone 보정
+- ✅ `formatCreatedAt()` 추가 — 작성 시간 전용 (YYYY-MM-DD HH:MM:SS)
+- ✅ AuthModal App.vue로 이동 — 전 페이지에서 로그인 모달 동작
+- ✅ CommentSection.vue 공통 컴포넌트 — 게시판/이벤트/장소 댓글 통합
+- ✅ `badge-row` 전역 스타일 추가 (layout.css)
+- ✅ 메뉴 이름 — 열린 플로어 / 클래스·이벤트 / 댄스바·연습실
+
+---
+
 ## P2 — 사용성 개선
 
 - ⬜ **B-015** 북마크/관심 저장 — 하트 버튼, bookmarks 테이블 신규, 내 저장 목록 탭
@@ -262,4 +329,6 @@
 - ⬜ **B-031** 연습 파트너 찾기 — 지역·장르별 연습 파트너 구인 게시판
 - ⬜ **B-032** 캘린더 뷰 — 주간/월간 캘린더로 이벤트 탐색
 - ⬜ **B-034** PWA 지원 — 모바일 홈 화면 추가, 오프라인 기본 동작
-- ⬜ **B-035** 검색 효율화 — DB 인덱스 (1단계), FULLTEXT (2단계), 검색엔진 (3단계)
+- ⬜ **B-035** 검색 효율화 — DB 인덱스 (1단계), FULLTEXT (2단계), 검색엔진  (3단계)
+- ⬜ **B-036** 강남, 홍대, 부산, 광주 주요 거점 바로 이동 버튼 맵 좌측 배치
+

@@ -3,71 +3,60 @@
     <div class="modal-content">
       <button class="modal-close" @click="$emit('close')">✕</button>
       <template v-if="event">
-        <span :class="['event-type-badge', `type-${event.event_type}`]">
-          {{ TYPE_LABELS[event.event_type] }}
-        </span>
-        <span
-          v-for="g in event.dance_genres || []"
-          :key="g"
-          :class="['genre-badge', `genre-${g}`]"
-        >
-          {{ GENRE_LABELS[g] }}
-        </span>
-        <span v-if="event.difficulty" class="difficulty-badge">
-          {{ DIFFICULTY_LABELS[event.difficulty] }}
-        </span>
+        <!-- 뱃지 -->
+        <div class="badge-row">
+          <span :class="['event-type-badge', `type-${event.event_type}`]">
+            {{ TYPE_LABELS[event.event_type] }}
+          </span>
+          <span v-for="g in event.dance_genres || []" :key="g"
+                :class="['genre-badge', `genre-${g}`]">
+            {{ GENRE_LABELS[g] }}
+          </span>
+          <span v-if="event.difficulty" class="difficulty-badge">
+            {{ DIFFICULTY_LABELS[event.difficulty] }}
+          </span>
+        </div>
+
         <h2 style="margin-top:8px">{{ event.title }}</h2>
-        <div v-if="event.description" class="markdown-body" style="margin:8px 0;font-size:0.85rem;" v-html="renderMarkdown(event.description)"></div>
 
         <!-- 이미지 갤러리 -->
-        <ImageGallery :images="event.media || []" />        
+        <ImageGallery :images="event.media || []" />
 
+        <!-- 설명 -->
+        <div v-if="event.description" class="markdown-body" style="margin:8px 0;font-size:0.85rem;" v-html="renderMarkdown(event.description)"></div>
+
+        <!-- 상세 정보 -->
         <div class="detail-row"><span class="detail-label">장소</span>{{ event.location_name }}</div>
         <div v-if="event.address" class="detail-row"><span class="detail-label">주소</span>{{ event.address }}<span v-if="event.address_detail"> {{ event.address_detail }}</span></div>
-        <div class="detail-row"><span class="detail-label">시작</span>{{ formatDate(event.start_date) }}</div>
-        <div v-if="event.end_date" class="detail-row"><span class="detail-label">종료</span>{{ formatDate(event.end_date) }}</div>
-
-        <!-- 가격 정보 -->
+        <div class="detail-row"><span class="detail-label">날짜</span>{{ formatEventDate(event) }}</div>
+        <div v-if="event.start_time" class="detail-row">
+          <span class="detail-label">시간</span>
+          {{ formatTime(event.start_time) }}{{ event.end_time ? ' ~ ' + formatTime(event.end_time) : '' }}
+        </div>
         <div v-if="event.price" class="detail-row"><span class="detail-label">가격</span>{{ event.price }}</div>
         <div v-if="event.early_bird_price" class="detail-row"><span class="detail-label">얼리버드</span>{{ event.early_bird_price }}</div>
-
         <!-- 소셜 파티 -->
         <div v-if="event.dj_name" class="detail-row"><span class="detail-label">DJ</span>{{ event.dj_name }}</div>
         <div v-if="event.dress_code" class="detail-row"><span class="detail-label">드레스코드</span>{{ event.dress_code }}</div>
         <div v-if="event.has_pre_lesson" class="detail-row"><span class="detail-label">프리레슨</span>포함</div>
-
         <!-- 워크샵/수업 -->
         <div v-if="event.instructor_name" class="detail-row"><span class="detail-label">강사</span>{{ event.instructor_name }}</div>
-        <div v-if="event.max_participants" class="detail-row"><span class="detail-label">정원</span>{{ event.max_participants }}명</div>
-        <div v-if="event.requires_partner" class="detail-row"><span class="detail-label">파트너</span>필요</div>
-
-        <!-- 반복 -->
+        <!-- 반복 (주기·요일만 표시) -->
         <template v-if="event.is_recurring && event.recurrence_rule">
           <div class="detail-row">
             <span class="detail-label">반복</span>
             {{ event.recurrence_rule.frequency === 'weekly' ? '매주' : '격주' }}
             {{ (event.recurrence_rule.days || []).map(d => DAY_LABELS[d]).join(' · ') }}
           </div>
-          <div v-if="event.recurrence_rule.skip_dates?.length" class="detail-row">
-            <span class="detail-label">휴강일</span>
-            <span class="date-tag-list-inline">
-              <span v-for="d in event.recurrence_rule.skip_dates" :key="d" class="date-tag">{{ d }}</span>
-            </span>
-          </div>
-          <div v-if="event.recurrence_rule.extra_dates?.length" class="detail-row">
-            <span class="detail-label">보강일</span>
-            <span class="date-tag-list-inline">
-              <span v-for="d in event.recurrence_rule.extra_dates" :key="d" class="date-tag">{{ d }}</span>
-            </span>
-          </div>
         </template>
-        <div v-else-if="event.is_recurring" class="detail-row"><span class="detail-label">반복</span>반복 이벤트</div>
+        <div v-else-if="event.is_recurring" class="detail-row"><span class="detail-label">반복</span>반복 강습·행사</div>
 
-        <div class="detail-row"><span class="detail-label">작성자</span>{{ event.organizer_nickname || '-' }}</div>
-
-        <div v-if="isOwner" class="action-row">
-          <button class="btn-ghost" @click="$emit('edit', event)">수정</button>
-          <button class="btn-danger" @click="handleDelete">삭제</button>
+        <div class="action-row">
+          <router-link :to="`/events/${event.id}`" class="btn-ghost">상세 보기</router-link>
+          <template v-if="isOwner">
+            <router-link :to="`/events/${event.id}/edit`" class="btn-ghost">수정</router-link>
+            <button class="btn-danger" @click="handleDelete">삭제</button>
+          </template>
         </div>
       </template>
     </div>
@@ -77,47 +66,30 @@
 <script setup>
 import { computed } from 'vue'
 import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '../utils/constants.js'
-import { formatDate } from '../utils/api.js'
+import { formatTime } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import ImageGallery from './ImageGallery.vue'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
-
-marked.setOptions({ breaks: true })
-
-function embedYouTube(html) {
-  const ytRegex = /<a[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^"]*"[^>]*>[^<]*<\/a>/g
-  html = html.replace(ytRegex, (m, id) => `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`)
-  const ytText = /(?:<p>)?(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^\s<]*)(?:<\/p>)?/g
-  html = html.replace(ytText, (m, u, id) => m.includes('<iframe') ? m : `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`)
-  return html
-}
-
-function embedInstagram(html) {
-  const igRegex = /(?:<a[^>]*href=")?https?:\/\/(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)\/?[^"<\s]*"?[^<]*(?:<\/a>)?/g
-  html = html.replace(igRegex, (m, type, code) => `<div class="embed-video"><iframe src="https://www.instagram.com/${type}/${code}/embed" frameborder="0" scrolling="no"></iframe></div>`)
-  return html
-}
-
-function renderMarkdown(content) {
-  if (!content) return ''
-  let html = marked(content)
-  html = embedYouTube(html)
-  html = embedInstagram(html)
-  return DOMPurify.sanitize(html, {
-    ADD_TAGS: ['iframe'],
-    ADD_ATTR: ['allowfullscreen', 'frameborder', 'src', 'scrolling'],
-  })
-}
+import { renderMarkdown } from '@/utils/markdown.js'
 
 const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' }
+
+function formatEventDate(e) {
+  if (!e.event_date) return '-'
+  const d = new Date(e.event_date + 'T00:00:00')
+  let str = d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' })
+  if (e.event_end_date && e.event_end_date !== e.event_date) {
+    const d2 = new Date(e.event_end_date + 'T00:00:00')
+    str += ' ~ ' + d2.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
+  }
+  return str
+}
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
   event: { type: Object, default: null },
 })
-const emit = defineEmits(['close', 'edit'])
+const emit = defineEmits(['close'])
 
 const { currentUser } = useAuth()
 const { deleteEvent } = useEvents()
@@ -127,7 +99,7 @@ const isOwner = computed(() => {
 })
 
 async function handleDelete() {
-  if (!confirm('이벤트를 삭제할까요?')) return
+  if (!confirm('강습·행사를 삭제할까요?')) return
   const ok = await deleteEvent(props.event.id)
   if (ok) emit('close')
 }

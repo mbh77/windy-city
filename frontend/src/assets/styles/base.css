@@ -1,0 +1,30 @@
+/* ── 기본 리셋 ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #F9F9F9; color: #3D3029; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+#app { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+a { text-decoration: none; }
+
+/* ── 버튼 ── */
+.btn-primary { background: #D4725C; color: #fff; border: 1px solid #D4725C; border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+.btn-primary:hover { background: #C4624C; }
+.btn-ghost { background: transparent; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 0.85rem; }
+.btn-ghost:hover { background: #FFFFFF; }
+.btn-danger { background: #c0392b; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 0.85rem; }
+.w100 { width: 100%; margin-top: 10px; }
+
+/* ── 버튼 스피너 ── */
+.btn-loading { position: relative; pointer-events: none; opacity: 0.7; }
+.btn-loading .btn-text { visibility: hidden; }
+.btn-loading::after {
+  content: ''; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+/* ── 유틸리티 ── */
+.hidden { display: none !important; }

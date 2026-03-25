@@ -61,10 +61,9 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { apiJson } from '../utils/api.js'
-import { useAuth } from '../composables/useAuth.js'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
+import { apiJson } from '@/utils/api.js'
+import { useAuth } from '@/composables/useAuth.js'
+import { renderMarkdown } from '@/utils/markdown.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -83,50 +82,6 @@ const videoUrl = ref('')
 const category = computed(() => route.query.category || 'free')
 const editId = computed(() => route.query.edit || null)
 const editMode = computed(() => !!editId.value)
-
-marked.setOptions({ breaks: true })
-
-// YouTube URL → iframe 변환
-function embedYouTube(html) {
-  // 일반 URL: youtube.com/watch?v=ID
-  // 짧은 URL: youtu.be/ID  
-  // Shorts: youtube.com/shorts/ID
-  const ytRegex = /<a[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^"]*"[^>]*>[^<]*<\/a>/g
-  html = html.replace(ytRegex, (match, id) => {
-    return `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`
-  })
-
-  // <a> 태그 없이 텍스트로 된 URL도 처리
-  const ytTextRegex = /(?:<p>)?(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)[^\s<]*)(?:<\/p>)?/g
-  html = html.replace(ytTextRegex, (match, url, id) => {
-    // 이미 iframe으로 변환된 건 스킵
-    if (match.includes('<iframe')) return match
-    return `<div class="embed-video"><iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>`
-  })
-
-  return html
-}
-
-// Instagram URL → iframe 변환
-function embedInstagram(html) {
-  // instagram.com/p/CODE/ 또는 /reel/CODE/
-  const igRegex = /(?:<a[^>]*href=")?https?:\/\/(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)\/?[^"<\s]*"?[^<]*(?:<\/a>)?/g
-  html = html.replace(igRegex, (match, type, code) => {
-    return `<div class="embed-video"><iframe src="https://www.instagram.com/${type}/${code}/embed" frameborder="0" scrolling="no"></iframe></div>`
-  })
-  return html
-}
-
-function renderMarkdown(content) {
-  if (!content) return ''
-  let html = marked(content)
-  html = embedYouTube(html)
-  html = embedInstagram(html)
-  return DOMPurify.sanitize(html, {
-    ADD_TAGS: ['iframe'],
-    ADD_ATTR: ['allowfullscreen', 'frameborder', 'src', 'scrolling'],
-  })
-}
 
 onMounted(async () => {
   if (!currentUser.value) {
@@ -242,45 +197,6 @@ function insertVideo() {
 <style scoped>
 .write-hint { font-size: 0.75rem; color: #8B7B6B; margin-bottom: 12px; line-height: 1.5; }
 .write-hint code { background: #FFFFFF; padding: 1px 4px; border-radius: 3px; font-size: 0.7rem; }
-.write-title { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 10px; font-size: 1rem; margin-bottom: 8px; }
 .write-pin-check { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #5A4A3A; margin-bottom: 8px; cursor: pointer; }
 .write-pin-check input { accent-color: #D4725C; }
-.write-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
-.write-tabs button { padding: 4px 12px; border: 1px solid #E0D5C8; background: transparent; color: #8B7B6B; border-radius: 6px 6px 0 0; font-size: 0.8rem; cursor: pointer; }
-.write-tabs button.active { background: #FFFFFF; color: #3D3029; border-bottom-color: #FFFFFF; }
-.write-content { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 0 6px 6px 6px; padding: 10px; font-size: 0.9rem; resize: vertical; font-family: inherit; line-height: 1.6; }
-.write-preview { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 0 6px 6px 6px; padding: 10px; font-size: 0.9rem; min-height: 200px; line-height: 1.6; }
-.write-error { color: #D4725C; font-size: 0.8rem; margin-top: 8px; }
-.write-submit { width: 100%; margin-top: 12px; padding: 10px; font-size: 0.9rem; }
-
-/* 마크다운 렌더링 스타일 */
-.markdown-body :deep(h1) { font-size: 1.3rem; margin: 16px 0 8px; }
-.markdown-body :deep(h2) { font-size: 1.15rem; margin: 14px 0 6px; }
-.markdown-body :deep(h3) { font-size: 1.05rem; margin: 12px 0 4px; }
-.markdown-body :deep(p) { margin: 0 0 8px; }
-.markdown-body :deep(a) { color: #5BA89E; text-decoration: underline; }
-.markdown-body :deep(code) { background: #F0E8DE; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
-.markdown-body :deep(pre) { background: #F0E8DE; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
-.markdown-body :deep(pre code) { background: none; padding: 0; }
-.markdown-body :deep(blockquote) { border-left: 3px solid #E0D5C8; padding-left: 12px; color: #8B7B6B; margin: 8px 0; }
-.markdown-body :deep(ul), .markdown-body :deep(ol) { padding-left: 20px; margin: 8px 0; }
-.markdown-body :deep(img) { max-width: 100%; border-radius: 6px; }
-.markdown-body :deep(hr) { border: none; border-top: 1px solid #EDE5DB; margin: 16px 0; }
-
-/* 미디어 임베드 */
-.markdown-body :deep(.embed-video) { position: relative; width: 100%; padding-bottom: 56.25%; margin: 12px 0; }
-.markdown-body :deep(.embed-video iframe) { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; }
-
-/* 글 작성 툴바 */
-.write-toolbar { display: flex; gap: 4px; margin-bottom: 4px; }
-.write-toolbar button { padding: 4px 10px; background: #FFFFFF; border: 1px solid #E0D5C8; color: #5A4A3A; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
-.write-toolbar button:hover { background: #EDE5DB; color: #3D3029; }
-
-/* 영상 URL 다이얼로그 */
-.dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.dialog-box { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 10px; padding: 20px; width: 90%; max-width: 400px; }
-.dialog-box h4 { margin: 0 0 8px; font-size: 1rem; }
-.dialog-hint { font-size: 0.75rem; color: #8B7B6B; margin-bottom: 12px; }
-.dialog-input { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px; font-size: 0.85rem; margin-bottom: 12px; }
-.dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
 </style>

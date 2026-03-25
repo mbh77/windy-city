@@ -1,0 +1,126 @@
+/* ── 페이지 폼 기본 스타일 ── */
+.page-body input, .page-body select, .page-body textarea {
+  display: block; width: 100%; margin-bottom: 10px;
+  background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem;
+}
+.page-body input[type="checkbox"] { display: inline; width: auto; margin-bottom: 0; }
+.page-body input[type="file"] { display: none; }
+.page-body textarea { resize: vertical; min-height: 70px; font-family: inherit; line-height: 1.6; }
+
+/* ── 폼 라벨/에러 ── */
+.form-label { font-size: 0.8rem; color: #8B7B6B; margin-bottom: 6px; display: block; }
+.form-error { color: #D4725C; font-size: 0.8rem; margin-top: 6px; min-height: 1em; }
+
+/* ── 위치 검색 ── */
+.location-search-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.location-search-row input { flex: 1; margin-bottom: 0 !important; }
+.location-search-row .btn-ghost { white-space: nowrap; flex-shrink: 0; }
+.search-results { list-style: none; background: #FFFFFF; border: 1px solid #E0D5C8; border-top: none; border-radius: 0 0 6px 6px; max-height: 200px; overflow-y: auto; margin-bottom: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
+.search-results li { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #EDE5DB; transition: background 0.1s; }
+.search-results li:last-child { border-bottom: none; }
+.search-results li:hover { background: #FFFFFF; }
+.search-place-name { font-size: 0.85rem; color: #3D3029; font-weight: 600; }
+.search-place-addr { font-size: 0.75rem; color: #8B7B6B; margin-top: 2px; }
+.search-loading, .search-empty { color: #8B7B6B; font-size: 0.8rem; cursor: default !important; text-align: center; }
+.search-loading:hover, .search-empty:hover { background: transparent !important; }
+
+/* ── 주소 + 상세주소 가로 배치 ── */
+.address-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.address-row .location-pick-row { flex: 1; margin-bottom: 0; }
+.address-row input { flex: 1; margin-bottom: 0 !important; }
+
+/* ── 위치 선택 표시 ── */
+.location-pick-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.picked-address { flex: 1; font-size: 0.85rem; color: #8B7B6B; padding: 8px 10px; background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.picked-address.has-value { color: #3D3029; }
+
+/* ── 날짜/시간 ── */
+.page-body input[type="date"],
+.page-body input[type="time"] { width: auto; display: inline-block; }
+.date-row { display: flex; gap: 8px; }
+.date-row input { flex: none; }
+
+/* ── 체크박스/장르 ── */
+.checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 0.85rem; color: #5A4A3A; cursor: pointer; }
+.genre-checkboxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 8px; margin-bottom: 10px; }
+.genre-checkboxes .checkbox-label { margin-bottom: 0; white-space: nowrap; }
+.inline-checks { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+
+/* ── 접이식 섹션 ── */
+.collapsible-toggle {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  background: #FFFFFF; color: #5A4A3A; border: 1px solid #E0D5C8; border-radius: 6px;
+  padding: 10px 14px; font-size: 0.85rem; cursor: pointer; margin-bottom: 8px;
+  transition: background 0.15s;
+}
+.collapsible-toggle:hover { background: #EDE5DB; }
+.collapse-arrow { font-size: 0.75rem; transition: transform 0.2s; }
+.collapse-arrow.open { transform: rotate(180deg); }
+.collapsible-body { margin-bottom: 8px; padding: 0 2px; }
+
+/* ── 이미지 업로드 ── */
+.image-upload-area { display: flex; gap: 8px; flex-wrap: wrap; }
+.image-thumb { position: relative; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; }
+.image-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.image-remove { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.5); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; line-height: 20px; padding: 0; }
+.image-add { width: 80px; height: 80px; border: 2px dashed #D0C4B8; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.image-add span { font-size: 1.5rem; color: #8B7B6B; }
+.image-add:hover { border-color: #8B7B6B; }
+.upload-hint { font-size: 0.7rem; color: #A89888; margin-top: 6px; }
+
+/* ── 반복 이벤트 휴강/보강일 ── */
+.skip-date-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.skip-date-row input { flex: none; margin-bottom: 0 !important; }
+.skip-date-row .btn-ghost { white-space: nowrap; flex-shrink: 0; }
+.date-tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.date-tag { display: inline-flex; align-items: center; gap: 4px; background: #FFFFFF; color: #5A4A3A; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
+.date-tag button { background: none; border: none; color: #8B7B6B; cursor: pointer; font-size: 0.7rem; padding: 0; }
+.date-tag button:hover { color: #D4725C; }
+.date-tag-list-inline { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+
+/* ── 글 작성 공통 (제목, 탭, 툴바, 미리보기) ── */
+.write-title { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 10px; font-size: 1rem; margin-bottom: 8px; }
+.write-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.write-tabs button { padding: 4px 12px; border: 1px solid #E0D5C8; background: transparent; color: #8B7B6B; border-radius: 6px 6px 0 0; font-size: 0.8rem; cursor: pointer; }
+.write-tabs button.active { background: #FFFFFF; color: #3D3029; border-bottom-color: #FFFFFF; }
+.write-toolbar { display: flex; gap: 4px; margin-bottom: 4px; }
+.write-toolbar button { padding: 4px 10px; background: #FFFFFF; border: 1px solid #E0D5C8; color: #5A4A3A; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+.write-toolbar button:hover { background: #EDE5DB; color: #3D3029; }
+.write-preview { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 0 6px 6px 6px; padding: 10px; font-size: 0.9rem; min-height: 150px; line-height: 1.6; }
+.write-content { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 0 6px 6px 6px; padding: 10px; font-size: 0.9rem; resize: vertical; font-family: inherit; line-height: 1.6; }
+.write-error { color: #D4725C; font-size: 0.8rem; margin-top: 8px; }
+.write-submit { width: 100%; margin-top: 12px; padding: 10px; font-size: 0.9rem; }
+
+/* ── 다이얼로그 (영상 URL 등) ── */
+.dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.dialog-box { background: #FFFFFF; border: 1px solid #E0D5C8; border-radius: 10px; padding: 20px; width: 90%; max-width: 400px; }
+.dialog-box h4 { margin: 0 0 8px; font-size: 1rem; }
+.dialog-hint { font-size: 0.75rem; color: #8B7B6B; margin-bottom: 12px; }
+.dialog-box input { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px; font-size: 0.85rem; margin-bottom: 12px; box-sizing: border-box; }
+.dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ── 댓글 ── */
+.comment-section { margin-top: 16px; }
+.comment-section h3 { font-size: 0.9rem; margin-bottom: 12px; }
+.comment-list { list-style: none; padding: 0; margin: 0 0 12px 0; }
+.comment-item { padding: 10px 0; border-bottom: 1px solid #EDE5DB; }
+.comment-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.comment-author { font-size: 0.8rem; font-weight: 600; }
+.comment-date { font-size: 0.7rem; color: #8B7B6B; }
+.comment-delete { background: none; border: none; color: #8B7B6B; font-size: 0.7rem; cursor: pointer; margin-left: auto; }
+.comment-delete:hover { color: #c0392b; }
+.comment-body { font-size: 0.85rem; line-height: 1.5; }
+.comment-form { display: flex; gap: 8px; align-items: flex-start; }
+.comment-form textarea { flex: 1; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; }
+.comment-form .btn-primary { padding: 8px 16px; font-size: 0.8rem; white-space: nowrap; align-self: flex-end; }
+.comment-login-msg { font-size: 0.8rem; color: #8B7B6B; }
+.comment-edit { background: none; border: none; color: #8B7B6B; font-size: 0.7rem; cursor: pointer; }
+.comment-edit:hover { color: #5BA89E; }
+.comment-edit-form textarea { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical; font-family: inherit; margin-top: 4px; }
+.comment-edit-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px; }
+.comment-edit-actions button { padding: 4px 12px; font-size: 0.75rem; }
+
+@media (max-width: 768px) {
+  .genre-checkboxes { grid-template-columns: repeat(2, 1fr); }
+  .address-row { flex-direction: column; }
+}

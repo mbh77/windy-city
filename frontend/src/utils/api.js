@@ -38,11 +38,24 @@ export async function apiJson(url, options = {}) {
 // ── 날짜 포맷 ──
 export function formatDate(iso) {
   if (!iso) return '-'
-  const d = new Date(iso)
+  const d = new Date(iso.includes('T') ? iso : iso + 'T00:00:00')
   return d.toLocaleDateString('ko-KR', {
+    year: 'numeric',
     month: 'short',
     day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
   })
+}
+
+// ── 작성일 포맷 (YYYY-MM-DD HH:MM:SS) ──
+export function formatCreatedAt(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+// ── 시간 포맷 (HH:MM만 표시) ──
+export function formatTime(time) {
+  if (!time) return ''
+  return time.slice(0, 5)
 }
