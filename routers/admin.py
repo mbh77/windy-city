@@ -106,7 +106,7 @@ def list_events(
                 "title": e.title,
                 "location_name": e.location_name,
                 "event_type": e.event_type,
-                "start_date": e.start_date,
+                "event_date": e.event_date,
                 "organizer_nickname": e.organizer.nickname if e.organizer else None,
                 "created_at": e.created_at,
             }
