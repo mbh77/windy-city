@@ -129,14 +129,16 @@ def create_venue(
 
 
 @router.get("/{venue_id}", response_model=schemas.VenueResponse)
-def get_venue(venue_id: int, db: Session = Depends(get_db)):
+def get_venue(venue_id: int, no_count: bool = False, db: Session = Depends(get_db)):
     """장소 상세 조회"""
     venue = db.query(models.Venue).filter(models.Venue.id == venue_id).first()
     if not venue:
         raise HTTPException(status_code=404, detail="장소를 찾을 수 없습니다")
     
-    venue.view_count += 1
-    db.commit()    
+    if not no_count:
+        venue.view_count = (venue.view_count or 0) + 1
+        db.commit()  
+
     return _venue_to_response(db, venue)
 
 
