@@ -8,7 +8,7 @@
       <input
         v-model="searchQuery"
         type="text"
-        placeholder="🔍 강습·행사, 장소, 강사 이름으로 검색..."
+        placeholder="🔍 클래스, 댄스바, 강사, DJ 등으로 검색"
         @keydown.esc="searchQuery = ''"
         @focus="isExpanded = true"
       />
