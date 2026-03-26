@@ -115,13 +115,14 @@ def create_post(
 
 
 @router.get("/{post_id}")
-def get_post(post_id: int, db: Session = Depends(get_db)):
+def get_post(post_id: int, no_count: bool = False, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not post:
         raise HTTPException(404, "게시글을 찾을 수 없습니다")
         
-    post.view_count = (post.view_count or 0) + 1
-    db.commit()
+    if not no_count:
+        post.view_count = (post.view_count or 0) + 1
+        db.commit()
 
     return {
         "id": post.id,

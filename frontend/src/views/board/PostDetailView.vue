@@ -54,8 +54,14 @@ const canEdit = computed(() => {
 onMounted(() => loadPost())
 
 async function loadPost() {
-  const res = await apiJson(`/api/posts/${route.params.id}`)
-  post.value = await res.json()
+  const viewedKey = `viewed_post_${route.params.id}`
+  const noCount = localStorage.getItem(viewedKey) ? 'true' : 'false'
+
+  const res = await apiJson(`/api/posts/${route.params.id}?no_count=${noCount}`)
+  if (res.ok) {
+    post.value = await res.json()
+    localStorage.setItem(viewedKey, 'true')
+  }
 }
 
 function goBack() {

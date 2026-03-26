@@ -185,15 +185,17 @@ def create_event(
 
 
 @router.get("/{event_id}", response_model=schemas.EventResponse)
-def get_event(event_id: int, db: Session = Depends(get_db)):
+def get_event(event_id: int, no_count: bool = False, db: Session = Depends(get_db)):
     """강습·행사 상세 조회"""
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=404, detail="강습·행사를 찾을 수 없습니다")
     
     # GET /{id} 엔드포인트에서 이벤트 조회 후
-    event.view_count += 1
-    db.commit()
+
+    if not no_count:
+        event.view_count = (event.view_count or 0) + 1
+        db.commit()
 
     return _event_to_response(db, event)
 

@@ -144,9 +144,13 @@ function formatEventDate(e) {
 
 async function fetchEvent() {
   try {
-    const res = await apiFetch(`/api/events/${route.params.id}`)
+    const viewedKey = `viewed_event_${route.params.id}`
+    const noCount = localStorage.getItem(viewedKey) ? 'true' : 'false' 
+
+    const res = await apiFetch(`/api/events/${route.params.id}?no_count=${noCount}`)
     if (res.ok) {
       event.value = await res.json()
+      localStorage.setItem(viewedKey, 'true')  // 첫 조회 후 기록
     }
   } finally {
     loading.value = false

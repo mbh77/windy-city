@@ -134,9 +134,13 @@ const isOwner = computed(() => {
 
 async function fetchVenue() {
   try {
-    const res = await apiFetch(`/api/venues/${route.params.id}`)
+    const viewedKey = `viewed_venue_${route.params.id}`
+    const noCount = localStorage.getItem(viewedKey) ? 'true' : 'false'
+     
+    const res = await apiFetch(`/api/venues/${route.params.id}?no_count=${noCount}`)
     if (res.ok) {
       venue.value = await res.json()
+      localStorage.setItem(viewedKey, 'true')  // 첫 조회 후 기록
     }
   } finally {
     loading.value = false
