@@ -28,7 +28,7 @@
         <input
           type="text"
           v-model="searchQuery"
-          placeholder="장소/주소 검색 (예: 강남역, 홍대)"
+          placeholder="지역 이동 (예: 강남역)"
           class="place-search-input"
           @input="onSearchInput"
           @keydown.down.prevent="moveHighlight(1)"
