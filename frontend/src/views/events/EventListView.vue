@@ -15,23 +15,26 @@
       <!-- 목록 -->
       <ul class="event-list">
         <li v-for="event in events" :key="event.id" class="event-card" @click="goDetail(event.id)">
-          <div class="event-info">
-            <div class="event-badges">
-              <span :class="['event-type-badge', `type-${event.event_type}`]">{{ TYPE_LABELS[event.event_type] }}</span>
-              <span v-for="g in event.dance_genres || []" :key="g" :class="['genre-badge', `genre-${g}`]">{{ GENRE_LABELS[g] }}</span>
+          <div class="event-content">
+            <img v-if="event.media?.length" class="event-thumb" :src="event.media[0].url" />
+            <div class="event-info">
+              <div class="event-badges">
+                <span :class="['event-type-badge', `type-${event.event_type}`]">{{ TYPE_LABELS[event.event_type] }}</span>
+                <span v-for="g in event.dance_genres || []" :key="g" :class="['genre-badge', `genre-${g}`]">{{ GENRE_LABELS[g] }}</span>
+              </div>
+              <div class="event-title">{{ event.title }}</div>
+              <div class="event-detail">
+                <span v-if="event.location_name">{{ event.location_name }}</span>
+                <span v-if="event.event_date" class="event-date">{{ formatDate(event.event_date) }}</span>
+                <span v-if="event.event_end_date" class="event-date"> ~ {{ formatDate(event.event_end_date) }}</span>
+              </div>
             </div>
-            <div class="event-title">{{ event.title }}</div>
-            <div class="event-detail">
-              <span v-if="event.location_name">{{ event.location_name }}</span>
-              <span v-if="event.event_date" class="event-date">{{ formatDate(event.event_date) }}</span>
-              <span v-if="event.event_end_date" class="event-date"> ~ {{ formatDate(event.event_end_date) }}</span>
-            </div>
-            <div class="event-meta">
-              <span>{{ event.organizer_nickname }}</span>
-              <span>{{ formatCreatedAt(event.created_at) }}</span>
-              <span>👁 {{ event.view_count || 0 }}</span>
-              <span v-if="event.comment_count > 0">💬 {{ event.comment_count }}</span>
-            </div>
+          </div>
+          <div class="event-meta">
+            <span>{{ event.organizer_nickname }}</span>
+            <span>{{ formatCreatedAt(event.created_at) }}</span>
+            <span>👁 {{ event.view_count || 0 }}</span>
+            <span v-if="event.comment_count > 0">💬 {{ event.comment_count }}</span>
           </div>
         </li>
         <li v-if="events.length === 0" class="board-empty">등록된 강습·행사가 없습니다</li>
@@ -50,7 +53,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { apiFetch, formatDate, formatTime, formatCreatedAt } from '@/utils/api.js'
+import { apiFetch, formatDate, formatCreatedAt } from '@/utils/api.js'
 import { useAuth } from '@/composables/useAuth.js'
 import { TYPE_LABELS, GENRE_LABELS } from '@/utils/constants.js'
 
@@ -106,8 +109,10 @@ function goDetail(id) {
 .board-toolbar input { flex: 1; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; margin-bottom: 0 !important; }
 .board-toolbar .btn-primary { padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; box-sizing: border-box; }
 .event-list { list-style: none; padding: 0; margin: 0; }
-.event-card { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #EDE5DB; cursor: pointer; }
+.event-card { padding: 12px 0; border-bottom: 1px solid #EDE5DB; cursor: pointer; }
 .event-card:hover { background: #FAFAFA; }
+.event-content { display: flex; gap: 12px; margin-bottom: 6px; }
+.event-thumb { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; background: #EDE5DB; flex-shrink: 0; }
 .event-info { flex: 1; min-width: 0; }
 .event-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
 .event-badges .event-type-badge,

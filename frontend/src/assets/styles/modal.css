@@ -38,6 +38,11 @@
 .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.3); cursor: pointer; }
 .gallery-dot.active { background: #D4725C; }
 
+/* 상세 페이지 갤러리 — PC에서 높이 확대 (모달은 기존 240px 유지) */
+@media (min-width: 769px) {
+  .page-container .gallery-slide img { height: 400px; }
+}
+
 /* ── 전체화면 이미지 뷰어 ── */
 .image-viewer {
   position: fixed; inset: 0; background: rgba(0,0,0,0.9);
