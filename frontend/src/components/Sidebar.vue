@@ -136,7 +136,9 @@
             <div class="empty-icon">📅</div>
             <div class="empty-title">이 지역에 강습·행사가 없어요</div>
             <div class="empty-hint">날짜 범위를 넓히거나 지도를 이동해보세요</div>
-            <button v-if="currentUser?.is_organizer" class="btn-primary" @click="$emit('addEvent')">+ 강습·행사 등록하기</button>
+            <router-link to="/events/new"
+              v-if="currentUser?.is_organizer && activeTab === 'events'"
+              class="btn-primary tab-action">+ 강습·행사 등록하기</router-link>
           </li>
         </ul>
       </template>    
@@ -165,7 +167,9 @@
             <div class="empty-icon">📍</div>
             <div class="empty-title">이 지역에 등록된 장소가 없어요</div>
             <div class="empty-hint">지도를 이동해서 다른 지역을 탐색해보세요</div>
-            <button v-if="currentUser?.is_organizer" class="btn-primary" @click="$emit('addVenue')">+ 장소 등록하기</button>
+              <router-link to="/venues/new"
+              v-if="currentUser?.is_organizer && activeTab === 'venues'"
+              class="btn-primary tab-action">+ 장소 등록하기</router-link>
           </li>          
         </ul>
       </template>      
