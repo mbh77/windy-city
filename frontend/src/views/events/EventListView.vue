@@ -21,12 +21,11 @@
               <div class="event-badges">
                 <span :class="['event-type-badge', `type-${event.event_type}`]">{{ TYPE_LABELS[event.event_type] }}</span>
                 <span v-for="g in event.dance_genres || []" :key="g" :class="['genre-badge', `genre-${g}`]">{{ GENRE_LABELS[g] }}</span>
+                <span class="event-title">{{ event.title }}</span>
               </div>
-              <div class="event-title">{{ event.title }}</div>
               <div class="event-detail">
                 <span v-if="event.location_name">{{ event.location_name }}</span>
-                <span v-if="event.event_date" class="event-date">{{ formatDate(event.event_date) }}</span>
-                <span v-if="event.event_end_date" class="event-date"> ~ {{ formatDate(event.event_end_date) }}</span>
+                <span class="event-date">{{ formatEventSchedule(event) }}</span>
               </div>
             </div>
           </div>
@@ -59,6 +58,28 @@ import { TYPE_LABELS, GENRE_LABELS } from '@/utils/constants.js'
 
 const router = useRouter()
 const { currentUser } = useAuth()
+
+const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' }
+
+function formatEventSchedule(ev) {
+  const parts = []
+  if (ev.event_date) {
+    let dateStr = formatDate(ev.event_date)
+    if (ev.event_end_date && ev.event_end_date !== ev.event_date) {
+      dateStr += ' ~ ' + formatDate(ev.event_end_date)
+    }
+    parts.push(dateStr)
+  }
+  if (ev.start_time) {
+    parts.push(ev.start_time.slice(0, 5))
+  }
+  if (ev.is_recurring && ev.recurrence_rule) {
+    const freq = ev.recurrence_rule.frequency === 'weekly' ? '매주' : '격주'
+    const days = (ev.recurrence_rule.days || []).map(d => DAY_LABELS[d] || d).join('·')
+    parts.push(`${freq} ${days}`)
+  }
+  return parts.join(' · ')
+}
 
 const events = ref([])
 const total = ref(0)
@@ -112,12 +133,12 @@ function goDetail(id) {
 .event-card { padding: 12px 0; border-bottom: 1px solid #EDE5DB; cursor: pointer; }
 .event-card:hover { background: #FAFAFA; }
 .event-content { display: flex; gap: 12px; margin-bottom: 6px; }
-.event-thumb { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; background: #EDE5DB; flex-shrink: 0; }
+.event-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: #EDE5DB; flex-shrink: 0; }
 .event-info { flex: 1; min-width: 0; }
 .event-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
 .event-badges .event-type-badge,
 .event-badges .genre-badge { font-size: 0.65rem; }
-.event-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
 .event-detail { font-size: 0.78rem; color: #5A4A3A; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
 .event-date { color: #5BA89E; }
 .event-meta { font-size: 0.7rem; color: #8B7B6B; display: flex; gap: 10px; }

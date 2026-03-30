@@ -148,6 +148,7 @@ def list_events(
         keyword = f"%{q}%"
         query = query.filter(
             (models.Event.title.like(keyword)) |
+            (models.Event.description.like(keyword)) |
             (models.Event.location_name.like(keyword)) |
             (models.Event.instructor_name.like(keyword))
         )

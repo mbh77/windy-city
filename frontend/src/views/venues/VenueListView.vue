@@ -21,11 +21,10 @@
               <div class="venue-badges">
                 <span :class="['venue-type-badge', `vtype-${venue.venue_type}`]">{{ VENUE_TYPE_LABELS[venue.venue_type] }}</span>
                 <span v-for="g in venue.dance_genres || []" :key="g" :class="['genre-badge', `genre-${g}`]">{{ GENRE_LABELS[g] }}</span>
+                <span class="venue-title">{{ venue.name }}</span>
               </div>
-              <div class="venue-title">{{ venue.name }}</div>
               <div class="venue-detail">
                 <span v-if="venue.address">{{ venue.address }}</span>
-                <span v-if="venue.phone">{{ venue.phone }}</span>
               </div>
             </div>
           </div>
@@ -111,7 +110,7 @@ function goDetail(id) {
 .venue-card { padding: 12px 0; border-bottom: 1px solid #EDE5DB; cursor: pointer; }
 .venue-card:hover { background: #FAFAFA; }
 .venue-content { display: flex; gap: 12px; margin-bottom: 6px; }
-.venue-thumb { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; background: #EDE5DB; flex-shrink: 0; }
+.venue-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: #EDE5DB; flex-shrink: 0; }
 .venue-info { flex: 1; min-width: 0; }
 .venue-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
 .venue-badges .venue-type-badge,
