@@ -39,11 +39,10 @@ export async function apiJson(url, options = {}) {
 export function formatDate(iso) {
   if (!iso) return '-'
   const d = new Date(iso.includes('T') ? iso : iso + 'T00:00:00')
-  return d.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+  const yy = String(d.getFullYear()).slice(2)
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yy}-${mm}-${dd}`
 }
 
 // ── 작성일 포맷 (YYYY-MM-DD HH:MM:SS) ──

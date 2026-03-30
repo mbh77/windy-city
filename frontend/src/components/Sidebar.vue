@@ -52,7 +52,7 @@
               <span class="item-meta">{{ item.item_type === 'event' ? item.location_name : item.address }}</span>
               <template v-if="item.item_type === 'event'">
                 <span class="card-dot">·</span>
-                <span class="item-meta">{{ formatDate(item.event_date) }}</span>
+                <span class="item-meta">{{ formatEventSchedule(item) }}</span>
               </template>
             </div>
           </div>
@@ -128,8 +128,7 @@
               <div class="card-line2">
                 <span class="item-meta">{{ ev.location_name }}</span>
                 <span class="card-dot">·</span>
-                <span class="item-meta">{{ ev.is_recurring ? formatRecurringSchedule(ev) : formatDate(ev.event_date) }}</span>
-                <span v-if="ev.is_recurring" class="recurring-badge">🔄 {{ formatRecurring(ev.recurrence_rule) }}</span>
+                <span class="item-meta">{{ formatEventSchedule(ev) }}</span>
               </div>
             </div>
           </li>
@@ -322,9 +321,25 @@ function formatRecurring(rule) {
   return `${freq} ${days}`
 }
 
-function formatRecurringSchedule(ev) {
-  const time = ev.start_time ? ev.start_time.slice(0, 5) : ''
-  return `${formatRecurring(ev.recurrence_rule)} ${time}`
+function formatEventSchedule(ev) {
+  const parts = []
+  // 날짜
+  if (ev.event_date) {
+    let dateStr = formatDate(ev.event_date)
+    if (ev.event_end_date && ev.event_end_date !== ev.event_date) {
+      dateStr += ' ~ ' + formatDate(ev.event_end_date)
+    }
+    parts.push(dateStr)
+  }
+  // 시간
+  if (ev.start_time) {
+    parts.push(ev.start_time.slice(0, 5))
+  }
+  // 반복
+  if (ev.is_recurring && ev.recurrence_rule) {
+    parts.push(formatRecurring(ev.recurrence_rule))
+  }
+  return parts.join(' · ')
 }
 
 // 지도 영역 내 항목만 필터링
