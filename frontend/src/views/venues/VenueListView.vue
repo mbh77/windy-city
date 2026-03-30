@@ -2,7 +2,7 @@
   <div class="page-container">
     <header class="page-header">
       <router-link to="/" class="page-nav-btn">지도</router-link>
-      <h1 class="page-title">🎭 댄스바·연습실</h1>
+      <h1 class="page-title">🎭 댄스바·동호회·연습실</h1>
     </header>
 
     <main class="page-body">
