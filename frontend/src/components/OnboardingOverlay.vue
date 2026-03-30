@@ -16,7 +16,7 @@
         </div>
         <div class="guide-item">
           <span class="guide-num">②</span>
-          <span><b>카테고리 버튼</b>으로 클럽·학원·연습실·강습·행사를 필터링</span>
+          <span><b>카테고리 버튼</b>으로 클럽·동호회·연습실·강습·행사를 필터링</span>
         </div>
         <div class="guide-item">
           <span class="guide-num">③</span>

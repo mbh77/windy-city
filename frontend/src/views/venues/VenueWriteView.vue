@@ -137,7 +137,7 @@
 
           <!-- 유형별 추가 필드: 학원 -->
           <template v-if="form.venue_type === 'academy'">
-            <label class="form-label">학원 정보</label>
+            <label class="form-label">동호회 정보</label>
             <div class="inline-checks">
               <label class="checkbox-label"><input v-model="form.has_trial_class" type="checkbox" /> 체험 수업 가능</label>
             </div>
