@@ -50,6 +50,17 @@
         </ul>
       </div>
 
+      <!-- PC 가로 메뉴 -->
+      <nav class="nav-links">
+        <router-link to="/board?category=notice">공지사항</router-link>
+        <router-link to="/board?category=free">열린 플로어</router-link>
+        <router-link to="/events">클래스·이벤트</router-link>
+        <router-link to="/venues">댄스바·연습실</router-link>
+        <router-link to="/about">About</router-link>
+        <router-link to="/feedback">제보/제안</router-link>
+        <router-link v-if="currentUser?.is_admin" to="/admin">관리자</router-link>
+      </nav>
+
       <div class="auth-area">
         <!-- 로그아웃 상태: 로그인 아이콘 -->
         <button v-if="!currentUser" class="auth-icon-btn" @click="$emit('authClick')" title="로그인">

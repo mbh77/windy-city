@@ -33,7 +33,7 @@ export const GENRE_OPTIONS = Object.entries(GENRE_LABELS).map(([value, label]) =
 // 장소 유형 라벨
 export const VENUE_TYPE_LABELS = {
   club: '클럽',
-  academy: '학원',
+  academy: '동호회',
   practice_room: '연습실',
 }
 
@@ -55,7 +55,7 @@ export const DIFFICULTY_OPTIONS = Object.entries(DIFFICULTY_LABELS).map(([value,
 // 지도 마커 카테고리 (체크박스 필터용)
 export const MAP_CATEGORIES = [
   { key: 'club', label: '클럽', color: '#2E6EB5' },         // 파랑
-  { key: 'academy', label: '학원', color: '#D4A84C' },     // 노랑
+  { key: 'academy', label: '동호회', color: '#D4A84C' },     // 노랑
   { key: 'practice_room', label: '연습실', color: '#4EA89E' }, // 틸
   { key: 'event', label: '강습/행사', color: '#7B2D8E' },     // 보라
 ]
