@@ -1,3 +1,6 @@
+// 기본 날짜 필터 범위 (일)
+export const DEFAULT_DATE_RANGE_DAYS = 30
+
 // 이벤트 유형 라벨
 export const TYPE_LABELS = {
   social: '소셜',

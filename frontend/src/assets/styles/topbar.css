@@ -45,6 +45,13 @@
 
 /* ── 장소 검색 ── */
 .place-search { position: relative; flex: 1; max-width: 400px; }
+.place-search-input { padding-right: 28px !important; }
+.place-search-clear {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: rgba(0,0,0,0.4); font-size: 0.8rem;
+  cursor: pointer; padding: 2px 4px; line-height: 1; z-index: 1;
+}
+.place-search-clear:hover { color: #D4725C; }
 .place-search-input {
   background: rgba(255,255,255,0.7); color: #3D3029; border: 1px solid rgba(255,255,255,0.8);
   border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; width: 100%;

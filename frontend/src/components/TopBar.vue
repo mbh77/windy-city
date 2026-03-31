@@ -57,6 +57,7 @@
           @keydown.escape="closeResults"
           @focus="showResults = searchResults.length > 0"
         />
+        <button v-if="searchQuery" class="place-search-clear" @click="searchQuery = ''; closeResults()">✕</button>
         <ul v-if="showResults && searchResults.length > 0" class="place-search-results">
           <li
             v-for="(place, idx) in searchResults"

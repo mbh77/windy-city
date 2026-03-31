@@ -109,8 +109,10 @@ def get_events(
 
     for e in all_events:
         if e.is_recurring:
-            # 반복 이벤트: 시작일이 범위 끝 이전이고 범위 내 해당 요일이 있으면 포함
-            if date_to and e.event_date > date_to:
+            # 반복 이벤트: 시작일~종료일 범위가 필터 범위와 겹치는지 확인
+            if date_to and e.event_date and e.event_date > date_to:
+                continue
+            if date_from and e.event_end_date and e.event_end_date < date_from:
                 continue
             if date_from and date_to and not _recurring_in_range(e, date_from, date_to):
                 continue
@@ -130,7 +132,9 @@ def get_events(
 def list_events(
     q: str = Query("", description="검색어"),
     event_type: Optional[models.EventType] = Query(None),
-    dance_genre: Optional[models.DanceGenre] = Query(None),
+    dance_genres: List[models.DanceGenre] = Query([], description="춤 종류 필터 (다중)"),
+    date_from: Optional[date] = Query(None, description="시작일 필터"),
+    date_to: Optional[date] = Query(None, description="종료일 필터"),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -140,9 +144,9 @@ def list_events(
 
     if event_type:
         query = query.filter(models.Event.event_type == event_type)
-    if dance_genre:
+    if dance_genres:
         query = query.join(models.EventDanceGenre).filter(
-            models.EventDanceGenre.dance_genre == dance_genre
+            models.EventDanceGenre.dance_genre.in_(dance_genres)
         )
     if q:
         keyword = f"%{q}%"
@@ -153,14 +157,36 @@ def list_events(
             (models.Event.instructor_name.like(keyword))
         )
 
-    total = query.count()
-    events = query.order_by(models.Event.created_at.desc()).offset((page - 1) * limit).limit(limit).all()
+    all_events = query.order_by(models.Event.created_at.desc()).all()
+
+    # 날짜 필터 (반복 이벤트 대응)
+    if date_from or date_to:
+        filtered = []
+        for e in all_events:
+            if e.is_recurring:
+                if date_to and e.event_date and e.event_date > date_to:
+                    continue
+                if date_from and e.event_end_date and e.event_end_date < date_from:
+                    continue
+                if date_from and date_to and not _recurring_in_range(e, date_from, date_to):
+                    continue
+            else:
+                if date_from and e.event_date and e.event_date < date_from:
+                    continue
+                if date_to and e.event_date and e.event_date > date_to:
+                    continue
+            filtered.append(e)
+        all_events = filtered
+
+    total = len(all_events)
+    start = (page - 1) * limit
+    paged = all_events[start:start + limit]
     return {
         "total": total,
         "page": page,
         "events": [
             {**_event_to_response(db, e).model_dump(), "comment_count": len(e.comments)}
-            for e in events
+            for e in paged
         ],
     }
 
