@@ -80,6 +80,7 @@ def get_venues_list(
     limit: int = Query(20, ge=1, le=100),
     q: str = Query("", description="검색어"),
     venue_type: Optional[models.VenueType] = Query(None),
+    dance_genres: List[models.DanceGenre] = Query([], description="춤 종류 필터 (다중)"),
     db: Session = Depends(get_db)
 ):
     """장소 게시판형 목록 (페이징, 검색, 댓글수 포함)"""
@@ -87,6 +88,10 @@ def get_venues_list(
 
     if venue_type:
         query = query.filter(models.Venue.venue_type == venue_type)
+    if dance_genres:
+        query = query.join(models.VenueDanceGenre).filter(
+            models.VenueDanceGenre.dance_genre.in_(dance_genres)
+        )
 
     if q:
         like = f"%{q}%"

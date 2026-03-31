@@ -8,8 +8,30 @@
     <main class="page-body">
       <!-- 검색 + 등록 -->
       <div class="board-toolbar">
-        <input v-model="searchQuery" placeholder="장소명, 주소 검색..." @input="debouncedSearch" />
+        <div class="search-input-wrap">
+          <input v-model="searchQuery" placeholder="장소명, 주소 검색..." @input="debouncedSearch" />
+          <button v-if="searchQuery" class="search-clear" @click="searchQuery = ''; debouncedSearch()">✕</button>
+        </div>
         <router-link v-if="currentUser" to="/venues/new" class="btn-primary">등록</router-link>
+      </div>
+
+      <!-- 장르 필터 -->
+      <div class="compact-filter">
+        <div class="compact-filter-summary" @click="showGenreFilter = !showGenreFilter">
+          <span>🎵 춤 종류{{ selectedGenres.length ? ` (${selectedGenres.length})` : '' }}</span>
+          <span class="date-toggle">{{ showGenreFilter ? '▲' : '▼' }}</span>
+        </div>
+        <div v-if="showGenreFilter" class="compact-filter-body">
+          <div class="filter-row">
+            <button
+              v-for="g in GENRE_FILTER_OPTIONS"
+              :key="g.value"
+              :class="['genre-chip', { active: selectedGenres.includes(g.value) }]"
+              @click="toggleGenre(g.value)"
+            >{{ g.label }}</button>
+            <button v-if="selectedGenres.length" class="genre-chip genre-reset" @click="selectedGenres = []; page = 1; loadVenues()">초기화</button>
+          </div>
+        </div>
       </div>
 
       <!-- 목록 -->
@@ -53,10 +75,22 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiFetch, formatCreatedAt } from '@/utils/api.js'
 import { useAuth } from '@/composables/useAuth.js'
-import { VENUE_TYPE_LABELS, GENRE_LABELS } from '@/utils/constants.js'
+import { VENUE_TYPE_LABELS, GENRE_LABELS, GENRE_OPTIONS } from '@/utils/constants.js'
 
 const router = useRouter()
 const { currentUser } = useAuth()
+
+const GENRE_FILTER_OPTIONS = GENRE_OPTIONS.filter(g => g.value !== 'other')
+const selectedGenres = ref([])
+const showGenreFilter = ref(false)
+
+function toggleGenre(value) {
+  const idx = selectedGenres.value.indexOf(value)
+  if (idx >= 0) selectedGenres.value.splice(idx, 1)
+  else selectedGenres.value.push(value)
+  page.value = 1
+  loadVenues()
+}
 
 const venues = ref([])
 const total = ref(0)
@@ -75,6 +109,7 @@ async function loadVenues() {
     limit,
     q: searchQuery.value,
   })
+  for (const g of selectedGenres.value) params.append('dance_genres', g)
   const res = await apiFetch(`/api/venues/list?${params}`)
   if (res.ok) {
     const data = await res.json()
@@ -103,8 +138,19 @@ function goDetail(id) {
 </script>
 
 <style scoped>
-.board-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-.board-toolbar input { flex: 1; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; margin-bottom: 0 !important; }
+.board-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.board-toolbar .search-input-wrap { flex: 1; position: relative; min-width: 0; }
+.board-toolbar input { width: 100%; background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 6px; padding: 8px 10px; padding-right: 28px; font-size: 0.85rem; margin-bottom: 0 !important; box-sizing: border-box; }
+.board-toolbar .search-clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #8B7B6B; font-size: 0.8rem; cursor: pointer; padding: 2px 4px; line-height: 1; }
+.board-toolbar .search-clear:hover { color: #D4725C; }
+.compact-filter { border-bottom: 1px solid #EDE5DB; margin-bottom: 4px; }
+.compact-filter-summary { font-size: 0.8rem; color: #5A4A3A; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 6px 0; }
+.compact-filter-body { padding-bottom: 8px; }
+.date-toggle { font-size: 0.6rem; color: #8B7B6B; margin-left: auto; }
+.filter-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.genre-chip { padding: 4px 10px; border-radius: 14px; font-size: 0.7rem; cursor: pointer; border: 1px solid #E0D5C8; background: transparent; color: #5A4A3A; transition: all 0.15s; }
+.genre-chip.active { background: #a855f7; color: #fff; border-color: #a855f7; }
+.genre-chip:hover { border-color: #8B7B6B; }
 .board-toolbar .btn-primary { padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; box-sizing: border-box; }
 .venue-list { list-style: none; padding: 0; margin: 0; }
 .venue-card { padding: 12px 0; border-bottom: 1px solid #EDE5DB; cursor: pointer; }
