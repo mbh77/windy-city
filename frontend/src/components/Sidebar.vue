@@ -211,7 +211,7 @@ const activeTab = ref('events')
 const showDatePicker = ref(false)
 const showFilter = ref(false)
 const today = new Date().toISOString().slice(0, 10)
-const weekLater = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
+const weekLater = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10)
 const dateFrom = ref(today)
 const dateTo = ref(weekLater)
 
