@@ -2,6 +2,26 @@
   <header class="topbar">
     <!-- 1단: 로고 + 장소 검색 + 로그인 -->
     <div class="topbar-row topbar-main">
+      <div class="auth-area">
+        <!-- 로그아웃 상태: 로그인 아이콘 -->
+        <button v-if="!currentUser" class="auth-icon-btn" @click="$emit('authClick')" title="로그인">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </button>
+        <!-- 로그인 상태: 이름 약자 아바타 -->
+        <div v-else class="user-menu" ref="userMenuRef">
+          <button class="user-avatar" @click="showUserMenu = !showUserMenu">
+            {{ currentUser.nickname?.charAt(0)?.toUpperCase() || 'U' }}
+          </button>
+          <div v-if="showUserMenu" class="user-dropdown">
+            <div class="user-dropdown-name">{{ currentUser.nickname }}</div>
+            <button class="user-dropdown-item" @click="handleLogout">로그아웃</button>
+            <button v-if="!currentUser.is_admin" class="user-dropdown-item user-dropdown-danger" @click="handleWithdraw">회원 탈퇴</button>
+          </div>
+        </div>
+      </div>
       <div class="logo-area">
         <div class="nav-menu" ref="navMenuRef">
           <button class="nav-menu-btn" @click="showNavMenu = !showNavMenu" title="메뉴">
@@ -50,37 +70,19 @@
         </ul>
       </div>
 
-      <!-- PC 가로 메뉴 -->
-      <nav class="nav-links">
-        <router-link to="/board?category=notice">공지사항</router-link>
-        <router-link to="/board?category=free">열린 플로어</router-link>
-        <router-link to="/events">클래스·이벤트</router-link>
-        <router-link to="/venues">댄스바·동호회·연습실</router-link>
-        <router-link to="/about">About</router-link>
-        <router-link to="/feedback">제보/제안</router-link>
-        <router-link v-if="currentUser?.is_admin" to="/admin">관리자</router-link>
-      </nav>
-
-      <div class="auth-area">
-        <!-- 로그아웃 상태: 로그인 아이콘 -->
-        <button v-if="!currentUser" class="auth-icon-btn" @click="$emit('authClick')" title="로그인">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-        </button>
-        <!-- 로그인 상태: 이름 약자 아바타 -->
-        <div v-else class="user-menu" ref="userMenuRef">
-          <button class="user-avatar" @click="showUserMenu = !showUserMenu">
-            {{ currentUser.nickname?.charAt(0)?.toUpperCase() || 'U' }}
-          </button>
-          <div v-if="showUserMenu" class="user-dropdown">
-            <div class="user-dropdown-name">{{ currentUser.nickname }}</div>
-            <button class="user-dropdown-item" @click="handleLogout">로그아웃</button>
-            <button v-if="!currentUser.is_admin" class="user-dropdown-item user-dropdown-danger" @click="handleWithdraw">회원 탈퇴</button>
-          </div>
-        </div>
+      <!-- 가로 메뉴 -->
+      <div class="nav-links-wrap">
+        <nav class="nav-links">
+          <router-link to="/board?category=notice">공지사항</router-link>
+          <router-link to="/board?category=free">열린 플로어</router-link>
+          <router-link to="/events">클래스·이벤트</router-link>
+          <router-link to="/venues">댄스바·동호회·연습실</router-link>
+          <router-link to="/about">About</router-link>
+          <router-link to="/feedback">제보/제안</router-link>
+          <router-link v-if="currentUser?.is_admin" to="/admin">관리자</router-link>
+        </nav>
       </div>
+
     </div>
   </header>
 </template>

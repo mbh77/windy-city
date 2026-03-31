@@ -1,6 +1,6 @@
 /* ── 지역명 오버레이 ── */
 .region-overlay {
-  position: absolute; bottom: 12px; right: 12px; z-index: 5;
+  position: absolute; bottom: 40px; left: 12px; z-index: 5;
   background: rgba(255,255,255,0.9); color: #3D3029;
   padding: 4px 10px; border-radius: 16px;
   font-size: 0.75rem; font-weight: 600;
@@ -25,7 +25,7 @@
   display: flex; gap: 8px;
 }
 .cat-chip {
-  padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+  padding: 3px 7px; border-radius: 10px; font-size: 0.8rem; font-weight: 600;
   cursor: pointer; transition: all 0.2s;
   background: rgba(255,255,255,0.9); color: #555;
   border: 1.5px solid #ccc;
@@ -58,5 +58,6 @@
 .search-bounds-btn { background: rgba(255,255,255,0.9); border: 1px solid #D0C4B8; color: #5A4A3A; border-radius: 16px; padding: 4px 10px; font-size: 0.75rem; white-space: nowrap; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
 .search-bounds-btn.active { background: #D4725C; border-color: #D4725C; color: #fff; }
 
-/* PC에서 바텀시트 핸들 숨김 */
+/* PC에서 바텀시트 핸들/라벨 숨김 */
 .sheet-handle { display: none; }
+.sheet-handle-label { display: none; }
