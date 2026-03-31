@@ -1,16 +1,17 @@
 <template>
   <aside :class="['sidebar', { expanded: isExpanded }]">
     <div class="sheet-handle" @click="isExpanded = !isExpanded">
-      <span></span>
+      <span class="sheet-handle-arrow">{{ isExpanded ? '▼' : '▲' }}</span>
+      <span class="sheet-handle-label">{{ isExpanded ? '목록 접기' : '목록 보기' }}</span>
     </div>
     <!-- 검색창 -->
+    <div class="sidebar-body">
     <div class="search-box">
       <input
         v-model="searchQuery"
         type="text"
         placeholder="🔍 클래스, 댄스바, 강사, DJ 등으로 검색"
         @keydown.esc="searchQuery = ''"
-        @focus="isExpanded = true"
       />
       <button
         :class="['search-bounds-btn', { active: searchInBounds }]"
@@ -175,6 +176,7 @@
       </template>      
 
     </template>
+    </div>
   </aside>
 </template>
 
