@@ -7,18 +7,67 @@
     <!-- 검색창 -->
     <div class="sidebar-body">
     <div class="search-box">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="🔍 클래스, 댄스바, 강사, DJ 등으로 검색"
-        @keydown.esc="searchQuery = ''"
-      />
+      <div class="search-input-wrap">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="🔍 클래스, 댄스바, 강사, DJ 등으로 검색"
+          @keydown.esc="searchQuery = ''"
+        />
+        <button v-if="searchQuery" class="search-clear" @click="searchQuery = ''">✕</button>
+      </div>
       <button
         :class="['search-bounds-btn', { active: searchInBounds }]"
         @click="searchInBounds = !searchInBounds">
         📍 지도 내
       </button>
     </div>
+    <!-- 장르 필터 -->
+    <div class="compact-filter">
+      <div class="compact-filter-summary" @click="showGenreFilter = !showGenreFilter">
+        <span>🎵 춤 종류{{ selectedGenres.length ? ` (${selectedGenres.length})` : '' }}</span>
+        <span v-if="selectedGenres.length" class="filter-days-tag">{{ selectedGenres.map(g => GENRE_LABELS[g]).join('·') }}</span>
+        <span class="date-toggle">{{ showGenreFilter ? '▲' : '▼' }}</span>
+      </div>
+      <div v-if="showGenreFilter" class="compact-filter-body">
+        <div class="genre-filter">
+          <button
+            v-for="g in GENRE_FILTER_OPTIONS"
+            :key="g.value"
+            :class="['genre-chip', { active: selectedGenres.includes(g.value) }]"
+            @click="toggleGenre(g.value)"
+          >{{ g.label }}</button>
+          <button v-if="selectedGenres.length" class="genre-chip genre-reset" @click="selectedGenres = []">초기화</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 기간+요일 필터 (이벤트용, 장소 탭에서는 숨김) -->
+    <div class="compact-filter" v-if="activeTab === 'events' || searchQuery.trim()">
+      <div class="compact-filter-summary" @click="showFilter = !showFilter">
+        <span>📅 {{ formatFilterDate(dateFrom) }}~{{ formatFilterDate(dateTo) }}</span>
+        <span v-if="selectedDays.length" class="filter-days-tag">{{ selectedDays.map(d => DAY_LABELS[d]).join('·') }}</span>
+        <span class="date-toggle">{{ showFilter ? '▲' : '▼' }}</span>
+      </div>
+      <div v-if="showFilter" class="compact-filter-body">
+        <div class="date-filter-inputs">
+          <input type="date" v-model="dateFrom" />
+          <span>~</span>
+          <input type="date" v-model="dateTo" />
+          <button class="btn-ghost" @click="applyDateFilter">적용</button>
+          <button class="btn-ghost" @click="resetDateFilter">초기화</button>
+        </div>
+        <div class="day-filter">
+          <button
+            v-for="day in DAY_OPTIONS"
+            :key="day.value"
+            :class="['day-chip', { active: selectedDays.includes(day.value) }]"
+            @click="toggleDay(day.value)"
+          >{{ day.label }}</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 검색 모드: 검색어가 있을 때 -->
     <template v-if="searchQuery.trim()">
       <div class="sidebar-header">
@@ -88,31 +137,6 @@
 
       <!-- 이벤트 탭 -->
       <template v-if="activeTab === 'events'">
-        <!-- 날짜+요일 필터 (접이식) -->
-        <div class="compact-filter">
-          <div class="compact-filter-summary" @click="showFilter = !showFilter">
-            <span>📅 {{ formatFilterDate(dateFrom) }}~{{ formatFilterDate(dateTo) }}</span>
-            <span v-if="selectedDays.length" class="filter-days-tag">{{ selectedDays.map(d => DAY_LABELS[d]).join('·') }}</span>
-            <span class="date-toggle">{{ showFilter ? '▲' : '▼' }}</span>
-          </div>
-          <div v-if="showFilter" class="compact-filter-body">
-            <div class="date-filter-inputs">
-              <input type="date" v-model="dateFrom" />
-              <span>~</span>
-              <input type="date" v-model="dateTo" />
-              <button class="btn-ghost" @click="applyDateFilter">적용</button>
-              <button class="btn-ghost" @click="resetDateFilter">초기화</button>
-            </div>
-            <div class="day-filter">
-              <button
-                v-for="day in DAY_OPTIONS"
-                :key="day.value"
-                :class="['day-chip', { active: selectedDays.includes(day.value) }]"
-                @click="toggleDay(day.value)"
-              >{{ day.label }}</button>
-            </div>
-          </div>
-        </div>
         <ul class="sidebar-list">
           <li v-for="ev in filteredEvents" :key="ev.id" class="card-item card-with-thumb" @click="$emit('selectEvent', ev)">
             <img :src="ev.media?.[0]?.url || markerEventImg" class="card-thumb" />
@@ -182,7 +206,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { TYPE_LABELS, GENRE_LABELS, VENUE_TYPE_LABELS } from '../utils/constants.js'
+import { TYPE_LABELS, GENRE_LABELS, VENUE_TYPE_LABELS, GENRE_OPTIONS, DEFAULT_DATE_RANGE_DAYS } from '../utils/constants.js'
 import { apiFetch, formatDate } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
@@ -210,14 +234,33 @@ const { venues } = useVenues()
 const activeTab = ref('events')
 
 // 날짜 필터
-const showDatePicker = ref(false)
 const showFilter = ref(false)
 const today = new Date().toISOString().slice(0, 10)
-const weekLater = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10)
+const weekLater = new Date(Date.now() + DEFAULT_DATE_RANGE_DAYS * 86400000).toISOString().slice(0, 10)
 const dateFrom = ref(today)
 const dateTo = ref(weekLater)
 
 const searchInBounds = ref(false)
+
+// 장르 필터
+const showGenreFilter = ref(false)
+const selectedGenres = ref([])
+const GENRE_FILTER_OPTIONS = GENRE_OPTIONS.filter(g => g.value !== 'other')
+
+function toggleGenre(genre) {
+  const idx = selectedGenres.value.indexOf(genre)
+  if (idx >= 0) {
+    selectedGenres.value.splice(idx, 1)
+  } else {
+    selectedGenres.value.push(genre)
+  }
+}
+
+function matchesGenre(item) {
+  if (selectedGenres.value.length === 0) return true
+  const genres = item.dance_genres || []
+  return selectedGenres.value.some(g => genres.includes(g))
+}
 
 watch(dateFrom, (val) => {
   if (dateTo.value < val) {
@@ -362,23 +405,40 @@ const visibleEvents = computed(() =>
 )
 
 const filteredEvents = computed(() =>
-  visibleEvents.value.filter(ev => matchesDay(ev))
+  visibleEvents.value.filter(ev => matchesDay(ev) && matchesGenre(ev))
 )
 
 const visibleVenues = computed(() =>
   venues.value.filter(v =>
-    props.visibleCategories[v.venue_type] && inBounds(v.latitude, v.longitude)
+    props.visibleCategories[v.venue_type] && inBounds(v.latitude, v.longitude) && matchesGenre(v)
   )
 )
 
+function matchesDateRange(item) {
+  if (item.item_type !== 'event') return true  // 장소는 날짜 무시
+  const from = dateFrom.value
+  const to = dateTo.value
+  // 반복 이벤트: 시작일~종료일이 필터 범위와 겹치는지
+  if (item.event_end_date && item.event_end_date < from) return false
+  if (item.event_date && item.event_date > to) return false
+  return true
+}
+
 const filteredSearchResults = computed(() => {
-  if (!searchInBounds.value || !props.mapBounds) return searchResults.value
-  return searchResults.value.filter(item => {
-    const lat = item.latitude
-    const lng = item.longitude
-    return lat >= props.mapBounds.swLat && lat <= props.mapBounds.neLat
-        && lng >= props.mapBounds.swLng && lng <= props.mapBounds.neLng
-  })
+  let results = searchResults.value
+  if (searchInBounds.value && props.mapBounds) {
+    results = results.filter(item => {
+      const lat = item.latitude
+      const lng = item.longitude
+      return lat >= props.mapBounds.swLat && lat <= props.mapBounds.neLat
+          && lng >= props.mapBounds.swLng && lng <= props.mapBounds.neLng
+    })
+  }
+  if (selectedGenres.value.length > 0) {
+    results = results.filter(item => matchesGenre(item))
+  }
+  results = results.filter(item => matchesDateRange(item))
+  return results
 })
 
 </script>

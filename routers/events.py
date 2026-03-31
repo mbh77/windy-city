@@ -109,8 +109,10 @@ def get_events(
 
     for e in all_events:
         if e.is_recurring:
-            # 반복 이벤트: 시작일이 범위 끝 이전이고 범위 내 해당 요일이 있으면 포함
-            if date_to and e.event_date > date_to:
+            # 반복 이벤트: 시작일~종료일 범위가 필터 범위와 겹치는지 확인
+            if date_to and e.event_date and e.event_date > date_to:
+                continue
+            if date_from and e.event_end_date and e.event_end_date < date_from:
                 continue
             if date_from and date_to and not _recurring_in_range(e, date_from, date_to):
                 continue

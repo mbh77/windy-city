@@ -41,6 +41,16 @@
   align-items: center;
   gap: 6px;
 }
+.search-input-wrap {
+  flex: 1; position: relative; min-width: 0;
+}
+.search-input-wrap input { width: 100%; padding-right: 28px; box-sizing: border-box; }
+.search-clear {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: #8B7B6B; font-size: 0.8rem;
+  cursor: pointer; padding: 2px 4px; line-height: 1;
+}
+.search-clear:hover { color: #D4725C; }
 .search-box input {
   flex: 1;
   min-width: 0;
@@ -93,6 +103,17 @@
 }
 .day-chip.active { background: #D4725C; color: #fff; border-color: #D4725C; }
 .day-chip:hover { border-color: #8B7B6B; }
+
+/* ── 장르 필터 ── */
+.genre-filter { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 0; }
+.genre-chip {
+  padding: 4px 10px; border-radius: 14px; font-size: 0.7rem;
+  cursor: pointer; border: 1px solid #E0D5C8;
+  background: transparent; color: #5A4A3A; transition: all 0.15s;
+}
+.genre-chip.active { background: #a855f7; color: #fff; border-color: #a855f7; }
+.genre-chip:hover { border-color: #8B7B6B; }
+.genre-chip.genre-reset { color: #8B7B6B; font-size: 0.65rem; }
 
 /* ── 빈 페이지 안내 ── */
 .empty-state { padding: 16px; text-align: center; cursor: default; }

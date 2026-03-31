@@ -56,6 +56,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiFetch } from '../utils/api.js'
+import { DEFAULT_DATE_RANGE_DAYS } from '../utils/constants.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
@@ -155,11 +156,11 @@ function toLocalDate(date) {
 }
 
 const today = new Date()
-const weekLater = new Date()
-weekLater.setDate(today.getDate() + 7)
+const rangeLater = new Date()
+rangeLater.setDate(today.getDate() + DEFAULT_DATE_RANGE_DAYS)
 const currentFilters = ref({
   date_from: toLocalDate(today),
-  date_to: toLocalDate(weekLater),
+  date_to: toLocalDate(rangeLater),
 })
 
 // ── 초기화 ──
