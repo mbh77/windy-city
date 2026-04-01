@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Enum, JSON, Date, Time
+from sqlalchemy import Column, Integer, String, Text, Float, Double, Boolean, DateTime, ForeignKey, Enum, JSON, Date, Time
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -82,8 +82,8 @@ class Venue(Base):
     description = Column(Text)  # 리치 텍스트 HTML
     address = Column(String(500))
     address_detail = Column(String(255))
-    latitude = Column(Float, nullable=False)
-    longitude = Column(Float, nullable=False)
+    latitude = Column(Double, nullable=False)
+    longitude = Column(Double, nullable=False)
     phone = Column(String(50))
     website = Column(String(500))
     sns_links = Column(JSON)  # {"instagram": "...", "kakao": "..."}
@@ -157,8 +157,8 @@ class Event(Base):
     location_name = Column(String(255), nullable=False)
     address = Column(String(500))
     address_detail = Column(String(255))
-    latitude = Column(Float, nullable=False)
-    longitude = Column(Float, nullable=False)
+    latitude = Column(Double, nullable=False)
+    longitude = Column(Double, nullable=False)
     event_date = Column(Date, nullable=False)
     event_end_date = Column(Date, nullable=True)
     start_time = Column(Time, nullable=True)
