@@ -276,6 +276,7 @@ function formatFilterDate(dateStr) {
 function applyDateFilter() {
   emit('dateFilterChange', { date_from: dateFrom.value, date_to: dateTo.value })
   showFilter.value = false
+  refreshSearch()
 }
 
 function resetDateFilter() {
@@ -284,6 +285,22 @@ function resetDateFilter() {
   selectedDays.value = []
   emit('dateFilterChange', { date_from: today, date_to: weekLater })
   showFilter.value = false
+  refreshSearch()
+}
+
+function refreshSearch() {
+  const q = searchQuery.value.trim()
+  if (!q) return
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(async () => {
+    const params = new URLSearchParams({ q })
+    if (dateFrom.value) params.set('date_from', dateFrom.value)
+    if (dateTo.value) params.set('date_to', dateTo.value)
+    const res = await apiFetch(`/api/search?${params}`)
+    if (res.ok) {
+      searchResults.value = await res.json()
+    }
+  }, 100)
 }
 
 // 검색 관련
@@ -304,7 +321,10 @@ watch(searchQuery, (val) => {
   isExpanded.value = true
 
   searchTimer = setTimeout(async () => {
-    const res = await apiFetch(`/api/search?q=${encodeURIComponent(q)}`)
+    const params = new URLSearchParams({ q })
+    if (dateFrom.value) params.set('date_from', dateFrom.value)
+    if (dateTo.value) params.set('date_to', dateTo.value)
+    const res = await apiFetch(`/api/search?${params}`)
     if (res.ok) {
       searchResults.value = await res.json()
     }
