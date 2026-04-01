@@ -301,10 +301,10 @@ function renderEventMarkers(evts) {
     const infoKey = `event_${ev.id}`
     infoItemStore[infoKey] = { type: 'event', data: ev }
     const infoContent = `
-      <div onclick="window.__windycity_infoClick('${infoKey}')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;white-space:nowrap;cursor:pointer">
-        <img src="${thumb || defaultThumbImg}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;background:#EDE5DB;" />
-        <div>
-          <strong>${ev.title}</strong><br/>
+      <div onclick="window.__windycity_infoClick('${infoKey}')" style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;font-size:13px;max-width:250px;cursor:pointer">
+        <img src="${thumb || defaultThumbImg}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;background:#EDE5DB;flex-shrink:0" />
+        <div style="min-width:0">
+          <strong style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.title}</strong>
           <span style="color:#888;font-size:11px">${formatDate(ev.event_date)}</span>
           ${genres ? `<br/><span style="font-size:10px;color:#5BA89E">${genres}</span>` : ''}
         </div>
@@ -428,12 +428,12 @@ function renderVenueMarkers(vns) {
     const infoKey = `venue_${v.id}`
     infoItemStore[infoKey] = { type: 'venue', data: v }
     const infoContent = `
-      <div onclick="window.__windycity_infoClick('${infoKey}')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;white-space:nowrap;cursor:pointer">
-        <img src="${thumb || defaultThumbImg}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;background:#EDE5DB;" />
-        <div>
+      <div onclick="window.__windycity_infoClick('${infoKey}')" style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;font-size:13px;max-width:250px;cursor:pointer">
+        <img src="${thumb || defaultThumbImg}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;background:#EDE5DB;flex-shrink:0" />
+        <div style="min-width:0">
           <span style="color:${color};font-size:11px;font-weight:600">${typeLabel}</span><br/>
-          <strong>${v.name}</strong>
-          ${vGenres ? `<br/><span style="font-size:10px;color:#5BA89E">${vGenres}</span>` : ''}
+          <strong style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.name}</strong>
+          ${vGenres ? `<span style="font-size:10px;color:#5BA89E">${vGenres}</span>` : ''}
         </div>
       </div>`
     const infowindow = new window.kakao.maps.InfoWindow({ content: infoContent })
