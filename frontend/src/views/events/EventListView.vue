@@ -250,7 +250,7 @@ function goDetail(id) {
 .filter-days-tag { font-size: 0.7rem; background: #D4725C22; color: #D4725C; padding: 1px 6px; border-radius: 3px; }
 .date-toggle { font-size: 0.6rem; color: #8B7B6B; margin-left: auto; }
 .date-filter-inputs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
-.date-filter-inputs input[type="date"] { background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 3px; padding: 4px 6px; font-size: 0.7rem; flex: 1; min-width: 0; max-width: 140px; }
+.date-filter-inputs input[type="date"] { background: #FFFFFF; color: #3D3029; border: 1px solid #E0D5C8; border-radius: 3px; padding: 4px 6px; font-size: 0.7rem; flex: 1; min-width: 0; max-width: 140px; margin-bottom: 0 !important; }
 .date-filter-inputs .btn-ghost { padding: 4px 6px; font-size: 0.7rem; }
 .day-filter { display: flex; gap: 4px; }
 .day-chip { flex: 1; padding: 4px 0; border-radius: 4px; font-size: 0.75rem; text-align: center; cursor: pointer; border: 1px solid #E0D5C8; background: transparent; color: #8B7B6B; transition: all 0.15s; }

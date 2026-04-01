@@ -10,6 +10,8 @@ router = APIRouter(prefix="/api", tags=["search"])
 @router.get("/search")
 def search(
     q: str = Query(..., min_length=1),
+    date_from: str = Query(None),
+    date_to: str = Query(None),
     limit: int = Query(20, ge=1, le=50),
     db: Session = Depends(get_db),
 ):
@@ -18,17 +20,38 @@ def search(
 
     keyword = f"%{q}%"
 
-    now = datetime.now()
-    today = date.today()
+    # 기간 필터: 파라미터가 있으면 해당 범위, 없으면 오늘 기준
+    try:
+        filter_from = date.fromisoformat(date_from) if date_from else date.today()
+    except ValueError:
+        filter_from = date.today()
+    try:
+        filter_to = date.fromisoformat(date_to) if date_to else None
+    except ValueError:
+        filter_to = None
 
-    # 이벤트 검색: title, description, instructor_name, location_name
+    # 이벤트 검색: 기간 필터 적용
     # 반복 이벤트는 항상 포함 (진행중인 정기 이벤트)
+    date_conditions = [models.Event.is_recurring == True]
+    if filter_to:
+        # event_date <= filter_to AND (event_end_date >= filter_from OR event_date >= filter_from)
+        date_conditions.append(
+            (models.Event.event_date <= filter_to) &
+            or_(
+                models.Event.event_end_date >= filter_from,
+                (models.Event.event_end_date == None) & (models.Event.event_date >= filter_from),
+            )
+        )
+    else:
+        date_conditions.append(
+            or_(
+                models.Event.event_end_date >= filter_from,
+                (models.Event.event_end_date == None) & (models.Event.event_date >= filter_from),
+            )
+        )
+
     events = db.query(models.Event).filter(
-        or_(
-            models.Event.is_recurring == True,
-            models.Event.event_end_date >= today,
-            (models.Event.event_end_date == None) & (models.Event.event_date >= today),
-        ),
+        or_(*date_conditions),
         (models.Event.title.like(keyword)) |
         (models.Event.description.like(keyword)) |
         (models.Event.instructor_name.like(keyword)) |
