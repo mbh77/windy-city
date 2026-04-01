@@ -200,9 +200,10 @@ onMounted(async () => {
   await Promise.all(Object.values(markerImagePromises))
 
   const container = document.getElementById('map')
+  const saved = JSON.parse(localStorage.getItem('mapPosition') || 'null')
   map = new window.kakao.maps.Map(container, {
-    center: new window.kakao.maps.LatLng(37.4979, 127.0276),
-    level: 7,
+    center: new window.kakao.maps.LatLng(saved?.lat || 37.4979, saved?.lng || 127.0276),
+    level: saved?.level || 7,
   })
 
   // 지도 영역 변경 시 bounds 전달
@@ -217,7 +218,13 @@ onMounted(async () => {
       centerLat: center.getLat(), centerLng: center.getLng(),
     })
   }
-  window.kakao.maps.event.addListener(map, 'idle', emitBounds)
+  window.kakao.maps.event.addListener(map, 'idle', () => {
+    emitBounds()
+    const center = map.getCenter()
+    localStorage.setItem('mapPosition', JSON.stringify({
+      lat: center.getLat(), lng: center.getLng(), level: map.getLevel()
+    }))
+  })
   // 초기 bounds 전달 (타일 로드 후)
   window.kakao.maps.event.addListener(map, 'tilesloaded', function onTiles() {
     emitBounds()
