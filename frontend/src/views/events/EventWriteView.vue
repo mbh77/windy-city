@@ -370,17 +370,13 @@ function selectPlace(place) {
 
   // 주소 기반 좌표 보정 (Geocoder가 keywordSearch보다 정확)
   const geocoder = new window.kakao.maps.services.Geocoder()
-  console.log('[selectPlace] 키워드 좌표:', place.y, place.x, '주소:', form.address)
   geocoder.addressSearch(form.address, (result, status) => {
-    console.log('[selectPlace] Geocoder 상태:', status, '결과:', result)
     if (status === window.kakao.maps.services.Status.OK && result.length > 0) {
-      console.log('[selectPlace] Geocoder 좌표:', result[0].y, result[0].x)
       form.latitude = parseFloat(result[0].y).toFixed(6)
       form.longitude = parseFloat(result[0].x).toFixed(6)
       moveMinimap(result[0].y, result[0].x)
     } else {
       // Geocoder 실패 시 키워드 검색 좌표 사용
-      console.log('[selectPlace] Geocoder 실패, 키워드 좌표 사용')
       form.latitude = parseFloat(place.y).toFixed(6)
       form.longitude = parseFloat(place.x).toFixed(6)
       moveMinimap(place.y, place.x)
