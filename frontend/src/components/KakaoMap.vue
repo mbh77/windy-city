@@ -105,9 +105,11 @@ function getMarkerImage(colorOrType, size = 'small') {
 // 말풍선 클릭 → 상세 보기 (글로벌 함수)
 const infoItemStore = {}
 function closeAllInfowindows() {
-  eventInfowindows.forEach(iw => iw.close())
-  venueInfowindows.forEach(iw => iw.close())
+  const evts = [...eventInfowindows]
+  const vens = [...venueInfowindows]
   activeInfowindow = null
+  evts.forEach(iw => iw.close())
+  vens.forEach(iw => iw.close())
 }
 window.__windycity_closeInfowindows = closeAllInfowindows
 
@@ -277,6 +279,7 @@ let eventBadgeOverlays = []
 function renderEventMarkers(evts) {
   eventMarkers.forEach(m => m.setMap(null))
   eventBadgeOverlays.forEach(o => o.setMap(null))
+  eventInfowindows.forEach(iw => iw.close())
   eventMarkers = []
   eventInfowindows = []
   eventBadgeOverlays = []
@@ -410,6 +413,7 @@ function renderEventMarkers(evts) {
 
 function renderVenueMarkers(vns) {
   venueMarkers.forEach(m => m.setMap(null))
+  venueInfowindows.forEach(iw => iw.close())
   venueMarkers = []
   venueInfowindows = []
 
