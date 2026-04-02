@@ -218,7 +218,7 @@ import markerEventImg from '@/assets/maker_event.png'
 
 const venueDefaultImg = { club: markerClubImg, academy: markerSchoolImg, practice_room: markerPracticeImg }
 
-const emit = defineEmits(['addEvent', 'selectEvent', 'addVenue', 'selectVenue', 'dateFilterChange', 'genreFilterChange'])
+const emit = defineEmits(['addEvent', 'selectEvent', 'addVenue', 'selectVenue', 'dateFilterChange', 'genreFilterChange', 'dayFilterChange'])
 const props = defineProps({
   mapBounds: { type: Object, default: null },
   visibleCategories: {
@@ -375,6 +375,10 @@ function toggleDay(day) {
     selectedDays.value.push(day)
   }
 }
+
+watch(selectedDays, (val) => {
+  emit('dayFilterChange', [...val])
+}, { deep: true })
 
 function matchesDay(ev) {
   if (selectedDays.value.length === 0) return true

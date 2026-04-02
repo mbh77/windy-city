@@ -26,6 +26,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  selectedDays: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const { events } = useEvents()
@@ -319,11 +323,23 @@ function matchesGenreFilter(genres) {
   return props.selectedGenres.some(g => genres.includes(g))
 }
 
+// 요일 필터 매칭 (이벤트만 해당)
+const WEEKDAY_TO_DAY = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+function matchesDayFilter(ev) {
+  if (props.selectedDays.length === 0) return true
+  if (ev.is_recurring && ev.recurrence_rule?.days) {
+    return ev.recurrence_rule.days.some(d => props.selectedDays.includes(d))
+  }
+  const weekday = new Date(ev.event_date).getDay()
+  const dayKey = WEEKDAY_TO_DAY[weekday === 0 ? 6 : weekday - 1]
+  return props.selectedDays.includes(dayKey)
+}
+
 // 카테고리+장르 표시/숨김
 function updateMarkerVisibility() {
   const cats = props.visibleCategories
   eventMarkers.forEach(m => {
-    const visible = cats.event && matchesGenreFilter(m._genres)
+    const visible = cats.event && matchesGenreFilter(m._genres) && matchesDayFilter(m._event)
     m.setMap(visible ? map : null)
   })
   venueMarkers.forEach(m => {
@@ -335,6 +351,7 @@ function updateMarkerVisibility() {
 
 watch(() => props.visibleCategories, () => updateMarkerVisibility(), { deep: true })
 watch(() => props.selectedGenres, () => updateMarkerVisibility(), { deep: true })
+watch(() => props.selectedDays, () => updateMarkerVisibility(), { deep: true })
 
 let eventInfowindows = []
 let venueInfowindows = []
@@ -450,7 +467,8 @@ function renderEventMarkers(evts) {
     }
 
     marker._genres = ev.dance_genres || []
-    if (props.visibleCategories.event && matchesGenreFilter(marker._genres)) marker.setMap(map)
+    marker._event = ev
+    if (props.visibleCategories.event && matchesGenreFilter(marker._genres) && matchesDayFilter(ev)) marker.setMap(map)
     eventMarkers.push(marker)
   })
 
@@ -587,10 +605,10 @@ function renderBadges() {
   eventBadgeOverlays = []
   venueBadgeOverlays = []
 
-  // 좌표별 이벤트/장소 그룹핑 (장르 필터 적용)
+  // 좌표별 이벤트/장소 그룹핑 (장르+요일 필터 적용)
   const eventCoords = {}
   events.value.forEach(ev => {
-    if (!matchesGenreFilter(ev.dance_genres || [])) return
+    if (!matchesGenreFilter(ev.dance_genres || []) || !matchesDayFilter(ev)) return
     const key = `${ev.latitude.toFixed(6)}_${ev.longitude.toFixed(6)}`
     if (!eventCoords[key]) eventCoords[key] = []
     eventCoords[key].push(ev)
