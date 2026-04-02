@@ -218,7 +218,7 @@ import markerEventImg from '@/assets/maker_event.png'
 
 const venueDefaultImg = { club: markerClubImg, academy: markerSchoolImg, practice_room: markerPracticeImg }
 
-const emit = defineEmits(['addEvent', 'selectEvent', 'addVenue', 'selectVenue', 'dateFilterChange'])
+const emit = defineEmits(['addEvent', 'selectEvent', 'addVenue', 'selectVenue', 'dateFilterChange', 'genreFilterChange'])
 const props = defineProps({
   mapBounds: { type: Object, default: null },
   visibleCategories: {
@@ -261,6 +261,10 @@ function matchesGenre(item) {
   const genres = item.dance_genres || []
   return selectedGenres.value.some(g => genres.includes(g))
 }
+
+watch(selectedGenres, (val) => {
+  emit('genreFilterChange', [...val])
+}, { deep: true })
 
 watch(dateFrom, (val) => {
   if (dateTo.value < val) {

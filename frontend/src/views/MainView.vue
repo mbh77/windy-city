@@ -5,6 +5,7 @@
       <KakaoMap
         ref="mapRef"
         :visibleCategories="visibleCategories"
+        :selectedGenres="selectedGenres"
         @markerClick="openEventDetail"
         @venueMarkerClick="openVenueDetail"
         @boundsChanged="mapBounds = $event"
@@ -26,6 +27,7 @@
       @selectEvent="openEventDetail"
       @selectVenue="openVenueDetail"
       @dateFilterChange="handleDateFilter"
+      @genreFilterChange="handleGenreFilter"
       @click="closeMapInfowindows"
     />
   </main>
@@ -229,6 +231,12 @@ async function closeVenueDetail() {
 function handleDateFilter({ date_from, date_to }) {
   currentFilters.value = { date_from, date_to }
   loadEvents(currentFilters.value)
+}
+
+// ── 장르 필터 ──
+const selectedGenres = ref([])
+function handleGenreFilter(genres) {
+  selectedGenres.value = genres
 }
 
 function closeMapInfowindows() {

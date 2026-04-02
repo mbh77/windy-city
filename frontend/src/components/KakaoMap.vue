@@ -22,6 +22,10 @@ const props = defineProps({
     type: Object,
     default: () => ({ club: true, academy: true, practice_room: true, event: true }),
   },
+  selectedGenres: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const { events } = useEvents()
@@ -309,16 +313,28 @@ watch(venues, (vns) => {
   if (map) renderVenueMarkers(vns)
 }, { immediate: true })
 
-// 카테고리 표시/숨김
-watch(() => props.visibleCategories, (cats) => {
-  eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
-  eventBadgeOverlays.forEach(o => o.setMap(cats.event ? map : null))
-  venueMarkers.forEach(m => m.setMap(cats[m._venueType] ? map : null))
-  venueBadgeOverlays.forEach(o => {
-    const anyVisible = o._venueTypes.some(t => cats[t])
-    o.setMap(anyVisible ? map : null)
+// 장르 필터 매칭
+function matchesGenreFilter(genres) {
+  if (props.selectedGenres.length === 0) return true
+  return props.selectedGenres.some(g => genres.includes(g))
+}
+
+// 카테고리+장르 표시/숨김
+function updateMarkerVisibility() {
+  const cats = props.visibleCategories
+  eventMarkers.forEach(m => {
+    const visible = cats.event && matchesGenreFilter(m._genres)
+    m.setMap(visible ? map : null)
   })
-}, { deep: true })
+  venueMarkers.forEach(m => {
+    const visible = cats[m._venueType] && matchesGenreFilter(m._genres)
+    m.setMap(visible ? map : null)
+  })
+  renderBadges()
+}
+
+watch(() => props.visibleCategories, () => updateMarkerVisibility(), { deep: true })
+watch(() => props.selectedGenres, () => updateMarkerVisibility(), { deep: true })
 
 let eventInfowindows = []
 let venueInfowindows = []
@@ -433,7 +449,8 @@ function renderEventMarkers(evts) {
       selectedMarkerColor = eventColor
     }
 
-    if (props.visibleCategories.event) marker.setMap(map)
+    marker._genres = ev.dance_genres || []
+    if (props.visibleCategories.event && matchesGenreFilter(marker._genres)) marker.setMap(map)
     eventMarkers.push(marker)
   })
 
@@ -554,7 +571,8 @@ function renderVenueMarkers(vns) {
       selectedMarkerColor = color
     }
 
-    if (props.visibleCategories[v.venue_type]) marker.setMap(map)
+    marker._genres = v.dance_genres || []
+    if (props.visibleCategories[v.venue_type] && matchesGenreFilter(marker._genres)) marker.setMap(map)
     venueMarkers.push(marker)
   })
 
@@ -569,15 +587,17 @@ function renderBadges() {
   eventBadgeOverlays = []
   venueBadgeOverlays = []
 
-  // 좌표별 이벤트/장소 그룹핑
+  // 좌표별 이벤트/장소 그룹핑 (장르 필터 적용)
   const eventCoords = {}
   events.value.forEach(ev => {
+    if (!matchesGenreFilter(ev.dance_genres || [])) return
     const key = `${ev.latitude.toFixed(6)}_${ev.longitude.toFixed(6)}`
     if (!eventCoords[key]) eventCoords[key] = []
     eventCoords[key].push(ev)
   })
   const venueCoords = {}
   venues.value.forEach(v => {
+    if (!matchesGenreFilter(v.dance_genres || [])) return
     const key = `${v.latitude.toFixed(6)}_${v.longitude.toFixed(6)}`
     if (!venueCoords[key]) venueCoords[key] = []
     venueCoords[key].push(v)
@@ -636,14 +656,7 @@ watch(() => props.isPicking, (picking) => {
     venueMarkers.forEach(m => m.setMap(null))
     venueBadgeOverlays.forEach(o => o.setMap(null))
   } else {
-    const cats = props.visibleCategories
-    eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
-    eventBadgeOverlays.forEach(o => o.setMap(cats.event ? map : null))
-    venueMarkers.forEach(m => m.setMap(cats[m._venueType] ? map : null))
-    venueBadgeOverlays.forEach(o => {
-      const anyVisible = o._venueTypes.some(t => cats[t])
-      o.setMap(anyVisible ? map : null)
-    })
+    updateMarkerVisibility()
     if (tempMarker) { tempMarker.setMap(null); tempMarker = null }
   }
 })
