@@ -17,7 +17,12 @@
           </span>
         </div>
 
-        <h2 style="margin-top:8px">{{ event.title }}</h2>
+        <div class="title-row">
+          <h2 style="margin-top:8px">{{ event.title }}</h2>
+          <button class="copy-link-btn" @click="copyLink" :title="copied ? '복사됨!' : '링크 복사'">
+            {{ copied ? '✔' : '🔗' }}
+          </button>
+        </div>
 
         <!-- 이미지 갤러리 -->
         <ImageGallery :images="event.media || []" />
@@ -64,7 +69,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '../utils/constants.js'
 import { formatTime } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
@@ -93,6 +98,15 @@ const emit = defineEmits(['close'])
 
 const { currentUser } = useAuth()
 const { deleteEvent } = useEvents()
+const copied = ref(false)
+
+function copyLink() {
+  const url = `${window.location.origin}/events/${props.event.id}`
+  navigator.clipboard.writeText(url).then(() => {
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  })
+}
 
 const isOwner = computed(() => {
   return currentUser.value && props.event && (currentUser.value.id === props.event.organizer_id || currentUser.value.is_admin)
