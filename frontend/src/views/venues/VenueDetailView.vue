@@ -19,7 +19,12 @@
       </div>
 
       <!-- 이름 -->
-      <h2 class="post-title">{{ venue.name }}</h2>
+      <div class="title-row">
+        <h2 class="post-title">{{ venue.name }}</h2>
+        <button class="copy-link-btn" @click="copyLink" :title="copied ? '복사됨!' : '링크 복사'">
+          {{ copied ? '✔' : '🔗' }}
+        </button>
+      </div>
       <div class="post-meta">
         <span>{{ venue.owner_nickname || '-' }}</span>
         <span>조회 {{ venue.view_count || 0 }}</span>
@@ -126,6 +131,15 @@ const { currentUser } = useAuth()
 
 const venue = ref(null)
 const loading = ref(true)
+const copied = ref(false)
+
+function copyLink() {
+  const url = `${window.location.origin}${route.path}`
+  navigator.clipboard.writeText(url).then(() => {
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  })
+}
 
 const isOwner = computed(() => {
   return currentUser.value && venue.value &&

@@ -14,7 +14,12 @@
           </span>
         </div>
 
-        <h2 style="margin-top:8px">{{ venue.name }}</h2>
+        <div class="title-row">
+          <h2 style="margin-top:8px">{{ venue.name }}</h2>
+          <button class="copy-link-btn" @click="copyLink" :title="copied ? '복사됨!' : '링크 복사'">
+            {{ copied ? '✔' : '🔗' }}
+          </button>
+        </div>
 
         <!-- 이미지 갤러리 -->
         <ImageGallery :images="venue.media || []" />
@@ -78,7 +83,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { VENUE_TYPE_LABELS, GENRE_LABELS } from '../utils/constants.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useVenues } from '../composables/useVenues.js'
@@ -93,6 +98,15 @@ const emit = defineEmits(['close'])
 
 const { currentUser } = useAuth()
 const { deleteVenue } = useVenues()
+const copied = ref(false)
+
+function copyLink() {
+  const url = `${window.location.origin}/venues/${props.venue.id}`
+  navigator.clipboard.writeText(url).then(() => {
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  })
+}
 
 const isOwner = computed(() => {
   return currentUser.value && props.venue && (currentUser.value.id === props.venue.owner_id || currentUser.value.is_admin)

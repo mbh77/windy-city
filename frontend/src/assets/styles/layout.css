@@ -11,7 +11,11 @@
 
 /* ── 상세 페이지 공통 ── */
 .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.title-row .post-title { margin-bottom: 0; }
 .post-title { font-size: 1.2rem; margin-bottom: 8px; }
+.copy-link-btn { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 2px 4px; opacity: 0.5; transition: opacity 0.2s; flex-shrink: 0; }
+.copy-link-btn:hover { opacity: 1; }
 .post-meta { font-size: 0.8rem; color: #8B7B6B; display: flex; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #EDE5DB; }
 .post-body { font-size: 0.9rem; line-height: 1.6; min-height: 100px; margin-bottom: 16px; }
 .post-actions { display: flex; gap: 8px; margin-top: 20px; }
