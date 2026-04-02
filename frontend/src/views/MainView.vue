@@ -6,6 +6,7 @@
         ref="mapRef"
         :visibleCategories="visibleCategories"
         :selectedGenres="selectedGenres"
+        :selectedDays="selectedDays"
         @markerClick="openEventDetail"
         @venueMarkerClick="openVenueDetail"
         @boundsChanged="mapBounds = $event"
@@ -28,6 +29,7 @@
       @selectVenue="openVenueDetail"
       @dateFilterChange="handleDateFilter"
       @genreFilterChange="handleGenreFilter"
+      @dayFilterChange="handleDayFilter"
       @click="closeMapInfowindows"
     />
   </main>
@@ -237,6 +239,11 @@ function handleDateFilter({ date_from, date_to }) {
 const selectedGenres = ref([])
 function handleGenreFilter(genres) {
   selectedGenres.value = genres
+}
+
+const selectedDays = ref([])
+function handleDayFilter(days) {
+  selectedDays.value = days
 }
 
 function closeMapInfowindows() {
