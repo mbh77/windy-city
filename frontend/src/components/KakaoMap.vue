@@ -156,6 +156,43 @@ window.__windycity_badgeClick = (key) => {
   eventInfowindows.push(groupInfowindow)
 }
 
+window.__windycity_venueBadgeClick = (key) => {
+  const item = infoItemStore[key]
+  if (!item || item.type !== 'venue_badge') return
+  closeAllInfowindows()
+  const { group, lat, lng } = item
+  const listItems = group.map(v => {
+    const listKey = `venue_${v.id}`
+    infoItemStore[listKey] = { type: 'venue', data: v }
+    const listThumb = v.media?.[0]?.url
+    const typeLabel = VENUE_TYPE_LABELS[v.venue_type] || ''
+    const typeColor = venueColors[v.venue_type] || '#999'
+    return `<div onclick="window.__windycity_infoClick('${listKey}')" style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;border-bottom:1px solid #EDE5DB;">
+      <img src="${listThumb || defaultThumbImg}" style="width:36px;height:36px;border-radius:4px;object-fit:cover;background:#EDE5DB;" />
+      <div style="min-width:0;flex:1;overflow:hidden;">
+        <span style="color:${typeColor};font-size:10px;font-weight:600">${typeLabel}</span>
+        <strong style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.name}</strong>
+      </div>
+    </div>`
+  }).join('')
+  const groupContent = `
+    <div style="padding:8px 10px;font-size:13px;width:180px;overflow:hidden;">
+    <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#FF8C00;">📍 이 위치 장소 ${group.length}건</div>
+    <div style="max-height:160px;overflow-y:auto;">
+      ${listItems}
+    </div>
+    <div style="height:1px;"></div>
+  </div>`
+  const anchorMarker = venueMarkers.find(m => {
+    const mp = m.getPosition()
+    return mp.getLat().toFixed(6) === lat.toFixed(6) && mp.getLng().toFixed(6) === lng.toFixed(6)
+  })
+  const groupInfowindow = new window.kakao.maps.InfoWindow({ content: groupContent })
+  groupInfowindow.open(map, anchorMarker || map)
+  activeInfowindow = groupInfowindow
+  venueInfowindows.push(groupInfowindow)
+}
+
 // 선택된 마커 추적
 let selectedMarker = null
 let selectedMarkerColor = null
@@ -277,11 +314,16 @@ watch(() => props.visibleCategories, (cats) => {
   eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
   eventBadgeOverlays.forEach(o => o.setMap(cats.event ? map : null))
   venueMarkers.forEach(m => m.setMap(cats[m._venueType] ? map : null))
+  venueBadgeOverlays.forEach(o => {
+    const anyVisible = o._venueTypes.some(t => cats[t])
+    o.setMap(anyVisible ? map : null)
+  })
 }, { deep: true })
 
 let eventInfowindows = []
 let venueInfowindows = []
 let eventBadgeOverlays = []
+let venueBadgeOverlays = []
 
 function renderEventMarkers(evts) {
   eventMarkers.forEach(m => m.setMap(null))
@@ -395,34 +437,25 @@ function renderEventMarkers(evts) {
     eventMarkers.push(marker)
   })
 
-  // 동일 좌표 숫자 뱃지 표시
-  const shownBadgeKeys = new Set()
-  evts.forEach(ev => {
-    const key = `${ev.latitude.toFixed(6)}_${ev.longitude.toFixed(6)}`
-    const group = coordMap[key]
-    if (group.length >= 2 && !shownBadgeKeys.has(key)) {
-      shownBadgeKeys.add(key)
-      const pos = new window.kakao.maps.LatLng(ev.latitude, ev.longitude)
-      const badgeKey = `badge_${key}`
-      infoItemStore[badgeKey] = { type: 'badge', group, lat: ev.latitude, lng: ev.longitude }
-      const badge = new window.kakao.maps.CustomOverlay({
-        position: pos,
-        content: `<div onclick="window.__windycity_badgeClick('${badgeKey}')" style="background:#E74C3C;color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;line-height:20px;font-size:11px;font-weight:700;border:2px solid #fff;transform:translate(12px,-12px);cursor:pointer;">${group.length}</div>`,
-        yAnchor: 1,
-        xAnchor: 0,
-        zIndex: 10,
-      })
-      if (props.visibleCategories.event) badge.setMap(map)
-      eventBadgeOverlays.push(badge)
-    }
-  })
+  // 뱃지는 renderBadges()에서 통합 처리
+  renderBadges()
 }
 
 function renderVenueMarkers(vns) {
   venueMarkers.forEach(m => m.setMap(null))
+  venueBadgeOverlays.forEach(o => o.setMap(null))
   venueInfowindows.forEach(iw => iw.close())
   venueMarkers = []
+  venueBadgeOverlays = []
   venueInfowindows = []
+
+  // 좌표별 장소 그룹핑
+  const venueCoordMap = {}
+  vns.forEach(v => {
+    const key = `${v.latitude.toFixed(6)}_${v.longitude.toFixed(6)}`
+    if (!venueCoordMap[key]) venueCoordMap[key] = []
+    venueCoordMap[key].push(v)
+  })
 
   vns.forEach(v => {
     const pos = new window.kakao.maps.LatLng(v.latitude, v.longitude)
@@ -460,22 +493,57 @@ function renderVenueMarkers(vns) {
         infowindow.close()
       }
     })
+    // 동일 좌표 그룹 정보
+    const venueCoordKey = `${v.latitude.toFixed(6)}_${v.longitude.toFixed(6)}`
+    const venueGroup = venueCoordMap[venueCoordKey]
+
     window.kakao.maps.event.addListener(marker, 'click', () => {
       document.activeElement.blur()
       selectMarker(marker, color, v.id, 'venue')
 
-      if ('ontouchstart' in window) {
-        if (activeInfowindow === infowindow) {
-          closeAllInfowindows()
-          emit('venueMarkerClick', v)
+      if (venueGroup.length >= 2) {
+        // 동일 좌표 장소 목록 말풍선
+        closeAllInfowindows()
+        const listItems = venueGroup.map(vv => {
+          const listKey = `venue_${vv.id}`
+          infoItemStore[listKey] = { type: 'venue', data: vv }
+          const listThumb = vv.media?.[0]?.url
+          const tLabel = VENUE_TYPE_LABELS[vv.venue_type] || ''
+          const tColor = venueColors[vv.venue_type] || '#999'
+          return `<div onclick="window.__windycity_infoClick('${listKey}')" style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;border-bottom:1px solid #EDE5DB;">
+            <img src="${listThumb || defaultThumbImg}" style="width:36px;height:36px;border-radius:4px;object-fit:cover;background:#EDE5DB;" />
+            <div style="min-width:0;flex:1;overflow:hidden;">
+              <span style="color:${tColor};font-size:10px;font-weight:600">${tLabel}</span>
+              <strong style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${vv.name}</strong>
+            </div>
+          </div>`
+        }).join('')
+        const groupContent = `
+        <div style="padding:8px 10px;font-size:13px;width:180px;overflow:hidden;">
+          <div style="font-weight:700;margin-bottom:6px;font-size:12px;color:#FF8C00;">📍 이 위치 장소 ${venueGroup.length}건</div>
+          <div style="max-height:160px;overflow-y:auto;">
+            ${listItems}
+          </div>
+          <div style="height:1px;"></div>
+        </div>`
+        const groupInfowindow = new window.kakao.maps.InfoWindow({ content: groupContent })
+        groupInfowindow.open(map, marker)
+        activeInfowindow = groupInfowindow
+        venueInfowindows.push(groupInfowindow)
+      } else {
+        if ('ontouchstart' in window) {
+          if (activeInfowindow === infowindow) {
+            closeAllInfowindows()
+            emit('venueMarkerClick', v)
+          } else {
+            closeAllInfowindows()
+            infowindow.open(map, marker)
+            activeInfowindow = infowindow
+          }
         } else {
           closeAllInfowindows()
-          infowindow.open(map, marker)
-          activeInfowindow = infowindow
+          emit('venueMarkerClick', v)
         }
-      } else {
-        closeAllInfowindows()
-        emit('venueMarkerClick', v)
       }
     })
 
@@ -489,6 +557,75 @@ function renderVenueMarkers(vns) {
     if (props.visibleCategories[v.venue_type]) marker.setMap(map)
     venueMarkers.push(marker)
   })
+
+  // 뱃지는 renderBadges()에서 통합 처리
+  renderBadges()
+}
+
+// 이벤트·장소 좌표 충돌을 고려한 통합 뱃지 렌더링
+function renderBadges() {
+  eventBadgeOverlays.forEach(o => o.setMap(null))
+  venueBadgeOverlays.forEach(o => o.setMap(null))
+  eventBadgeOverlays = []
+  venueBadgeOverlays = []
+
+  // 좌표별 이벤트/장소 그룹핑
+  const eventCoords = {}
+  events.value.forEach(ev => {
+    const key = `${ev.latitude.toFixed(6)}_${ev.longitude.toFixed(6)}`
+    if (!eventCoords[key]) eventCoords[key] = []
+    eventCoords[key].push(ev)
+  })
+  const venueCoords = {}
+  venues.value.forEach(v => {
+    const key = `${v.latitude.toFixed(6)}_${v.longitude.toFixed(6)}`
+    if (!venueCoords[key]) venueCoords[key] = []
+    venueCoords[key].push(v)
+  })
+
+  // 모든 좌표 키 수집
+  const allKeys = new Set([...Object.keys(eventCoords), ...Object.keys(venueCoords)])
+
+  allKeys.forEach(key => {
+    const evGroup = eventCoords[key] || []
+    const vnGroup = venueCoords[key] || []
+    const hasOverlap = evGroup.length > 0 && vnGroup.length > 0
+    const lat = evGroup[0]?.latitude ?? vnGroup[0]?.latitude
+    const lng = evGroup[0]?.longitude ?? vnGroup[0]?.longitude
+    const pos = new window.kakao.maps.LatLng(lat, lng)
+
+    // 이벤트 뱃지: 같은 좌표 이벤트 2개+ OR 장소와 좌표 겹침
+    if (evGroup.length >= 2 || hasOverlap) {
+      const badgeKey = `badge_${key}`
+      infoItemStore[badgeKey] = { type: 'badge', group: evGroup, lat, lng }
+      const badge = new window.kakao.maps.CustomOverlay({
+        position: pos,
+        content: `<div onclick="window.__windycity_badgeClick('${badgeKey}')" style="background:#E74C3C;color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;line-height:20px;font-size:11px;font-weight:700;border:2px solid #fff;transform:translate(12px,-12px);cursor:pointer;">${evGroup.length}</div>`,
+        yAnchor: 1,
+        xAnchor: 0,
+        zIndex: 10,
+      })
+      if (props.visibleCategories.event) badge.setMap(map)
+      eventBadgeOverlays.push(badge)
+    }
+
+    // 장소 뱃지: 같은 좌표 장소 2개+ OR 이벤트와 좌표 겹침
+    if (vnGroup.length >= 2 || hasOverlap) {
+      const badgeKey = `venue_badge_${key}`
+      infoItemStore[badgeKey] = { type: 'venue_badge', group: vnGroup, lat, lng }
+      const badge = new window.kakao.maps.CustomOverlay({
+        position: pos,
+        content: `<div onclick="window.__windycity_venueBadgeClick('${badgeKey}')" style="background:#FF8C00;color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;line-height:20px;font-size:11px;font-weight:700;border:2px solid #fff;transform:translate(-12px,-12px);cursor:pointer;">${vnGroup.length}</div>`,
+        yAnchor: 1,
+        xAnchor: 1,
+        zIndex: 10,
+      })
+      badge._venueTypes = vnGroup.map(vv => vv.venue_type)
+      const anyVisible = vnGroup.some(vv => props.visibleCategories[vv.venue_type])
+      if (anyVisible) badge.setMap(map)
+      venueBadgeOverlays.push(badge)
+    }
+  })
 }
 
 // 위치 선택 모드 전환 시 마커 숨김/복원
@@ -497,11 +634,16 @@ watch(() => props.isPicking, (picking) => {
     eventMarkers.forEach(m => m.setMap(null))
     eventBadgeOverlays.forEach(o => o.setMap(null))
     venueMarkers.forEach(m => m.setMap(null))
+    venueBadgeOverlays.forEach(o => o.setMap(null))
   } else {
     const cats = props.visibleCategories
     eventMarkers.forEach(m => m.setMap(cats.event ? map : null))
     eventBadgeOverlays.forEach(o => o.setMap(cats.event ? map : null))
     venueMarkers.forEach(m => m.setMap(cats[m._venueType] ? map : null))
+    venueBadgeOverlays.forEach(o => {
+      const anyVisible = o._venueTypes.some(t => cats[t])
+      o.setMap(anyVisible ? map : null)
+    })
     if (tempMarker) { tempMarker.setMap(null); tempMarker = null }
   }
 })
