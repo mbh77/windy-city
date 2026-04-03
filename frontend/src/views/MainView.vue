@@ -7,6 +7,7 @@
         :visibleCategories="visibleCategories"
         :selectedGenres="selectedGenres"
         :selectedDays="selectedDays"
+        :selectedEventTypes="selectedEventTypes"
         @markerClick="openEventDetail"
         @venueMarkerClick="openVenueDetail"
         @boundsChanged="mapBounds = $event"
@@ -14,7 +15,9 @@
 
       <CategoryBar
         :visibleCategories="visibleCategories"
+        :selectedEventTypes="selectedEventTypes"
         @toggle="toggleCategory"
+        @toggleEventType="toggleEventType"
       ></CategoryBar>
 
       <div v-if="regionName" class="region-overlay">📍 {{ regionName }}</div>
@@ -244,6 +247,16 @@ function handleGenreFilter(genres) {
 const selectedDays = ref([])
 function handleDayFilter(days) {
   selectedDays.value = days
+}
+
+const selectedEventTypes = ref([])
+function toggleEventType(type) {
+  const idx = selectedEventTypes.value.indexOf(type)
+  if (idx >= 0) {
+    selectedEventTypes.value.splice(idx, 1)
+  } else {
+    selectedEventTypes.value.push(type)
+  }
 }
 
 function closeMapInfowindows() {
