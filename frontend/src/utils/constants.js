@@ -3,17 +3,20 @@ export const DEFAULT_DATE_RANGE_DAYS = 30
 
 // 이벤트 유형 라벨
 export const TYPE_LABELS = {
-  social: '소셜',
-  workshop: '워크샵',
-  festival: '페스티벌',
   regular_class: '강습',
+  social: '정모',
+  festival: '파티',
+  workshop: '워크샵',
+  other: '기타',
   performance: '공연',
   practice: '프랙티스',
-  other: '기타',
 }
 
-// 이벤트 유형 옵션 (select용)
-export const TYPE_OPTIONS = Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }))
+// 이벤트 유형 옵션 (select용 — 공연/프랙티스 제외)
+const HIDDEN_TYPES = ['performance', 'practice']
+export const TYPE_OPTIONS = Object.entries(TYPE_LABELS)
+  .filter(([value]) => !HIDDEN_TYPES.includes(value))
+  .map(([value, label]) => ({ value, label }))
 
 // 춤 종류 라벨
 export const GENRE_LABELS = {
@@ -47,6 +50,8 @@ export const VENUE_TYPE_OPTIONS = Object.entries(VENUE_TYPE_LABELS).map(([value,
 export const DIFFICULTY_LABELS = {
   beginner: '입문',
   elementary: '초급',
+  pre_intermediate: '초중급',
+  upper_intermediate: '준중급',
   intermediate: '중급',
   advanced: '고급',
   all_level: '올레벨',

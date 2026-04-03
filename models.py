@@ -43,6 +43,8 @@ class VenueType(str, enum.Enum):
 class DifficultyLevel(str, enum.Enum):
     beginner = "beginner"
     elementary = "elementary"
+    pre_intermediate = "pre_intermediate"
+    upper_intermediate = "upper_intermediate"
     intermediate = "intermediate"
     advanced = "advanced"
     all_level = "all_level"
