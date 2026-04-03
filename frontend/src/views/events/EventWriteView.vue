@@ -143,9 +143,9 @@
           <input v-model="form.price" type="text" placeholder="가격 (예: 20,000원)" />
           <input v-model="form.early_bird_price" type="text" placeholder="얼리버드 가격 (선택)" />
 
-          <!-- 유형별 추가 필드: 소셜 파티 -->
-          <template v-if="form.event_type === 'social'">
-            <label class="form-label">소셜 파티 정보</label>
+          <!-- 유형별 추가 필드: 정모/파티 -->
+          <template v-if="form.event_type === 'social' || form.event_type === 'festival'">
+            <label class="form-label">정모/파티 정보</label>
             <input v-model="form.dj_name" type="text" placeholder="DJ 이름 (선택)" />
             <input v-model="form.dress_code" type="text" placeholder="드레스코드 (선택)" />
             <div class="inline-checks">
