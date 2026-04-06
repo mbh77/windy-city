@@ -143,6 +143,12 @@ EVENT_TYPE_KO = {
     "social": "소셜파티", "workshop": "워크샵", "festival": "페스티벌",
     "regular_class": "강습", "performance": "공연", "practice": "연습", "other": "기타",
 }
+GENRE_KO = {
+    "salsa": "살사", "bachata": "바차타", "kizomba": "키좀바", "zouk": "주크",
+    "tango": "탱고", "merengue": "메렝게", "lindy_hop": "린디합", "balboa": "발보아",
+    "blues": "블루스", "west_coast_swing": "웨스트코스트스윙", "other": "기타",
+}
+SEO_KEYWORDS = "라틴댄스, 소셜댄스, 커플댄스, 살사, 바차타, 키좀바, 스윙, 린디합, 탱고, 발보아, 블루스"
 
 def _escape(text: str) -> str:
     """HTML 메타태그용 이스케이프"""
@@ -226,8 +232,13 @@ def _get_bot_response(full_path: str):
                 desc += f" | {plain[:150]}"
 
             # 봇용 본문
+            genres = db.query(models.EventDanceGenre).filter(models.EventDanceGenre.event_id == event.id).all()
+            genres_ko = ", ".join(GENRE_KO.get(g.dance_genre.value if hasattr(g.dance_genre, 'value') else g.dance_genre, "") for g in genres)
+
             body = f"<h1>{_escape(event.title)}</h1>"
             body += f"<p>{_escape(type_ko)} · {_escape(date_str)}</p>"
+            if genres_ko:
+                body += f"<p>장르: {_escape(genres_ko)}</p>"
             if event.location_name:
                 body += f"<p>장소: {_escape(event.location_name)}</p>"
             if event.address:
@@ -265,8 +276,13 @@ def _get_bot_response(full_path: str):
                 desc += f" | {plain[:150]}"
 
             # 봇용 본문
+            genres = db.query(models.VenueDanceGenre).filter(models.VenueDanceGenre.venue_id == venue.id).all()
+            genres_ko = ", ".join(GENRE_KO.get(g.dance_genre.value if hasattr(g.dance_genre, 'value') else g.dance_genre, "") for g in genres)
+
             body = f"<h1>{_escape(venue.name)}</h1>"
             body += f"<p>{_escape(type_ko)}</p>"
+            if genres_ko:
+                body += f"<p>장르: {_escape(genres_ko)}</p>"
             if venue.address:
                 body += f"<p>주소: {_escape(venue.address)}</p>"
             if venue.description:
@@ -299,15 +315,29 @@ def _get_bot_response(full_path: str):
         finally:
             db.close()
 
+    # / — 메인 페이지
+    if full_path == "" or full_path == "/":
+        title = "바람난 도시 - 라틴댄스·스윙·탱고 강습·행사·동호회 지도"
+        desc = f"{SEO_KEYWORDS} 강습·행사와 동호회, 댄스바를 지도에서 한눈에 찾아보세요."
+        body = (
+            "<h1>바람난 도시 - 댄스 강습·행사·동호회 지도</h1>"
+            f"<p>{SEO_KEYWORDS} 강습, 행사, 파티 일정과 동호회, 댄스바, 연습실을 지도에서 찾아보세요.</p>"
+            "<p>바람난 도시는 커플댄스 커뮤니티를 위한 지도 기반 탐색 서비스입니다. "
+            "인스타그램, 네이버 카페, 카카오채널에 흩어진 댄스 강습·행사·장소 정보를 하나의 플랫폼에서 확인하세요.</p>"
+            '<p><a href="/events">강습·행사 보기</a> · <a href="/venues">동호회·댄스바·연습실 보기</a> · <a href="/board">게시판</a></p>'
+        )
+        return _build_meta_html(title, desc, full_path, body_content=body)
+
     # /events — 이벤트 목록
     if full_path == "events":
         db = SessionLocal()
         try:
             events = db.query(models.Event).order_by(models.Event.event_date.desc()).limit(50).all()
-            title = "강습·행사 목록 - 바람난 도시"
-            desc = "살사, 바차타, 스윙, 탱고 댄스 강습과 행사를 찾아보세요."
+            title = "라틴댄스·스윙·탱고 강습·행사 - 바람난 도시"
+            desc = f"{SEO_KEYWORDS} 강습, 워크샵, 소셜파티, 페스티벌 일정을 찾아보세요."
 
-            body = "<h1>강습·행사 목록</h1><ul>"
+            body = f"<h1>강습·행사 목록</h1>"
+            body += f"<p>{SEO_KEYWORDS} 강습, 워크샵, 소셜파티, 페스티벌 일정을 한눈에 확인하세요.</p><ul>"
             for e in events:
                 type_ko = EVENT_TYPE_KO.get(e.event_type, "")
                 date_str = e.event_date.strftime("%Y-%m-%d") if e.event_date else ""
@@ -326,10 +356,11 @@ def _get_bot_response(full_path: str):
         db = SessionLocal()
         try:
             venues = db.query(models.Venue).order_by(models.Venue.created_at.desc()).limit(50).all()
-            title = "댄스바·동호회·연습실 목록 - 바람난 도시"
-            desc = "댄스바, 동호회, 연습실을 찾아보세요."
+            title = "라틴댄스·스윙·탱고 동호회·댄스바·연습실 - 바람난 도시"
+            desc = f"{SEO_KEYWORDS} 동호회, 댄스바, 연습실을 찾아보세요."
 
-            body = "<h1>댄스바·동호회·연습실 목록</h1><ul>"
+            body = f"<h1>동호회·댄스바·연습실 목록</h1>"
+            body += f"<p>{SEO_KEYWORDS} 동호회, 댄스바, 연습실 정보를 확인하세요.</p><ul>"
             for v in venues:
                 type_ko = VENUE_TYPE_KO.get(v.venue_type, "")
                 body += f'<li><a href="/venues/{v.id}">{_escape(v.name)}</a> · {_escape(type_ko)}'
