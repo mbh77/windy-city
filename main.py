@@ -163,8 +163,8 @@ def _strip_markup(text: str) -> str:
     text = re.sub(r'\s+', ' ', text).strip()             # 다중 공백 정리
     return text
 
-def _build_meta_html(title: str, description: str, url: str, image: str = "") -> str:
-    """index.html의 <head>에 메타태그를 교체한 HTML 반환"""
+def _build_meta_html(title: str, description: str, url: str, image: str = "", body_content: str = "") -> str:
+    """index.html의 <head>에 메타태그를 교체하고, body_content가 있으면 본문에 삽입"""
     try:
         with open("static/index.html", "r", encoding="utf-8") as f:
             html = f.read()
@@ -184,14 +184,21 @@ def _build_meta_html(title: str, description: str, url: str, image: str = "") ->
     html = re.sub(r'<meta property="og:url"[^>]*>', f'<meta property="og:url" content="{full_url}">', html)
     html = re.sub(r'<meta property="og:image"[^>]*>', f'<meta property="og:image" content="{image}">', html)
 
+    # 봇용 본문 콘텐츠 삽입 (SEO)
+    if body_content:
+        html = html.replace(
+            '<div id="app"></div>',
+            f'<div id="app"></div>\n<div id="bot-content" style="display:none">{body_content}</div>'
+        )
+
     return html
 
 def _get_bot_response(full_path: str):
-    """봇용 메타태그 HTML 생성. 해당 경로가 아니면 None 반환."""
+    """봇용 메타태그 + 본문 HTML 생성. 해당 경로가 아니면 None 반환."""
     from database import SessionLocal
     import models
 
-    # /events/123
+    # /events/123 — 이벤트 상세
     m = re.match(r"events/(\d+)$", full_path)
     if m:
         db = SessionLocal()
@@ -199,7 +206,6 @@ def _get_bot_response(full_path: str):
             event = db.query(models.Event).filter(models.Event.id == int(m.group(1))).first()
             if not event:
                 return None
-            # 대표 이미지
             media = db.query(models.Media).filter(
                 models.Media.entity_type == "event", models.Media.entity_id == event.id
             ).order_by(models.Media.sort_order).first()
@@ -217,15 +223,24 @@ def _get_bot_response(full_path: str):
                 desc_parts.append(event.location_name)
             desc = " · ".join(desc_parts)
             if event.description:
-                # HTML 태그 제거
                 plain = _strip_markup(event.description)
                 desc += f" | {plain[:150]}"
 
-            return _build_meta_html(title, desc, full_path, image)
+            # 봇용 본문
+            body = f"<h1>{_escape(event.title)}</h1>"
+            body += f"<p>{_escape(type_ko)} · {_escape(date_str)}</p>"
+            if event.location_name:
+                body += f"<p>장소: {_escape(event.location_name)}</p>"
+            if event.address:
+                body += f"<p>주소: {_escape(event.address)}</p>"
+            if event.description:
+                body += f"<p>{_escape(_strip_markup(event.description)[:500])}</p>"
+
+            return _build_meta_html(title, desc, full_path, image, body)
         finally:
             db.close()
 
-    # /venues/123
+    # /venues/123 — 장소 상세
     m = re.match(r"venues/(\d+)$", full_path)
     if m:
         db = SessionLocal()
@@ -250,11 +265,19 @@ def _get_bot_response(full_path: str):
                 plain = _strip_markup(venue.description)
                 desc += f" | {plain[:150]}"
 
-            return _build_meta_html(title, desc, full_path, image)
+            # 봇용 본문
+            body = f"<h1>{_escape(venue.name)}</h1>"
+            body += f"<p>{_escape(type_ko)}</p>"
+            if venue.address:
+                body += f"<p>주소: {_escape(venue.address)}</p>"
+            if venue.description:
+                body += f"<p>{_escape(_strip_markup(venue.description)[:500])}</p>"
+
+            return _build_meta_html(title, desc, full_path, image, body)
         finally:
             db.close()
 
-    # /board/123
+    # /board/123 — 게시글 상세
     m = re.match(r"board/(\d+)$", full_path)
     if m:
         db = SessionLocal()
@@ -267,7 +290,74 @@ def _get_bot_response(full_path: str):
             if post.content:
                 plain = _strip_markup(post.content)
                 desc = plain[:200]
-            return _build_meta_html(title, desc, full_path)
+
+            # 봇용 본문
+            body = f"<h1>{_escape(post.title)}</h1>"
+            if post.content:
+                body += f"<p>{_escape(_strip_markup(post.content)[:1000])}</p>"
+
+            return _build_meta_html(title, desc, full_path, body_content=body)
+        finally:
+            db.close()
+
+    # /events — 이벤트 목록
+    if full_path == "events":
+        db = SessionLocal()
+        try:
+            events = db.query(models.Event).order_by(models.Event.event_date.desc()).limit(50).all()
+            title = "강습·행사 목록 - 바람난 도시"
+            desc = "살사, 바차타, 스윙, 탱고 댄스 강습과 행사를 찾아보세요."
+
+            body = "<h1>강습·행사 목록</h1><ul>"
+            for e in events:
+                type_ko = EVENT_TYPE_KO.get(e.event_type, "")
+                date_str = e.event_date.strftime("%Y-%m-%d") if e.event_date else ""
+                body += f'<li><a href="/events/{e.id}">{_escape(e.title)}</a> · {_escape(type_ko)} · {_escape(date_str)}'
+                if e.location_name:
+                    body += f" · {_escape(e.location_name)}"
+                body += "</li>"
+            body += "</ul>"
+
+            return _build_meta_html(title, desc, full_path, body_content=body)
+        finally:
+            db.close()
+
+    # /venues — 장소 목록
+    if full_path == "venues":
+        db = SessionLocal()
+        try:
+            venues = db.query(models.Venue).order_by(models.Venue.created_at.desc()).limit(50).all()
+            title = "댄스바·동호회·연습실 목록 - 바람난 도시"
+            desc = "댄스바, 동호회, 연습실을 찾아보세요."
+
+            body = "<h1>댄스바·동호회·연습실 목록</h1><ul>"
+            for v in venues:
+                type_ko = VENUE_TYPE_KO.get(v.venue_type, "")
+                body += f'<li><a href="/venues/{v.id}">{_escape(v.name)}</a> · {_escape(type_ko)}'
+                if v.address:
+                    body += f" · {_escape(v.address)}"
+                body += "</li>"
+            body += "</ul>"
+
+            return _build_meta_html(title, desc, full_path, body_content=body)
+        finally:
+            db.close()
+
+    # /board — 게시판 목록
+    if full_path == "board":
+        db = SessionLocal()
+        try:
+            posts = db.query(models.Post).order_by(models.Post.created_at.desc()).limit(50).all()
+            title = "게시판 - 바람난 도시"
+            desc = "바람난 도시 커뮤니티 게시판입니다."
+
+            body = "<h1>게시판</h1><ul>"
+            for p in posts:
+                date_str = p.created_at.strftime("%Y-%m-%d") if p.created_at else ""
+                body += f'<li><a href="/board/{p.id}">{_escape(p.title)}</a> · {_escape(date_str)}</li>'
+            body += "</ul>"
+
+            return _build_meta_html(title, desc, full_path, body_content=body)
         finally:
             db.close()
 
