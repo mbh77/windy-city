@@ -39,7 +39,6 @@ app.include_router(health.router)
 async def robots_txt():
     content = """User-agent: *
 Allow: /
-Disallow: /api/
 Disallow: /admin
 
 Sitemap: https://windycity.co.kr/sitemap.xml
