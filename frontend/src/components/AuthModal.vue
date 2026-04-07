@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" class="modal modal-sm" @click.self="handleClose">
+  <div v-if="visible" class="modal modal-sm" @mousedown.self="onOverlayMouseDown" @click.self="onOverlayClick">
     <div class="modal-content">
       <button class="modal-close" @click="handleClose">✕</button>
 
@@ -102,6 +102,19 @@ watch(() => props.visible, (v) => {
     verifyError.value = ''
   }
 })
+
+let mouseDownOnOverlay = false
+
+function onOverlayMouseDown() {
+  mouseDownOnOverlay = true
+}
+
+function onOverlayClick() {
+  if (mouseDownOnOverlay) {
+    handleClose()
+  }
+  mouseDownOnOverlay = false
+}
 
 function handleClose() {
   emit('close')
