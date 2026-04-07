@@ -51,12 +51,6 @@
     @close="closeVenueDetail"
   />
 
-  <!-- 온보딩 (첫 방문 시) -->
-  <OnboardingOverlay
-    @goEvents="handleOnboardingEvents"
-    @goVenues="handleOnboardingVenues"
-    @close="() => {}"
-  />
 </template>
 
 <script setup>
@@ -73,7 +67,6 @@ import KakaoMap from '../components/KakaoMap.vue'
 import EventDetailModal from '../components/EventDetailModal.vue'
 import VenueDetailModal from '../components/VenueDetailModal.vue'
 import CategoryBar from '../components/CategoryBar.vue'
-import OnboardingOverlay from '../components/OnboardingOverlay.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -261,15 +254,6 @@ function toggleEventType(type) {
 
 function closeMapInfowindows() {
   window.__windycity_closeInfowindows?.()
-}
-
-// ── 온보딩 ──
-function handleOnboardingEvents() {
-  localStorage.setItem('onboarding_done', '1')
-}
-
-function handleOnboardingVenues() {
-  localStorage.setItem('onboarding_done', '1')
 }
 
 defineExpose({ handlePlaceSelect })
