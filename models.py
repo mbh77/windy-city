@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Float, Double, Boolean, DateTime, ForeignKey, Enum, JSON, Date, Time
+from sqlalchemy import Column, Integer, String, Text, Float, Double, Boolean, DateTime, ForeignKey, Enum, JSON, Date, Time, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -52,9 +52,12 @@ class DifficultyLevel(str, enum.Enum):
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = (
+        UniqueConstraint('email', 'provider', name='uq_email_provider'),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True, nullable=False)
+    email = Column(String(255), nullable=False)
     hashed_password = Column(String(255), nullable=True)  # 소셜 로그인은 비밀번호 없음
     nickname = Column(String(100), nullable=False)
     is_organizer = Column(Boolean, default=False)

@@ -1,6 +1,9 @@
+import os
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 
 from database import get_db
 import models
@@ -8,7 +11,15 @@ import schemas
 import auth as auth_utils
 from email_utils import generate_verify_code, send_verify_email
 
+load_dotenv()
+
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+# 소셜 로그인 설정
+KAKAO_CLIENT_ID = os.getenv("KAKAO_CLIENT_ID", "")
+KAKAO_CLIENT_SECRET = os.getenv("KAKAO_CLIENT_SECRET", "")
+NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID", "")
+NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "")
 
 # 인증 코드 유효 시간 (분)
 VERIFY_CODE_EXPIRE_MINUTES = 10
@@ -34,7 +45,10 @@ def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
     if user_data.email == GHOST_EMAIL:
         raise HTTPException(status_code=400, detail="사용할 수 없는 이메일입니다")
     # 이메일 중복 확인
-    existing = db.query(models.User).filter(models.User.email == user_data.email).first()
+    existing = db.query(models.User).filter(
+        models.User.email == user_data.email,
+        models.User.provider == "email",
+    ).first()
     if existing:
         if existing.is_verified:
             raise HTTPException(status_code=400, detail="이미 사용 중인 이메일입니다")
@@ -71,7 +85,10 @@ def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
 @router.post("/verify-email")
 def verify_email(data: schemas.VerifyEmail, db: Session = Depends(get_db)):
     """이메일 인증 코드 확인"""
-    user = db.query(models.User).filter(models.User.email == data.email).first()
+    user = db.query(models.User).filter(
+        models.User.email == data.email,
+        models.User.provider == "email",
+    ).first()
     if not user:
         raise HTTPException(status_code=404, detail="등록되지 않은 이메일입니다")
 
@@ -100,7 +117,10 @@ def verify_email(data: schemas.VerifyEmail, db: Session = Depends(get_db)):
 @router.post("/resend-code")
 def resend_code(data: schemas.ResendCode, db: Session = Depends(get_db)):
     """인증 코드 재발송"""
-    user = db.query(models.User).filter(models.User.email == data.email).first()
+    user = db.query(models.User).filter(
+        models.User.email == data.email,
+        models.User.provider == "email",
+    ).first()
     if not user:
         raise HTTPException(status_code=404, detail="등록되지 않은 이메일입니다")
 
@@ -137,7 +157,10 @@ def check_nickname(nickname: str, db: Session = Depends(get_db)):
 @router.post("/login", response_model=schemas.Token)
 def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
     """로그인 - JWT 토큰 발급"""
-    user = db.query(models.User).filter(models.User.email == user_data.email).first()
+    user = db.query(models.User).filter(
+        models.User.email == user_data.email,
+        models.User.provider == "email",
+    ).first()
     if not user or not auth_utils.verify_password(user_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="이메일 또는 비밀번호가 틀렸습니다")
 
@@ -185,3 +208,147 @@ def delete_me(current_user: models.User = Depends(auth_utils.get_current_user), 
     db.commit()
 
     return {"message": "회원 탈퇴가 완료되었습니다"}
+
+
+# ── 소셜 로그인 ──────────────────────────────────────────────
+
+@router.post("/kakao")
+async def kakao_login(data: schemas.SocialLoginRequest, db: Session = Depends(get_db)):
+    """카카오 소셜 로그인 — 인가코드로 토큰 교환 → 사용자 정보 조회"""
+    if not KAKAO_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="카카오 로그인이 설정되지 않았습니다")
+
+    async with httpx.AsyncClient() as client:
+        # 1. 인가코드 → 액세스 토큰 교환
+        token_res = await client.post(
+            "https://kauth.kakao.com/oauth/token",
+            data={
+                "grant_type": "authorization_code",
+                "client_id": KAKAO_CLIENT_ID,
+                "client_secret": KAKAO_CLIENT_SECRET,
+                "redirect_uri": data.redirect_uri,
+                "code": data.code,
+            },
+        )
+        if token_res.status_code != 200:
+            print(f"[카카오 토큰 교환 실패] {token_res.status_code}: {token_res.text}")
+            raise HTTPException(status_code=400, detail="카카오 인증에 실패했습니다")
+
+        access_token = token_res.json().get("access_token")
+
+        # 2. 액세스 토큰 → 사용자 정보 조회
+        user_res = await client.get(
+            "https://kapi.kakao.com/v2/user/me",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if user_res.status_code != 200:
+            raise HTTPException(status_code=400, detail="카카오 사용자 정보 조회에 실패했습니다")
+
+    kakao_user = user_res.json()
+    provider_id = str(kakao_user["id"])
+    kakao_account = kakao_user.get("kakao_account", {})
+    email = kakao_account.get("email", "")
+    nickname = kakao_account.get("profile", {}).get("nickname", "")
+
+    return _handle_social_login(db, "kakao", provider_id, email, nickname)
+
+
+@router.post("/naver")
+async def naver_login(data: schemas.SocialLoginRequest, db: Session = Depends(get_db)):
+    """네이버 소셜 로그인 — 인가코드로 토큰 교환 → 사용자 정보 조회"""
+    if not NAVER_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="네이버 로그인이 설정되지 않았습니다")
+
+    async with httpx.AsyncClient() as client:
+        # 1. 인가코드 → 액세스 토큰 교환
+        token_res = await client.post(
+            "https://nid.naver.com/oauth2.0/token",
+            data={
+                "grant_type": "authorization_code",
+                "client_id": NAVER_CLIENT_ID,
+                "client_secret": NAVER_CLIENT_SECRET,
+                "code": data.code,
+                "state": "windycity",
+            },
+        )
+        if token_res.status_code != 200:
+            raise HTTPException(status_code=400, detail="네이버 인증에 실패했습니다")
+
+        access_token = token_res.json().get("access_token")
+
+        # 2. 액세스 토큰 → 사용자 정보 조회
+        user_res = await client.get(
+            "https://openapi.naver.com/v1/nid/me",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if user_res.status_code != 200:
+            raise HTTPException(status_code=400, detail="네이버 사용자 정보 조회에 실패했습니다")
+
+    naver_user = user_res.json().get("response", {})
+    provider_id = naver_user.get("id", "")
+    email = naver_user.get("email", "")
+    nickname = naver_user.get("nickname", "")
+
+    return _handle_social_login(db, "naver", provider_id, email, nickname)
+
+
+@router.post("/social/register")
+def social_register(data: schemas.SocialRegisterRequest, db: Session = Depends(get_db)):
+    """소셜 로그인 신규 가입 — 닉네임 확인 후 계정 생성"""
+    # 금지 닉네임 확인
+    if data.nickname.lower().strip() in RESERVED_NICKNAMES:
+        raise HTTPException(status_code=400, detail="사용할 수 없는 닉네임입니다")
+
+    # 닉네임 중복 확인
+    nickname_exists = db.query(models.User).filter(models.User.nickname == data.nickname.strip()).first()
+    if nickname_exists:
+        raise HTTPException(status_code=400, detail="이미 사용 중인 닉네임입니다")
+
+    # 이미 가입된 계정인지 재확인
+    existing = db.query(models.User).filter(
+        models.User.provider == data.provider,
+        models.User.provider_id == data.provider_id,
+    ).first()
+    if existing:
+        token = auth_utils.create_access_token(existing.id)
+        return {"status": "login", "access_token": token, "token_type": "bearer"}
+
+    # 새 계정 생성
+    user = models.User(
+        email=data.email,
+        hashed_password=None,
+        nickname=data.nickname.strip(),
+        provider=data.provider,
+        provider_id=data.provider_id,
+        is_organizer=True,
+        is_verified=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    token = auth_utils.create_access_token(user.id)
+    return {"status": "registered", "access_token": token, "token_type": "bearer"}
+
+
+def _handle_social_login(db: Session, provider: str, provider_id: str, email: str, nickname: str):
+    """소셜 로그인 공통 처리: 기존 계정이면 로그인, 신규면 닉네임 입력 요청"""
+    # provider_id로 기존 계정 조회
+    user = db.query(models.User).filter(
+        models.User.provider == provider,
+        models.User.provider_id == provider_id,
+    ).first()
+
+    if user:
+        # 기존 계정 → 바로 JWT 발급
+        token = auth_utils.create_access_token(user.id)
+        return {"status": "login", "access_token": token, "token_type": "bearer"}
+
+    # 신규 → 닉네임 입력 필요 (프론트에서 social-register 모드로 전환)
+    return {
+        "status": "need_register",
+        "provider": provider,
+        "provider_id": provider_id,
+        "email": email,
+        "nickname": nickname,
+    }

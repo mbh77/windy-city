@@ -17,6 +17,14 @@
           <span class="btn-text">로그인</span>
         </button>
         <p class="form-error">{{ loginError }}</p>
+
+        <div class="social-divider"><span>또는</span></div>
+        <button type="button" class="btn-social btn-kakao" @click="loginKakao">
+          카카오 로그인
+        </button>
+        <button type="button" class="btn-social btn-naver" @click="loginNaver">
+          네이버 로그인
+        </button>
       </form>
 
       <!-- 회원가입 폼 -->
@@ -198,6 +206,23 @@ async function handleVerify() {
   } finally {
     verifyLoading.value = false
   }
+}
+
+// 소셜 로그인
+const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID || ''
+const NAVER_CLIENT_ID = import.meta.env.VITE_NAVER_CLIENT_ID || ''
+
+function loginKakao() {
+  const redirectUri = `${window.location.origin}/auth/kakao/callback`
+  const url = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`
+  window.location.href = url
+}
+
+function loginNaver() {
+  const redirectUri = `${window.location.origin}/auth/naver/callback`
+  const state = 'windycity'
+  const url = `https://nid.naver.com/oauth2.0/authorize?client_id=${NAVER_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&state=${state}`
+  window.location.href = url
 }
 
 async function handleResend() {
