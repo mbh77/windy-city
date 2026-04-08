@@ -22,6 +22,10 @@
           <button class="copy-link-btn" @click="copyLink" :title="copied ? '복사됨!' : '링크 복사'">
             {{ copied ? '✔' : '🔗' }}
           </button>
+          <button v-if="currentUser" class="bookmark-btn" @click="toggleBookmark('event', event.id)"
+            :title="isBookmarked('event', event.id) ? '북마크 해제' : '북마크'">
+            {{ isBookmarked('event', event.id) ? '♥' : '♡' }}
+          </button>
         </div>
 
         <!-- 이미지 갤러리 -->
@@ -73,6 +77,7 @@ import { ref, computed } from 'vue'
 import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '../utils/constants.js'
 import { formatTime } from '../utils/api.js'
 import { useAuth } from '../composables/useAuth.js'
+import { useBookmarks } from '../composables/useBookmarks.js'
 import { useEvents } from '../composables/useEvents.js'
 import ImageGallery from './ImageGallery.vue'
 import { renderMarkdown } from '@/utils/markdown.js'
@@ -97,6 +102,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const { currentUser } = useAuth()
+const { isBookmarked, toggleBookmark } = useBookmarks()
 const { deleteEvent } = useEvents()
 const copied = ref(false)
 

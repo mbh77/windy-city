@@ -55,6 +55,15 @@ class SocialRegisterRequest(BaseModel):
     email: str
     nickname: str
 
+class BookmarkResponse(BaseModel):
+    id: int
+    user_id: int
+    entity_type: str
+    entity_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 # ── 미디어 스키마 ──────────────────────────────────────────────
 
@@ -188,6 +197,7 @@ class VenueResponse(BaseModel):
     owner_nickname: Optional[str] = None
     media: List[MediaResponse] = []
     view_count: int = 0
+    bookmark_count: int = 0
     created_at: datetime
     updated_at: Optional[datetime]
 
@@ -312,6 +322,7 @@ class EventResponse(BaseModel):
     organizer_nickname: Optional[str] = None
     media: List[MediaResponse] = []
     view_count: int = 0
+    bookmark_count: int = 0
     created_at: datetime
     updated_at: Optional[datetime]
 

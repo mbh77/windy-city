@@ -46,11 +46,16 @@ def _get_media(db: Session, entity_type: str, entity_id: int) -> list:
 
 def _venue_to_response(db: Session, venue: models.Venue) -> schemas.VenueResponse:
     """Venue 모델을 VenueResponse로 변환"""
+    bookmark_count = db.query(models.Bookmark).filter(
+        models.Bookmark.entity_type == "venue",
+        models.Bookmark.entity_id == venue.id,
+    ).count()
     return schemas.VenueResponse(
         **{c.name: getattr(venue, c.name) for c in venue.__table__.columns},
         dance_genres=_get_dance_genres(venue),
         owner_nickname=venue.owner.nickname if venue.owner else None,
         media=[schemas.MediaResponse.model_validate(m) for m in _get_media(db, "venue", venue.id)],
+        bookmark_count=bookmark_count,
     )
 
 

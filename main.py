@@ -7,7 +7,8 @@ import re
 
 from database import engine
 import models
-from routers import auth, events, venues, search, upload, feedback, admin, posts, health
+from routers import auth, events, venues, search, upload, feedback, admin, posts, health, bookmarks
+
 
 # DB 테이블 생성
 models.Base.metadata.create_all(bind=engine)
@@ -33,6 +34,7 @@ app.include_router(feedback.router)
 app.include_router(admin.router)
 app.include_router(posts.router)
 app.include_router(health.router)
+app.include_router(bookmarks.router)
 
 # ── robots.txt ──
 @app.get("/robots.txt")

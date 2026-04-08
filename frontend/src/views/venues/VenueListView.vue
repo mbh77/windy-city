@@ -55,6 +55,9 @@
             <span>{{ formatCreatedAt(venue.created_at) }}</span>
             <span>👁 {{ venue.view_count || 0 }}</span>
             <span v-if="venue.comment_count > 0">💬 {{ venue.comment_count }}</span>
+            <button v-if="currentUser" class="bookmark-btn-sm" @click.stop="toggleBookmark('venue', venue.id)">
+              {{ isBookmarked('venue', venue.id) ? '♥' : '♡' }}
+            </button>
           </div>
         </li>
         <li v-if="venues.length === 0" class="board-empty">등록된 장소가 없습니다</li>
@@ -75,10 +78,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiFetch, formatCreatedAt } from '@/utils/api.js'
 import { useAuth } from '@/composables/useAuth.js'
+import { useBookmarks } from '@/composables/useBookmarks.js'
 import { VENUE_TYPE_LABELS, GENRE_LABELS, GENRE_OPTIONS } from '@/utils/constants.js'
 
 const router = useRouter()
 const { currentUser } = useAuth()
+const { isBookmarked, toggleBookmark } = useBookmarks()
 
 const GENRE_FILTER_OPTIONS = GENRE_OPTIONS.filter(g => g.value !== 'other')
 const selectedGenres = ref([])

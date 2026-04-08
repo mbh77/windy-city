@@ -52,11 +52,16 @@ def _get_media(db: Session, entity_id: int) -> list:
 
 def _event_to_response(db: Session, event: models.Event) -> schemas.EventResponse:
     """Event 모델을 EventResponse로 변환"""
+    bookmark_count = db.query(models.Bookmark).filter(
+        models.Bookmark.entity_type == "event",
+        models.Bookmark.entity_id == event.id,
+    ).count()
     return schemas.EventResponse(
         **{c.name: getattr(event, c.name) for c in event.__table__.columns},
         dance_genres=_get_dance_genres(event),
         organizer_nickname=event.organizer.nickname if event.organizer else None,
         media=[schemas.MediaResponse.model_validate(m) for m in _get_media(db, event.id)],
+        bookmark_count=bookmark_count,
     )
 
 

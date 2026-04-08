@@ -75,6 +75,19 @@ class User(Base):
     posts = relationship("Post", back_populates="author")
     comments = relationship("Comment", back_populates="author")
 
+class Bookmark(Base):
+    __tablename__ = "bookmarks"
+    __table_args__ = (
+        UniqueConstraint('user_id', 'entity_type', 'entity_id', name='uq_bookmark'),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    entity_type = Column(String(20), nullable=False)  # 'event' or 'venue'
+    entity_id = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")
 
 # ── 장소 (Venue) ─────────────────────────────────────────────
 
