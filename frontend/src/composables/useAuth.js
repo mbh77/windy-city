@@ -85,6 +85,44 @@ export function useAuth() {
     }
   }
 
+  // 소셜 로그인 (인가코드를 백엔드에 전달)
+  async function socialLogin(provider, code, redirectUri) {
+    const res = await apiJson(`/api/auth/${provider}`, {
+      method: 'POST',
+      body: JSON.stringify({ code, redirect_uri: redirectUri }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      if (data.status === 'login') {
+        setToken(data.access_token)
+        await restoreSession()
+        return { ok: true }
+      }
+      // 신규 가입 필요
+      return { ok: false, needRegister: true, socialData: data }
+    } else {
+      const err = await res.json()
+      return { ok: false, error: err.detail || '소셜 로그인에 실패했습니다' }
+    }
+  }
+
+  // 소셜 회원가입 (닉네임 확인 후 계정 생성)
+  async function socialRegister(provider, providerId, email, nickname) {
+    const res = await apiJson('/api/auth/social/register', {
+      method: 'POST',
+      body: JSON.stringify({ provider, provider_id: providerId, email, nickname }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      setToken(data.access_token)
+      await restoreSession()
+      return { ok: true }
+    } else {
+      const err = await res.json()
+      return { ok: false, error: err.detail || '가입에 실패했습니다' }
+    }
+  }
+
   // 로그아웃
   function logout() {
     clearToken()
@@ -111,6 +149,8 @@ export function useAuth() {
     register,
     verifyEmail,
     resendCode,
+    socialLogin,
+    socialRegister,
     logout,
     withdraw,
   }

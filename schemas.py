@@ -44,6 +44,18 @@ class ResendCode(BaseModel):
     email: EmailStr
 
 
+class SocialLoginRequest(BaseModel):
+    code: str  # 소셜 플랫폼에서 받은 인가 코드
+    redirect_uri: str  # 프론트엔드에서 사용한 redirect URI
+
+
+class SocialRegisterRequest(BaseModel):
+    provider: str  # kakao, naver
+    provider_id: str
+    email: str
+    nickname: str
+
+
 # ── 미디어 스키마 ──────────────────────────────────────────────
 
 class MediaCreate(BaseModel):
