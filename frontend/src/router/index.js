@@ -12,6 +12,7 @@ import VenueWriteView from '../views/venues/VenueWriteView.vue'
 import EventWriteView from '../views/events/EventWriteView.vue'
 import EventListView from '../views/events/EventListView.vue'
 import VenueListView from '../views/venues/VenueListView.vue'
+import BookmarkView from '../views/BookmarkView.vue'
 import SocialCallbackView from '../views/SocialCallbackView.vue'
 import SocialRegisterView from '../views/SocialRegisterView.vue'
 
@@ -31,6 +32,7 @@ const routes = [
   { path: '/venues/new', name: 'venueNew', component: VenueWriteView },
   { path: '/venues/:id/edit', name: 'venueEdit', component: VenueWriteView },
   { path: '/venues/:id', name: 'venueDetail', component: VenueDetailView },
+  { path: '/bookmarks', name: 'bookmarks', component: BookmarkView },
   { path: '/auth/:provider/callback', name: 'socialCallback', component: SocialCallbackView },
   { path: '/auth/social/register', name: 'socialRegister', component: SocialRegisterView },
 ]

@@ -27,11 +27,16 @@
         <button class="copy-link-btn" @click="copyLink" :title="copied ? '복사됨!' : '링크 복사'">
           {{ copied ? '✔' : '🔗' }}
         </button>
+        <button v-if="currentUser" class="bookmark-btn" @click="handleToggleBookmark"
+          :title="isBookmarked('event', event.id) ? '북마크 해제' : '북마크'">
+          {{ isBookmarked('event', event.id) ? '♥' : '♡' }}
+        </button>
       </div>
       <div class="post-meta">
         <span>{{ event.organizer_nickname || '-' }}</span>
         <span>{{ formatCreatedAt(event.created_at) }}</span>
         <span>조회 {{ event.view_count || 0 }}</span>
+        <span v-if="event.bookmark_count">♥ {{ event.bookmark_count }}</span>
       </div>
 
       <!-- 이미지 갤러리 -->
@@ -117,6 +122,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { apiFetch, formatTime, formatCreatedAt } from '@/utils/api.js'
 import { TYPE_LABELS, GENRE_LABELS, DIFFICULTY_LABELS } from '@/utils/constants.js'
 import { useAuth } from '@/composables/useAuth.js'
+import { useBookmarks } from '@/composables/useBookmarks.js'
 import ImageGallery from '@/components/ImageGallery.vue'
 import CommentSection from '@/components/CommentSection.vue'
 import { renderMarkdown } from '@/utils/markdown.js'
@@ -126,6 +132,7 @@ const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금',
 const route = useRoute()
 const router = useRouter()
 const { currentUser } = useAuth()
+const { isBookmarked, toggleBookmark } = useBookmarks()
 
 const event = ref(null)
 const loading = ref(true)
@@ -137,6 +144,11 @@ function copyLink() {
     copied.value = true
     setTimeout(() => { copied.value = false }, 2000)
   })
+}
+
+async function handleToggleBookmark() {
+  const added = await toggleBookmark('event', event.value.id)
+  event.value.bookmark_count = (event.value.bookmark_count || 0) + (added ? 1 : -1)
 }
 
 const isOwner = computed(() => {

@@ -17,6 +17,7 @@
           </button>
           <div v-if="showUserMenu" class="user-dropdown">
             <div class="user-dropdown-name">{{ currentUser.nickname }}</div>
+            <router-link to="/bookmarks" class="user-dropdown-item" @click="showUserMenu = false">내 북마크</router-link>
             <button class="user-dropdown-item" @click="handleLogout">로그아웃</button>
             <button v-if="!currentUser.is_admin" class="user-dropdown-item user-dropdown-danger" @click="handleWithdraw">회원 탈퇴</button>
           </div>

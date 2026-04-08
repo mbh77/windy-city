@@ -81,6 +81,9 @@
             <span>{{ formatCreatedAt(event.created_at) }}</span>
             <span>👁 {{ event.view_count || 0 }}</span>
             <span v-if="event.comment_count > 0">💬 {{ event.comment_count }}</span>
+            <button v-if="currentUser" class="bookmark-btn-sm" @click.stop="toggleBookmark('event', event.id)">
+              {{ isBookmarked('event', event.id) ? '♥' : '♡' }}
+            </button>
           </div>
         </li>
         <li v-if="filteredByDay.length === 0" class="board-empty">등록된 강습·행사가 없습니다</li>
@@ -101,10 +104,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiFetch, formatDate, formatCreatedAt } from '@/utils/api.js'
 import { useAuth } from '@/composables/useAuth.js'
+import { useBookmarks } from '@/composables/useBookmarks.js'
 import { TYPE_LABELS, GENRE_LABELS, GENRE_OPTIONS } from '@/utils/constants.js'
 
 const router = useRouter()
 const { currentUser } = useAuth()
+const { isBookmarked, toggleBookmark } = useBookmarks()
 
 const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' }
 

@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { apiFetch, apiJson, setToken, clearToken } from '../utils/api.js'
+import { useBookmarks } from './useBookmarks.js'
 
 // 전역 인증 상태
 const currentUser = ref(null)
@@ -127,6 +128,7 @@ export function useAuth() {
   function logout() {
     clearToken()
     currentUser.value = null
+    useBookmarks().clearBookmarks()
   }
 
   // 회원 탈퇴
@@ -135,6 +137,7 @@ export function useAuth() {
     if (res.ok) {
       clearToken()
       currentUser.value = null
+      useBookmarks().clearBookmarks()
       return { ok: true }
     } else {
       const err = await res.json()

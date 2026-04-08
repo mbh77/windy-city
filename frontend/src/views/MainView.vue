@@ -61,6 +61,7 @@ import { DEFAULT_DATE_RANGE_DAYS } from '../utils/constants.js'
 import { useAuth } from '../composables/useAuth.js'
 import { useEvents } from '../composables/useEvents.js'
 import { useVenues } from '../composables/useVenues.js'
+import { useBookmarks } from '../composables/useBookmarks.js'
 
 import Sidebar from '../components/Sidebar.vue'
 import KakaoMap from '../components/KakaoMap.vue'
@@ -70,9 +71,10 @@ import CategoryBar from '../components/CategoryBar.vue'
 
 const route = useRoute()
 const router = useRouter()
-const { restoreSession } = useAuth()
+const { currentUser, restoreSession } = useAuth()
 const { events, loadEvents } = useEvents()
 const { venues, loadVenues } = useVenues()
+const { fetchBookmarks } = useBookmarks()
 
 // refs
 const mapRef = ref(null)
@@ -166,6 +168,7 @@ const currentFilters = ref({
 // ── 초기화 ──
 onMounted(async () => {
   await restoreSession()
+  if (currentUser.value) fetchBookmarks()
   await Promise.all([
     loadEvents(currentFilters.value),
     loadVenues()
