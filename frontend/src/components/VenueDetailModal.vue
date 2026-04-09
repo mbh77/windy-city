@@ -26,7 +26,7 @@
         </div>
 
         <!-- 이미지 갤러리 -->
-        <ImageGallery :images="venue.media || []" />
+        <ImageGallery :images="venue.media || []" :altPrefix="venue.name" />
 
         <!-- 설명 -->
         <div v-if="venue.description" class="venue-desc markdown-body" v-html="renderMarkdown(venue.description)"></div>
