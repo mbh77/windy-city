@@ -6,7 +6,7 @@
   >
     <div class="gallery-track" :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
       <div v-for="(img, idx) in images" :key="idx" class="gallery-slide" @click="openViewer(idx)">
-        <img :src="img.url" draggable="false" />
+        <img :src="img.url" :alt="`${altPrefix} 이미지 ${idx + 1}`" draggable="false" />
       </div>
     </div>
     <button v-if="images.length > 1 && currentIndex > 0" class="gallery-arrow gallery-prev" @click="currentIndex--">‹</button>
@@ -25,7 +25,7 @@
   <div v-if="viewerOpen" class="image-viewer" @click.self="viewerOpen = false">
     <button class="viewer-close" @click="viewerOpen = false">✕</button>
     <button v-if="images.length > 1 && viewerIndex > 0" class="viewer-arrow viewer-prev" @click="viewerIndex--">‹</button>
-    <img :src="images[viewerIndex].url" class="viewer-image" />
+    <img :src="images[viewerIndex].url" :alt="`${altPrefix} 이미지 ${viewerIndex + 1}`" class="viewer-image" />
     <button v-if="images.length > 1 && viewerIndex < images.length - 1" class="viewer-arrow viewer-next" @click="viewerIndex++">›</button>
     <div class="viewer-counter">{{ viewerIndex + 1 }} / {{ images.length }}</div>
   </div>
@@ -36,6 +36,7 @@ import { ref } from 'vue'
 
 const props = defineProps({
   images: { type: Array, default: () => [] },
+  altPrefix: { type: String, default: '' },
 })
 
 const currentIndex = ref(0)

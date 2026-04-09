@@ -40,7 +40,7 @@
       </div>
 
       <!-- 이미지 갤러리 -->
-      <ImageGallery :images="event.media || []" />
+      <ImageGallery :images="event.media || []" :altPrefix="event.title" />
 
       <!-- 설명 (마크다운) -->
       <div v-if="event.description" class="post-body markdown-body"

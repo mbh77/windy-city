@@ -36,7 +36,7 @@
       </div>
 
       <!-- 이미지 갤러리 -->
-      <ImageGallery :images="venue.media || []" />
+      <ImageGallery :images="venue.media || []" :altPrefix="venue.name" />
 
       <!-- 설명 (마크다운) -->
       <div v-if="venue.description" class="post-body markdown-body"

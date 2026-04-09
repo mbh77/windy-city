@@ -29,7 +29,7 @@
         </div>
 
         <!-- 이미지 갤러리 -->
-        <ImageGallery :images="event.media || []" />
+        <ImageGallery :images="event.media || []" :altPrefix="event.title" />
 
         <!-- 설명 -->
         <div v-if="event.description" class="markdown-body" style="margin:8px 0;font-size:0.85rem;" v-html="renderMarkdown(event.description)"></div>
